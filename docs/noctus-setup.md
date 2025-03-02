@@ -8,6 +8,13 @@ Este projeto requer a instalação de alguns programas essenciais para o seu fun
 - **Descrição**: Ferramenta gráfica para gerenciar repositórios no GitHub.
 - **Repositório do projeto**: [Grupo-Noctus](https://github.com/Grupo-Noctus)
 - **Download**: [GitHub Desktop](https://desktop.github.com/)
+#### 📌 Obs.: Inicie o projeto com:
+```cmd
+npm install
+```
+```cmd
+npm run build
+```
 
 ### 2️⃣ Git
 - **Descrição**: Sistema de controle de versão distribuído.
