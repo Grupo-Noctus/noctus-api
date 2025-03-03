@@ -86,8 +86,9 @@ O IP estará no campo `inet`, por exemplo: `inet 172.31.216.21`.
 
 ### 2. Configuração no DBeaver
 - **Host:** Use o IP obtido no passo anterior.
-- **Banco de dados:** `db-noctus`
-- **Usuário e senha:** Configure de acordo com sua instância.
-- **Porta:** Utilize a porta configurada no banco (ex: `5432` para PostgreSQL).
+- **Porta:** Utilize a porta padrão do mysql `3306`.
+- **Banco de dados:** No arquivo `.env` inserir o valor de `DB_NAME`.
+- **Usuário:** No arquivo `.env` inserir o valor de `DB_USER_ROOT`.
+- **Senha:** No arquivo `.env` inserir o valor de `MYSQL_ROOT_PASSWORD`.
 
 Agora o DBeaver estará configurado para se conectar ao banco de dados dentro do WSL. 🚀
