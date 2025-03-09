@@ -84,7 +84,7 @@ model Certificate {
   id               Int      @id @default(autoincrement())
   idEnrollment     Int      @unique
   emited           Boolean
-  codeVerification BigInt
+  codeVerification BigInt   @unique
   createdAt        DateTime @default(now())
 
   enrollment Enrollment @relation(fields: [idEnrollment], references: [id])
@@ -162,10 +162,11 @@ model Question {
   updatedAt    DateTime     @updatedAt
   updatedBy    Int
 
-  module Module @relation(fields: [idModule], references: [id])
+  module  Module   @relation(fields: [idModule], references: [id])
+  options QuestionOptions[]
 }
 
-model Option {
+model QuestionOptions {
   id         Int      @id @default(autoincrement())
   idQuestion Int
   optionText String
@@ -174,6 +175,8 @@ model Option {
   createdBy  Int
   updatedAt  DateTime @updatedAt
   updatedBy  Int
+
+  question Question @relation(fields: [idQuestion], references: [id])
 }
 
 enum Role {
