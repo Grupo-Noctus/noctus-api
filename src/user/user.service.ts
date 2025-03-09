@@ -8,9 +8,14 @@ export class UserService {
         private prisma : PrismaService,
     ){}
 
-    async findByUsernameForAuth (username: string): Promise < UserAutResDto > {
-        return this.prisma.user.findUnique({
-            where: {username},
+    async findByUsernameOrEmailForAuth (usernameOrEmail: string): Promise < UserAutResDto > {
+        return this.prisma.user.findFirst({
+            where: {
+                OR: [
+                    { username: usernameOrEmail },
+                    { email: usernameOrEmail },
+                ],
+            },
             select: {
                 id: true,
                 username: true,

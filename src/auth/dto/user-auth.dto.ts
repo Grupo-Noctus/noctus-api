@@ -1,4 +1,5 @@
 export class UserAuthDto {
-    username: string
+    id?: number
+    usernameOrEmail: string
     password: string
 }
