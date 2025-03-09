@@ -6,10 +6,4 @@ import { Role } from '@prisma/client';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Roles(Role.ADMIN)
-  @Get()
-  testeGuard(){
-    console.log("Hello")
-  }
 }
