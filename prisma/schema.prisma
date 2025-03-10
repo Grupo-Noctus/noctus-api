@@ -14,35 +14,36 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  name      String
-  email     String   @unique
-  password  String
-  role      Role
-  dateBirth DateTime
-  image     String?
-  active    Boolean
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  username    String   @unique
+  name        String
+  email       String   @unique
+  password    String
+  role        Role
+  phoneNumber String?
+  image       String?
+  active      Boolean
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   student Student?
-  admin   Admin?
 }
 
 model Student {
-  id         Int          @id @default(autoincrement())
-  idUser     Int          @unique
-  //mais atributos serão colocados depois da resposta da Matera
-  user       User         @relation(fields: [idUser], references: [id])
-  enrollment Enrollment[]
-}
-
-model Admin {
-  id     Int  @id @default(autoincrement())
-  idUser Int  @unique
-  //mais atributos serão colocados depois da resposta da Matera
-  user   User @relation(fields: [idUser], references: [id])
+  id                          Int            @id @default(autoincrement())
+  idUser                      Int            @unique
+  dateBirth                   DateTime
+  educationLevel              EducationLevel
+  state                       State
+  ethnicity                   Ethnicity
+  gender                      Gender
+  hasDisability               Boolean        @default(false)
+  disabilityType              String?
+  needsSupportResources       Boolean        @default(false)
+  supportResourcesDescription String?
+  user                        User           @relation(fields: [idUser], references: [id])
+  
+  enrollment                  Enrollment[]
 }
 
 model Course {
@@ -197,4 +198,63 @@ enum TypeQuestion {
   SINGLE_CHOICE
   MULTIPLE_CHOICE
   TRUE_FALSE
+}
+
+enum EducationLevel {
+  NO_SCHOOLING
+  PRIMARY_INCOMPLETE
+  PRIMARY_COMPLETE
+  SECONDARY_INCOMPLETE
+  SECONDARY_COMPLETE
+  HIGHER_INCOMPLETE
+  HIGHER_COMPLETE
+  POSTGRADUATE
+  MASTERS
+  DOCTORATE
+}
+
+enum State {
+  AC
+  AL
+  AP
+  AM
+  BA
+  CE
+  DF
+  ES
+  GO
+  MA
+  MT
+  MS
+  MG
+  PA
+  PB
+  PR
+  PE
+  PI
+  RJ
+  RN
+  RS
+  RO
+  RR
+  SC
+  SP
+  SE
+  TO
+}
+
+enum Ethnicity {
+  WHITE
+  BLACK
+  BROWN
+  ASIAN
+  INDIGENOUS
+  OTHER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NON_BINARY
+  PREFER_NOT_TO_SAY
 }
