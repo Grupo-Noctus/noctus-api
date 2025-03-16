@@ -14,18 +14,21 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
     PrismaModule,
     AuthModule,
     UserModule,
-    ThrottlerModule.forRoot({
-      throttlers:[
-        {
-          ttl: 60000,
-          limit: 10,
-        },
-      ]
-    })
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 30,
+        blockDuration: 5000,
+      }
+    ]),
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: APP_GUARD,
+      useClass:ThrottlerGuard
+    },
     {
       provide: APP_GUARD,
       useClass: AuthGuard
@@ -34,10 +37,6 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
       provide: APP_GUARD,
       useClass: RolesGuard
     },
-    {
-      provide: APP_GUARD,
-      useClass:ThrottlerGuard
-    }
   ],
 })
 export class AppModule {}

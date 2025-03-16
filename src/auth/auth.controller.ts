@@ -13,7 +13,6 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60 }})
   @Post('login')
   async signIn (@Body() userAuth: UserAuthDto): Promise <{access_token: string}>{
     return await this.authService.singIn(userAuth);
@@ -21,7 +20,6 @@ export class AuthController {
 
   @HttpCode(HttpStatus.CREATED)
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60 }})
   @Post('register')
   async register (
     @Body() userRegister: UserRegisterDto,
