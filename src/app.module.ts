@@ -7,9 +7,22 @@ import { UserModule } from './user/user.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guard/auth.guard';
 import { RolesGuard } from './auth/guard/role.guard';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UserModule],
+  imports: [
+    PrismaModule,
+    AuthModule,
+    UserModule,
+    ThrottlerModule.forRoot({
+      throttlers:[
+        {
+          ttl: 60000,
+          limit: 10,
+        },
+      ]
+    })
+  ],
   controllers: [AppController],
   providers: [
     AppService,
@@ -20,6 +33,10 @@ import { RolesGuard } from './auth/guard/role.guard';
     {
       provide: APP_GUARD,
       useClass: RolesGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass:ThrottlerGuard
     }
   ],
 })
