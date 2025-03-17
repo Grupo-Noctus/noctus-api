@@ -1,0 +1,260 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  username    String   @unique
+  name        String
+  email       String   @unique
+  password    String
+  role        Role
+  phoneNumber String?
+  image       String?
+  active      Boolean
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  student Student?
+}
+
+model Student {
+  id                          Int            @id @default(autoincrement())
+  idUser                      Int            @unique
+  dateBirth                   DateTime
+  educationLevel              EducationLevel
+  state                       State
+  ethnicity                   Ethnicity
+  gender                      Gender
+  hasDisability               Boolean        @default(false)
+  disabilityType              String?
+  needsSupportResources       Boolean        @default(false)
+  supportResourcesDescription String?
+  user                        User           @relation(fields: [idUser], references: [id])
+  
+  enrollment                  Enrollment[]
+}
+
+model Course {
+  id               Int      @id @default(autoincrement())
+  name             String
+  description      String
+  image            String
+  duration         Int
+  certificateModel String
+  createdAt        DateTime @default(now())
+  createdBy        Int
+  updatedAt        DateTime @updatedAt
+  updatedBy        Int
+
+  enrollments Enrollment[]
+  alerts      Alert[]
+  materials   Material[]
+  modules     Module[]
+}
+
+model Enrollment {
+  id        Int      @id @default(autoincrement())
+  idStudent Int
+  idCourse  Int
+  active    Boolean
+  completed Boolean
+  stardData DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student     Student      @relation(fields: [idStudent], references: [id])
+  course      Course       @relation(fields: [idCourse], references: [id])
+  certificate Certificate?
+}
+
+model Certificate {
+  id               Int      @id @default(autoincrement())
+  idEnrollment     Int      @unique
+  emited           Boolean
+  codeVerification BigInt   @unique
+  createdAt        DateTime @default(now())
+
+  enrollment Enrollment @relation(fields: [idEnrollment], references: [id])
+}
+
+model Alert {
+  id        Int      @id @default(autoincrement())
+  idCourse  Int
+  title     String
+  message   String
+  createdAt DateTime @default(now())
+  createdBy Int
+  updatedAt DateTime @updatedAt
+  updatedBy Int
+
+  course Course @relation(fields: [idCourse], references: [id])
+}
+
+model Material {
+  id          Int       @id @default(autoincrement())
+  idCourse    Int
+  name        String
+  description String
+  filename    String
+  type        TypeMidia
+  link        String
+  createdAt   DateTime  @default(now())
+  createdBy   Int
+  updatedAt   DateTime  @updatedAt
+  updatedBy   Int
+
+  course Course @relation(fields: [idCourse], references: [id])
+}
+
+model Module {
+  id          Int      @id @default(autoincrement())
+  idCourse    Int
+  name        String
+  description String
+  order       Int
+  createdAt   DateTime @default(now())
+  createdBy   Int
+  updatedAt   DateTime @updatedAt
+  updatedBy   Int
+
+  course       Course         @relation(fields: [idCourse], references: [id])
+  videoLecture VideoLecture[]
+  questions    Question[]
+}
+
+model VideoLecture {
+  id          Int      @id @default(autoincrement())
+  idModule    Int
+  name        String
+  description String
+  duration    Int
+  link        String
+  order       Int
+  createdAt   DateTime @default(now())
+  createdBy   Int
+  updatedAt   DateTime @updatedAt
+  updatedBy   Int
+
+  module Module @relation(fields: [idModule], references: [id])
+}
+
+model Question {
+  id           Int          @id @default(autoincrement())
+  idModule     Int
+  questionText String
+  type         TypeQuestion
+  order        Int
+  createdAt    DateTime     @default(now())
+  createdBy    Int
+  updatedAt    DateTime     @updatedAt
+  updatedBy    Int
+
+  module  Module   @relation(fields: [idModule], references: [id])
+  options QuestionOptions[]
+}
+
+model QuestionOptions {
+  id         Int      @id @default(autoincrement())
+  idQuestion Int
+  optionText String
+  correct    Boolean
+  createdAt  DateTime @default(now())
+  createdBy  Int
+  updatedAt  DateTime @updatedAt
+  updatedBy  Int
+
+  question Question @relation(fields: [idQuestion], references: [id])
+}
+
+enum Role {
+  ADMIN
+  STUDENT
+}
+
+enum TypeMidia {
+  PDF
+  AUDIO
+  IMAGE
+  TEXT
+  SLIDES
+  LINK
+  CODE
+}
+
+enum TypeQuestion {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+}
+
+enum EducationLevel {
+  NO_SCHOOLING
+  PRIMARY_INCOMPLETE
+  PRIMARY_COMPLETE
+  SECONDARY_INCOMPLETE
+  SECONDARY_COMPLETE
+  HIGHER_INCOMPLETE
+  HIGHER_COMPLETE
+  POSTGRADUATE
+  MASTERS
+  DOCTORATE
+}
+
+enum State {
+  AC
+  AL
+  AP
+  AM
+  BA
+  CE
+  DF
+  ES
+  GO
+  MA
+  MT
+  MS
+  MG
+  PA
+  PB
+  PR
+  PE
+  PI
+  RJ
+  RN
+  RS
+  RO
+  RR
+  SC
+  SP
+  SE
+  TO
+}
+
+enum Ethnicity {
+  WHITE
+  BLACK
+  BROWN
+  ASIAN
+  INDIGENOUS
+  OTHER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NON_BINARY
+  PREFER_NOT_TO_SAY
+}
