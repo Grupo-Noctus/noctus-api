@@ -5,7 +5,9 @@ import { Public } from './decorator/public.decorator';
 import { UserRegisterDto } from './dto/user-register.dto';
 import { StudentRegisterDto } from './dto/student-register.dto';
 import { Role } from '@prisma/client';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiProperty } from '@nestjs/swagger';
 
+@ApiTags('Autenticação')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -13,6 +15,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Public()
   @Post('login')
+  @ApiOperation({ summary: 'Realiza login do usuário' })
+  @ApiResponse({ status: 200, description: 'Login bem-sucedido, retorna access_token' })
+  @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
+  @ApiBody({ type: UserAuthDto })
   async signIn (@Body() userAuth: UserAuthDto): Promise <{access_token: string}>{
     return await this.authService.singIn(userAuth);
   }
@@ -20,6 +26,9 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Public()
   @Post('register')
+  @ApiOperation({ summary: 'Registra novo usuário (admin ou estudante)' })
+  @ApiResponse({ status: 201, description: 'Usuário registrado com sucesso' })
+  @ApiResponse({ status: 400, description: 'Dados inválidos ou incompletos' })
   async register (
     @Body() userRegister: UserRegisterDto,
     @Body('student') studentRegister: StudentRegisterDto

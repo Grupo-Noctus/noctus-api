@@ -1,4 +1,5 @@
 import { EducationLevel, Ethnicity, Gender, State } from "@prisma/client";
+import { ApiProperty } from "@nestjs/swagger";
 
 export class StudentRegisterDto {
   dateBirth: string;
