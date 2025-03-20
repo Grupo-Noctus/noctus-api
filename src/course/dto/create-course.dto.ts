@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsDate, Matches } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsDate } from 'class-validator';
 
 export class CreateCourseDto {
     
@@ -16,8 +16,6 @@ export class CreateCourseDto {
     @IsNotEmpty()
     @IsString()
     @IsOptional()
-    /*@Matches(/^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/=]+$/, {
-        message: 'imagem valida em base64...' */
     image: string;
 
     @IsNotEmpty()
@@ -30,7 +28,7 @@ export class CreateCourseDto {
     @IsNotEmpty()
     @IsDate()
     createdAt: Date;
-
+    
     @IsNotEmpty()
     @IsNumber()
     createdBy: number;

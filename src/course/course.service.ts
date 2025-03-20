@@ -1,14 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Course, Prisma } from '@prisma/client';
-import { UpdateCourseDto } from './dto/update-course.dto';
 
 @Injectable()
 export class CourseService {
   constructor(private prisma: PrismaService) {}
 
-  async create( data: Prisma.CourseCreateInput): Promise<Course> {
-    return this.prisma.course.create({ data });
+  async createCourse( data: Prisma.CourseCreateInput): Promise<Course> {
+    try {
+    return this.prisma.course.create({ data }); 
+    } catch(error) {
+      throw new Error(`Error in create for course: ${error.message}`);
+    }
   }
 
   async updateCourse(params: {
@@ -16,11 +19,14 @@ export class CourseService {
     data: Prisma.CourseUpdateInput;
   }): Promise<Course> {
     const { where, data } = params;
-  
+    try {
     return this.prisma.course.update({
       where,
       data,
     });
+    } catch (error) {
+      throw new Error(`Error in searching/update for course: ${error.message}`);
+    }
   }
   
 
@@ -28,14 +34,14 @@ export class CourseService {
     try {
       return await this.prisma.course.delete({ where });
     } catch (error) {
-      throw new Error(`Curso não encontrado com ID: ${where.id}`);
+      throw new Error(`Error in searching/delete for course: ${error.message}`);
     }
   }
 
   async findOneCourse(id: number): Promise<Course> {
-  const course = await this.prisma.course.findUnique({ where: { id } });
+  const course = await this.prisma.course.findUnique({ where: { id: Number(id) } });
   if (!course) {
-    throw new Error(`Curso com ID ${id} não encontrado`);
+    throw new Error(`Error in searching the Course by Id: ${id}`);
   }
   return course;
   }
