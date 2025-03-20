@@ -8,12 +8,29 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guard/auth.guard';
 import { RolesGuard } from './auth/guard/role.guard';
 import { CourseModule } from './course/course.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UserModule, CourseModule],
+  imports: [
+    PrismaModule,
+    AuthModule,
+    UserModule,
+    CourseModule,
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 30,
+        blockDuration: 5000,
+      }
+    ]),
+  ],
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: APP_GUARD,
+      useClass:ThrottlerGuard
+    },
     {
       provide: APP_GUARD,
       useClass: AuthGuard
@@ -21,7 +38,7 @@ import { CourseModule } from './course/course.module';
     {
       provide: APP_GUARD,
       useClass: RolesGuard
-    }
+    },
   ],
 })
 export class AppModule {}
