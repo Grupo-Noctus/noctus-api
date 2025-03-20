@@ -5,6 +5,7 @@ import { Public } from './decorator/public.decorator';
 import { UserRegisterDto } from './dto/user-register.dto';
 import { StudentRegisterDto } from './dto/student-register.dto';
 import { Role } from '@prisma/client';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
