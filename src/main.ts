@@ -7,10 +7,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('')
+    .setTitle('Noctus')
     .setDescription('Noctus API')
     .setVersion('1.0')
-    .addTag('')
+    .addTag('Autenticação')
     .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);

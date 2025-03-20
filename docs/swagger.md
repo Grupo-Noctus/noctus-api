@@ -2,6 +2,9 @@
 # Documentação dos Decorators do Swagger no NestJS
 
 Esta documentação apresenta os principais decorators do pacote `@nestjs/swagger`, utilizados para documentar APIs no NestJS com suporte ao Swagger UI.
+sempre que um novo controller e consequentemente uma nova tag for criada é importante colocar no arquivo src/main.ts.
+ex: @ApiTags('Autenticação') -> .addTag('Autenticação')
+
 
 ---
 
@@ -88,6 +91,34 @@ export class CreateUserDto {
 }
 ```
 
+## 📌 @ApiPropertyOptional
+
+**Descrição**
+Serve para indicar que uma propriedade é opcional na documentação da API (gerada pelo Swagger).
+
+Diferença entre @ApiProperty e @ApiPropertyOptional
+@ApiProperty: marca o campo como obrigatório na documentação.
+@ApiPropertyOptional: marca o campo como opcional na documentação.
+
+```ts
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export class UpdateUserDto {
+  @ApiProperty({
+    description: 'Nome completo do usuário',
+    example: 'João da Silva',
+  })
+  name: string;
+
+  @ApiPropertyOptional({
+    description: 'Número de telefone do usuário',
+    example: '(11) 91234-5678',
+  })
+  phone?: string;
+}
+
+```
+
 ## 📌 @ApiBody
 
 **Descrição:**
@@ -129,22 +160,7 @@ Execute o comando abaixo para instalar os pacotes necessários:
 
 
 ```cmd
-npm install --save @nestjs/swagger
-```
-
-Caso falhe use esse comando para forçar a instalação
-```cmd
-npm install --save @nestjs/swagge --force
-```
-Iniciar o projeto
-
-iniciar o prisma e o projeto
-```cmd
-npx prisma db push 
-```
-
-```cmd
--npm run start:dev
+npm install 
 ```
 
 Após iniciar o projeto vá para a porta 3000 do swagger
