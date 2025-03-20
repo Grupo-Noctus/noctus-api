@@ -5,7 +5,6 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
   const config = new DocumentBuilder()
     .setTitle('Noctus')
     .setDescription('Noctus API')
@@ -15,6 +14,11 @@ async function bootstrap() {
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
+
+  app.enableCors({
+    origin: '*' //no ambiente de produção colocar o dominio
+  });
+  await app.listen(process.env.PORT);
 
   await app.listen(process.env.PORT ?? 3000);
 }
