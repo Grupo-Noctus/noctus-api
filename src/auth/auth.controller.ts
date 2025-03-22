@@ -15,7 +15,7 @@ export class AuthController {
   @Public()
   @Post('login')
   async signIn (@Body() userAuth: UserAuthDto): Promise <{access_token: string}>{
-    return await this.authService.singIn(userAuth);
+    return await this.authService.signIn(userAuth);
   }
 
   @HttpCode(HttpStatus.CREATED)
@@ -36,6 +36,6 @@ export class AuthController {
     } else {
       createdUser = await this.authService.registerAdmin(userRegister, Role.ADMIN);
     }
-    return this.authService.singIn(createdUser);
+    return this.authService.signIn(createdUser);
   }
 }
