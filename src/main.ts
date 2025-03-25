@@ -9,7 +9,7 @@ async function bootstrap() {
     .setTitle('Noctus')
     .setDescription('Noctus API')
     .setVersion('1.0')
-    .addTag('Autenticação')
+    .addTag('Autenticação','Enrollment')
     .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
@@ -18,8 +18,7 @@ async function bootstrap() {
   app.enableCors({
     origin: '*' //no ambiente de produção colocar o dominio
   });
-  await app.listen(process.env.PORT);
-
+  
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
