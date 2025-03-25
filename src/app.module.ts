@@ -9,6 +9,7 @@ import { AuthGuard } from './auth/guard/auth.guard';
 import { RolesGuard } from './auth/guard/role.guard';
 import { CourseModule } from './course/course.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { EnrollmentModule } from './enrollment/enrollment.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
         blockDuration: 5000,
       }
     ]),
+    EnrollmentModule,
   ],
   controllers: [AppController],
   providers: [

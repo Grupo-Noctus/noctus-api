@@ -70,7 +70,7 @@ model Enrollment {
   idCourse  Int
   active    Boolean
   completed Boolean
-  stardData DateTime
+  startDate DateTime
   endDate   DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
