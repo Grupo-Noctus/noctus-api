@@ -19,7 +19,11 @@ export class AuthService {
 
     async signIn(userAuth: UserAuthDto): Promise<{ access_token: string }> {
         const user = await this.userService.findByUsernameOrEmailForAuth(userAuth.usernameOrEmail);
-    
+
+        const argonVerify = await argon2.verify(user?.password, userAuth.password) 
+            if(!argonVerify){
+                throw new UnauthorizedException();
+}
         const payload = {
             sub: user.id,
             username: user.username,
