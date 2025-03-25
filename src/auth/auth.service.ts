@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { UserRegisterDto } from './dto/user-register.dto';
@@ -6,6 +6,7 @@ import { UserAuthDto } from './dto/user-auth.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { StudentRegisterDto } from './dto/student-register.dto';
 import { Role } from '@prisma/client';
+import { UserAuthJwtDto } from './dto/user-auth-jwt.dto';
 
 @Injectable()
 export class AuthService {
@@ -43,54 +44,64 @@ export class AuthService {
     async registerAdmin (
         userRegister: UserRegisterDto,
         role: Role
-    ): Promise <UserAuthDto>{
-        const createdAdimin = await this.prisma.user.create({
-            data: {
-                ...userRegister,
-                role: role,
-                active: true,
-            },
-            select:{
-                id: true,
-                email: true,
-                password: true,
-            }
-        });
-        const userAuthDto = new UserAuthDto();
-        userAuthDto.id = createdAdimin.id;
-        userAuthDto.usernameOrEmail = createdAdimin.email;
-        userAuthDto.password = createdAdimin.password;
-
-        return userAuthDto;
+    ): Promise <UserAuthJwtDto>{
+        try {
+            const createdAdimin = await this.prisma.user.create({
+                data: {
+                    ...userRegister,
+                    role: role,
+                    active: true,
+                },
+                select:{
+                    id: true,
+                    email: true,
+                    password: true,
+                }
+            });
+            const userAuth = new UserAuthJwtDto();
+            userAuth.id = createdAdimin.id;
+            userAuth.usernameOrEmail = createdAdimin.email;
+            userAuth.password = createdAdimin.password;
+    
+            return userAuth;
+        }catch(error){
+            console.error(error);
+            throw new InternalServerErrorException();
+        }
     }
 
     async registerStudent (
         userRegister: UserRegisterDto,
         studentRegister: StudentRegisterDto
-    ): Promise <UserAuthDto>{
-        const createdStudent = await this.prisma.user.create({
-            data: {
-                ...userRegister,
-                role: Role.STUDENT,
-                active: true,
-                student:{
-                    create: {
-                        ...studentRegister
+    ): Promise <UserAuthJwtDto>{
+        try {
+            const createdStudent = await this.prisma.user.create({
+                data: {
+                    ...userRegister,
+                    role: Role.STUDENT,
+                    active: true,
+                    student:{
+                        create: {
+                            ...studentRegister
+                        }
                     }
+                },
+                select:{
+                    id: true,
+                    email: true,
+                    password: true,
                 }
-            },
-            select:{
-                id: true,
-                email: true,
-                password: true,
-            }
-        });
-
-        const userAuthDto = new UserAuthDto();
-        userAuthDto.id = createdStudent.id;
-        userAuthDto.usernameOrEmail = createdStudent.email;
-        userAuthDto.password = createdStudent.password;
-
-        return userAuthDto;
+            });
+    
+            const userAuth = new UserAuthJwtDto();
+            userAuth.id = createdStudent.id;
+            userAuth.usernameOrEmail = createdStudent.email;
+            userAuth.password = createdStudent.password;
+    
+            return userAuth;
+        }catch(error){
+            console.error(error);
+            throw new InternalServerErrorException();
+        }
     }
 }
