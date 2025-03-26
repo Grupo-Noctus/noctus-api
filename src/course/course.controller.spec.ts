@@ -1,39 +1,27 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CourseController } from './course.controller';
 import { CourseService } from './course.service';
-import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto } from './dto/update-course.dto';
+import { CourseRequestDto } from './dto/course-request.dto';
+import { CourseUpdateDto } from './dto/course-update.dto';
+import { CourseResponseDto } from './dto/course-response.dto';
+import { CoursePaginationResponseDto } from './dto/course-pagination-response.dto';
 
 describe('CourseController', () => {
   let controller: CourseController;
   let service: CourseService;
 
-  const mockCourseService = {
-    create: jest.fn((dto) => ({ ...dto })),
-    findOneCourse: jest.fn((id) => ({
-      id,
-      name: 'Test Course',
-      description: 'Test Description',
-      image: 'test.jpg',
-      duration: 10,
-      certificateModel: 'Basic',
-      createdAt: new Date(),
-      createdBy: 1,
-      updatedAt: new Date(),
-      updatedBy: 2,
-    })),
-    updateCourse: jest.fn((data) => ({ id: data.where.id, ...data.data })),
+  const mockService = {
+    createCourse: jest.fn(),
+    findOneCourse: jest.fn(),
+    updateCourse: jest.fn(),
+    deleteCourse: jest.fn(),
+    findManyCourse: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CourseController],
-      providers: [
-        {
-          provide: CourseService,
-          useValue: mockCourseService,
-        },
-      ],
+      providers: [{ provide: CourseService, useValue: mockService }],
     }).compile();
 
     controller = module.get<CourseController>(CourseController);
@@ -44,86 +32,74 @@ describe('CourseController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should create a course', async () => {
-    const dto: CreateCourseDto = {
-      id: 1,
-      name: 'NestJS Course',
-      description: 'A complete NestJS course',
-      image: 'course.jpg',
-      duration: 20,
-      certificateModel: 'Advanced',
-      createdAt: new Date(),
-      createdBy: 1,
-      updatedAt: new Date(),
-      updatedBy: 2,
-    };
+  describe('createCourse', () => {
+    it('should call service and return true', async () => {
+      const dto: CourseRequestDto = {
+        name: 'Test Course',
+        description: 'Test Description',
+        image: 'https://image.url',
+        startDate: new Date(),
+        endDate: new Date(),
+        certificateModel: '<html></html>',
+      };
+      mockService.createCourse.mockResolvedValue(true);
 
-    expect(await controller.createCourse(dto)).toEqual({ ...dto });
-    expect(service.createCourse).toHaveBeenCalledWith(dto);
-  });
-
-  it('should return a course by id', async () => {
-    expect(await controller.findOneCourse(1)).toEqual({
-      id: 1,
-      name: 'Test Course',
-      description: 'Test Description',
-      image: 'test.jpg',
-      duration: 10,
-      certificateModel: 'Basic',
-      createdAt: expect.any(Date),
-      createdBy: 1,
-      updatedAt: expect.any(Date),
-      updatedBy: 2,
+      const result = await controller.createCourse(dto, 1);
+      expect(service.createCourse).toHaveBeenCalledWith(dto, 1);
+      expect(result).toBe(true);
     });
-
-    expect(service.findOneCourse).toHaveBeenCalledWith(1);
   });
 
-  it('should update a course', async () => {
-    const dto: UpdateCourseDto = {
-      name: 'Updated Course',
-      description: 'Updated Description',
-      image: 'updated.jpg',
-      duration: 25,
-      certificateModel: 'Expert',
-      updatedAt: new Date(),
-      updatedBy: 3,
-    };
+  describe('findOneCourse', () => {
+    it('should return a course', async () => {
+      const course: CourseResponseDto = {
+        name: 'Course',
+        description: 'Description',
+        image: 'https://image.url',
+        startDate: new Date(),
+        endDate: new Date(),
+      };
+      mockService.findOneCourse.mockResolvedValue(course);
 
-    expect(await controller.updateCourse('1', dto)).toEqual({ id: 1, ...dto });
-    expect(service.updateCourse).toHaveBeenCalledWith({
-      where: { id: 1 },
-      data: dto,
+      const result = await controller.findOneCourse('1');
+      expect(service.findOneCourse).toHaveBeenCalledWith(1);
+      expect(result).toEqual(course);
+    });
+  });
+
+  describe('updateCourse', () => {
+    it('should update and return true', async () => {
+      const dto: CourseUpdateDto = {
+        name: 'Updated',
+      };
+      mockService.updateCourse.mockResolvedValue(true);
+
+      const result = await controller.updateCourse('1', dto, 1);
+      expect(service.updateCourse).toHaveBeenCalledWith(1, dto, 1);
+      expect(result).toBe(true);
     });
   });
 
   describe('deleteCourse', () => {
-    it('should delete a course and return deleted course data', async () => {
-      const mockDeletedCourse = {
-        id: 1,
-        name: 'NestJS Course',
-        description: 'Learn NestJS',
-        image: 'image-url.jpg',
-        duration: 40,
-        certificateModel: 'basic',
-        createdAt: new Date(),
-        createdBy: 1,
-        updatedAt: null,
-        updatedBy: null,
-      };
+    it('should call deleteCourse', async () => {
+      mockService.deleteCourse.mockResolvedValue(undefined);
 
-      jest.spyOn(service, 'deleteCourse').mockResolvedValue(mockDeletedCourse);
-
-      const result = await controller.deleteCourse('1');
-
-      expect(result).toEqual(mockDeletedCourse);
-      expect(service.deleteCourse).toHaveBeenCalledWith({ id: 1 });
+      await controller.deleteCourse('1');
+      expect(service.deleteCourse).toHaveBeenCalledWith(1);
     });
+  });
 
-    it('should throw an error if course does not exist', async () => {
-      jest.spyOn(service, 'deleteCourse').mockRejectedValue(new Error('Course not found'));
+  describe('findManyCourse', () => {
+    it('should return paginated courses', async () => {
+      const mockPagination: CoursePaginationResponseDto = {
+        courses: [],
+        totalPages: 1,
+      };
+      mockService.findManyCourse.mockResolvedValue(mockPagination);
 
-      await expect(controller.deleteCourse('999')).rejects.toThrow('Course not found');
+      const result = await controller.findManyCourse(1);
+      expect(service.findManyCourse).toHaveBeenCalledWith(1);
+      expect(result).toEqual(mockPagination);
     });
   });
 });

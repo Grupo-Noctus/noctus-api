@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { UserRegisterDto } from './dto/user-register.dto';
@@ -6,6 +6,7 @@ import { UserAuthDto } from './dto/user-auth.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { StudentRegisterDto } from './dto/student-register.dto';
 import { Role } from '@prisma/client';
+import { UserAuthJwtDto } from './dto/user-auth-jwt.dto';
 import * as argon2 from 'argon2';
 
 @Injectable()
@@ -42,57 +43,69 @@ export class AuthService {
         return regex.test(email);
     }
 
-    async registerAdmin(userRegister: UserRegisterDto, role: Role): Promise<UserAuthDto> {
-        const hashedPassword = await argon2.hash(userRegister.password); 
-        const createdAdmin = await this.prisma.user.create({
-            data: {
-                ...userRegister,
-                role: role,
-                active: true,
-                password: hashedPassword,  
-            },
-            select: {
-                id: true,
-                email: true,
-                password: true,
-            }
-        });
+    async registerAdmin(userRegister: UserRegisterDto, role: Role): Promise<UserAuthJwtDto> {
+        try {
+            const hashedPassword = await argon2.hash(userRegister.password); 
+            const createdAdmin = await this.prisma.user.create({
+                data: {
+                    ...userRegister,
+                    role: role,
+                    active: true,
+                    password: hashedPassword,  
+                },
+                select: {
+                    id: true,
+                    email: true,
+                    password: true,
+                }
+            });
 
-        const userAuthDto = new UserAuthDto();
-        userAuthDto.id = createdAdmin.id;
-        userAuthDto.usernameOrEmail = createdAdmin.email;
-        userAuthDto.password = createdAdmin.password;
+            const userAuthDto = new UserAuthJwtDto();
+            userAuthDto.id = createdAdmin.id;
+            userAuthDto.usernameOrEmail = createdAdmin.email;
+            userAuthDto.password = createdAdmin.password;
 
-        return userAuthDto;
+            return userAuthDto;
+        }catch(error){
+            console.error(error);
+            throw new InternalServerErrorException();
+        }
     }
 
-    async registerStudent(userRegister: UserRegisterDto, studentRegister: StudentRegisterDto): Promise<UserAuthDto> {
-        const hashedPassword = await argon2.hash(userRegister.password);  
-
-        const createdStudent = await this.prisma.user.create({
-            data: {
-                ...userRegister,
-                role: Role.STUDENT,
-                active: true,
-                password: hashedPassword,  
-                student: {
-                    create: {
-                        ...studentRegister
+    async registerStudent (
+        userRegister: UserRegisterDto,
+        studentRegister: StudentRegisterDto
+    ): Promise <UserAuthJwtDto>{
+        try {
+            const hashedPassword = await argon2.hash(userRegister.password);
+            const createdStudent = await this.prisma.user.create({
+                data: {
+                    ...userRegister,
+                    role: Role.STUDENT,
+                    active: true,
+                    password: hashedPassword, 
+                    student:{
+                        create: {
+                            ...studentRegister
+                        }
                     }
+                },
+                select:{
+                    id: true,
+                    email: true,
+                    password: true,
                 }
-            },
-            select: {
-                id: true,
-                email: true,
-                password: true,
-            }
-        });
-
-        const userAuthDto = new UserAuthDto();
-        userAuthDto.id = createdStudent.id;
-        userAuthDto.usernameOrEmail = createdStudent.email;
-        userAuthDto.password = createdStudent.password;
-
-        return userAuthDto;
+            });
+    
+            const userAuth = new UserAuthJwtDto();
+            userAuth.id = createdStudent.id;
+            userAuth.usernameOrEmail = createdStudent.email;
+            userAuth.password = createdStudent.password;
+    
+            return userAuth;
+        }catch(error){
+            console.error(error);
+            throw new InternalServerErrorException();
+        }
     }
 }

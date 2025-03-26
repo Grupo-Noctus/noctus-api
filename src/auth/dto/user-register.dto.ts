@@ -1,4 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger"
+import { ApiProperty } from "@nestjs/swagger";
+import { IsNotEmpty, IsEmail, IsString, IsOptional, IsUrl } from "class-validator";
 
 export class UserRegisterDto {
     
@@ -6,30 +7,40 @@ export class UserRegisterDto {
     example: 'joaosilva',
     description: 'Unique username used on the platform',
   })
-  username: string
+  @IsNotEmpty()
+  @IsString()
+  username: string;
 
   @ApiProperty({
     example: 'João da Silva',
     description: 'Full name of the user',
   })
-  name: string
+  @IsNotEmpty()
+  @IsString()
+  name: string;
 
   @ApiProperty({
     example: 'joao@email.com',
-    description: 'email address of the user',
+    description: 'Email address of the user',
   })
-  email: string
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
 
   @ApiProperty({
     example: 'senhaSegura123',
     description: 'Password created by the user for authentication',
   })
-  password: string
+  @IsNotEmpty()
+  @IsString()
+  password: string;
 
   @ApiProperty({
     example: 'https://meusite.com/imagens/avatar.png',
-    description: 'URL of the user\'s profile image (optional)',
+    description: 'URL of the user profile image (optional)',
     required: false,
   })
-  image: string
+  @IsOptional()
+  @IsUrl()
+  image: string;
 }

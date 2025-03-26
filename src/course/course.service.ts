@@ -1,49 +1,99 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Course, Prisma } from '@prisma/client';
+import { CourseRequestDto } from './dto/course-request.dto';
+import { CourseUpdateDto } from './dto/course-update.dto';
+import { CourseResponseDto } from './dto/course-response.dto';
+import { CoursePaginationResponseDto } from './dto/course-pagination-response.dto';
 
 @Injectable()
 export class CourseService {
   constructor(private prisma: PrismaService) {}
 
-  async createCourse( data: Prisma.CourseCreateInput): Promise<Course> {
+  async createCourse(courseResponse: CourseRequestDto, user: number): Promise<boolean> {
     try {
-    return this.prisma.course.create({ data }); 
-    } catch(error) {
-      throw new Error(`Error in create for course: ${error.message}`);
+      await this.prisma.course.create({
+        data: {
+          ...courseResponse,
+          createdBy: user,
+          updatedBy: user
+        }
+      }); 
+      return true;
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
     }
   }
 
-  async updateCourse(params: {
-    where: Prisma.CourseWhereUniqueInput;
-    data: Prisma.CourseUpdateInput;
-  }): Promise<Course> {
-    const { where, data } = params;
+  async updateCourse(idCourse: number, updateCourse: CourseUpdateDto, user: number): Promise<boolean> {
     try {
-    return this.prisma.course.update({
-      where,
-      data,
-    });
+      await this.prisma.course.update({
+        where: { id: idCourse},
+        data: {
+          ...updateCourse,
+          updatedBy:user
+        },
+      });
+      return true;
     } catch (error) {
-      throw new Error(`Error in searching/update for course: ${error.message}`);
+      console.error(error);
+      throw new BadRequestException();
     }
   }
   
 
-  async deleteCourse(where: Prisma.CourseWhereUniqueInput): Promise<Course> {
+  async deleteCourse(idCourse: number): Promise<void> {
     try {
-      return await this.prisma.course.delete({ where });
+      await this.prisma.course.delete({
+        where: {id: idCourse}
+      });
     } catch (error) {
-      throw new Error(`Error in searching/delete for course: ${error.message}`);
+      console.error(error);
+      throw new NotFoundException();
     }
   }
 
-  async findOneCourse(id: number): Promise<Course> {
-  const course = await this.prisma.course.findUnique({ where: { id: Number(id) } });
-  if (!course) {
-    throw new Error(`Error in searching the Course by Id: ${id}`);
-  }
-  return course;
+  async findOneCourse(idCourse: number): Promise<CourseResponseDto> {
+    try{
+      return await this.prisma.course.findUnique({
+        where: {id: idCourse},
+        select: {
+          name: true,
+          description: true,
+          image: true,
+          startDate: true,
+          endDate: true,
+        }
+      });
+    } catch (error) {
+      console.error(error);
+      throw new NotFoundException();
+    }
   }
 
+  async findManyCourse(pageNumber: number): Promise<CoursePaginationResponseDto>{
+    try{
+      const PAGE_SIZE = 10;
+      const page = (PAGE_SIZE * (pageNumber - 1));
+
+      const totalCount = await this.prisma.course.count(); 
+      const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+      const courses = await this.prisma.$queryRaw<
+        CourseResponseDto[]
+      >`
+        SELECT c.name, c.description, c.image, c.startDate, c.endDate
+        FROM Course c
+        ORDER BY name ASC
+        LIMIT ${PAGE_SIZE} OFFSET ${page}
+      `;
+      if(!courses || courses.length == 0){
+        throw new NotFoundException('No courses found.');
+      }
+      return {courses, totalPages};
+    }catch (error){
+      console.error (error);
+      throw new NotFoundException();
+    }
+  }
 }
