@@ -7,29 +7,31 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { StudentRegisterDto } from './dto/student-register.dto';
 import { Role } from '@prisma/client';
 import { UserAuthJwtDto } from './dto/user-auth-jwt.dto';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class AuthService {
+    
     constructor( 
         private jwt: JwtService,
         private userService: UserService,
         private readonly prisma: PrismaService
     ){}
 
-    async singIn (userAuth: UserAuthDto): Promise<{ access_token: string}>{
+    async signIn(userAuth: UserAuthDto): Promise<{ access_token: string }> {
         const user = await this.userService.findByUsernameOrEmailForAuth(userAuth.usernameOrEmail);
 
-        if(user?.password !== userAuth.password){
-            throw new UnauthorizedException();
-        }
-
+        const argonVerify = await argon2.verify(user?.password, userAuth.password) 
+            if(!argonVerify){
+                throw new UnauthorizedException();
+}
         const payload = {
             sub: user.id,
             username: user.username,
             role: user.role,
             active: user.active
         }
-
+    
         return {
             access_token: await this.jwt.signAsync(payload),
         }
@@ -41,29 +43,29 @@ export class AuthService {
         return regex.test(email);
     }
 
-    async registerAdmin (
-        userRegister: UserRegisterDto,
-        role: Role
-    ): Promise <UserAuthJwtDto>{
+    async registerAdmin(userRegister: UserRegisterDto, role: Role): Promise<UserAuthJwtDto> {
         try {
-            const createdAdimin = await this.prisma.user.create({
+            const hashedPassword = await argon2.hash(userRegister.password); 
+            const createdAdmin = await this.prisma.user.create({
                 data: {
                     ...userRegister,
                     role: role,
                     active: true,
+                    password: hashedPassword,  
                 },
-                select:{
+                select: {
                     id: true,
                     email: true,
                     password: true,
                 }
             });
-            const userAuth = new UserAuthJwtDto();
-            userAuth.id = createdAdimin.id;
-            userAuth.usernameOrEmail = createdAdimin.email;
-            userAuth.password = createdAdimin.password;
-    
-            return userAuth;
+
+            const userAuthDto = new UserAuthJwtDto();
+            userAuthDto.id = createdAdmin.id;
+            userAuthDto.usernameOrEmail = createdAdmin.email;
+            userAuthDto.password = createdAdmin.password;
+
+            return userAuthDto;
         }catch(error){
             console.error(error);
             throw new InternalServerErrorException();
@@ -75,11 +77,13 @@ export class AuthService {
         studentRegister: StudentRegisterDto
     ): Promise <UserAuthJwtDto>{
         try {
+            const hashedPassword = await argon2.hash(userRegister.password);
             const createdStudent = await this.prisma.user.create({
                 data: {
                     ...userRegister,
                     role: Role.STUDENT,
                     active: true,
+                    password: hashedPassword, 
                     student:{
                         create: {
                             ...studentRegister

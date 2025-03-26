@@ -22,7 +22,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiBody({ type: UserAuthDto })
   async signIn (@Body() userAuth: UserAuthDto): Promise <{access_token: string}>{
-    return await this.authService.singIn(userAuth);
+    return await this.authService.signIn(userAuth);
   }
 
   @HttpCode(HttpStatus.CREATED)
@@ -47,6 +47,6 @@ export class AuthController {
     } else {
       createdUser = await this.authService.registerAdmin(user, Role.ADMIN);
     }
-    return this.authService.singIn(createdUser);
+    return this.authService.signIn(createdUser);
   }
 }
