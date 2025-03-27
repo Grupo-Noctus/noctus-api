@@ -29,12 +29,12 @@ export class AuthController {
   @Public()
   @Post('register')
   @ApiOperation({ summary: 'Register new user' })
-  @ApiResponse({ status: 201, description: 'Success', type: String})
+  @ApiResponse({ status: 201, description: 'Success', type: Boolean})
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 500, description: 'Internal server error'})
   async register (
     @Body() registerDto: RegisterDto
-  ): Promise <{access_token: string}>{
+  ): Promise <boolean>{
     const { user, student } = registerDto;
     let createdUser: UserAuthJwtDto = null; 
     const isAdmin = this.authService.isEmailFromMatera(user.email);
@@ -43,10 +43,9 @@ export class AuthController {
       if(!student){
         throw new BadRequestException('The user is student and your data not found.')
       }
-      createdUser = await this.authService.registerStudent(user, student);
+      return await this.authService.registerStudent(user, student);
     } else {
-      createdUser = await this.authService.registerAdmin(user, Role.ADMIN);
+      return await this.authService.registerAdmin(user, Role.ADMIN);
     }
-    return this.authService.signIn(createdUser);
   }
 }
