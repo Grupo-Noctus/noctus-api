@@ -39,7 +39,7 @@ export class CourseService {
   }
 
   async findOneCourse(id: number): Promise<Course> {
-  const course = await this.prisma.course.findUnique({ where: { id: Number(id) } });
+  const course = await this.prisma.course.findUnique({ where: { id: Number(id) }, include: {materials: true  },});
   if (!course) {
     throw new Error(`Error in searching the Course by Id: ${id}`);
   }

@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UseGuards } from '@nestjs/common';
 import { MaterialService } from './material.service';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
+import { AuthGuard } from 'src/auth/guard/auth.guard';
 
 @Controller('material')
+@UseGuards(AuthGuard)
 export class MaterialController {
   constructor(private readonly materialService: MaterialService) {}
 
@@ -22,11 +24,6 @@ export class MaterialController {
   @Get('get/:id')
   findOneMaterial(@Param('id') id: string) {
     return this.materialService.findOne(+id);
-  }
-
-  @Patch('update/:id')
-  updateMaterial(@Param('id') id: string, @Body() updateMaterialDto: UpdateMaterialDto) {
-    return this.materialService.update(+id, updateMaterialDto);
   }
 
   @Delete('delete/:id')

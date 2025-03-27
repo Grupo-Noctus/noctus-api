@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsDate } from 'class-validator';
-
+import { Type } from 'class-transformer';
 export class CreateCourseDto {
     
     @IsNotEmpty()

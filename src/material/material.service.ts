@@ -1,26 +1,65 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, Query } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateMaterialDto } from './dto/create-material.dto';
-import { UpdateMaterialDto } from './dto/update-material.dto';
 
 @Injectable()
 export class MaterialService {
-  create(createMaterialDto: CreateMaterialDto) {
-    return 'This action adds a new material';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createMaterialDto: CreateMaterialDto) {
+    try {
+      return await this.prisma.material.create({
+        data: {
+          name: createMaterialDto.name,
+          description: createMaterialDto.description,
+          filename: createMaterialDto.filename,
+          type: createMaterialDto.type,
+          link: createMaterialDto.link,
+          createdBy: createMaterialDto.createdBy,
+          updatedBy: createMaterialDto.createdBy,
+          course: {
+            connect: { id: createMaterialDto.idCourse },
+          },
+        },
+      });
+    } catch (error) {
+      throw new Error(`Error creating material: ${error.message}`);
+    }
+  }
+  
+  async findAll(title?: string, page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+  
+    return this.prisma.material.findMany({
+      where: title
+        ? { name: { contains: title, mode: 'insensitive' } as any }
+        : {},
+      take: limit,
+      skip: skip,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+  
+
+  async findOne(id: number) {
+    const material = await this.prisma.material.findUnique({
+      where: { id },
+    });
+
+    if (!material) {
+      throw new NotFoundException(`Material with ID ${id} not found`);
+    }
+
+    return material;
   }
 
-  findAll() {
-    return `This action returns all material`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} material`;
-  }
-
-  update(id: number, updateMaterialDto: UpdateMaterialDto) {
-    return `This action updates a #${id} material`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} material`;
+  async remove(id: number) {
+    try {
+      return await this.prisma.material.delete({
+        where: { id },
+      });
+    } catch (error) {
+      throw new NotFoundException(`Material with ID ${id} not found`);
+    }
   }
 }

@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common'
 import { CourseService } from './course.service';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { CreateCourseDto } from './dto/create-course.dto';
-import { Public } from 'src/auth/decorator/public.decorator';
 import { Roles } from 'src/auth/decorator/role.decorator';
 
 @Controller('course')
