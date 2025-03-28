@@ -51,8 +51,9 @@ model Course {
   name             String
   description      String
   image            String
-  duration         Int
-  certificateModel String
+  startDate        DateTime
+  endDate          DateTime
+  certificateModel String?
   createdAt        DateTime @default(now())
   createdBy        Int
   updatedAt        DateTime @updatedAt
@@ -70,7 +71,7 @@ model Enrollment {
   idCourse  Int
   active    Boolean
   completed Boolean
-  stardData DateTime
+  startData DateTime
   endDate   DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -126,7 +127,7 @@ model Module {
   description String
   order       Int
   createdAt   DateTime @default(now())
-  createdBy   Int
+  createdBy   Int?
   updatedAt   DateTime @updatedAt
   updatedBy   Int
 
