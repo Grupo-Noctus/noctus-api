@@ -39,6 +39,7 @@ describe('MaterialController', () => {
       link: 'http://example.com',
       createdBy: 1,
       idCourse: 1,
+      updatedBy: null,
     };
     expect(await controller.uploadMaterial(dto)).toEqual({ id: 1, ...dto });
     expect(service.create).toHaveBeenCalledWith(dto);

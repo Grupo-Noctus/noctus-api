@@ -22,4 +22,7 @@ export class CreateMaterialDto {
 
   @IsInt()
   createdBy: number;
+
+  @IsOptional()
+  updatedBy: number;
 }
