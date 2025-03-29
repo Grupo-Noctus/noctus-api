@@ -22,9 +22,9 @@ export class AuthService {
         const user = await this.userService.findByUsernameOrEmailForAuth(userAuth.usernameOrEmail);
 
         const argonVerify = await argon2.verify(user?.password, userAuth.password) 
-            if(!argonVerify){
-                throw new UnauthorizedException();
-}
+        if(!argonVerify){
+            throw new UnauthorizedException();
+        }
         const payload = {
             sub: user.id,
             username: user.username,
@@ -43,7 +43,7 @@ export class AuthService {
         return regex.test(email);
     }
 
-    async registerAdmin(userRegister: UserRegisterDto, role: Role): Promise<UserAuthJwtDto> {
+    async registerAdmin(userRegister: UserRegisterDto, role: Role): Promise<boolean> {
         try {
             const hashedPassword = await argon2.hash(userRegister.password); 
             const createdAdmin = await this.prisma.user.create({
@@ -65,7 +65,7 @@ export class AuthService {
             userAuthDto.usernameOrEmail = createdAdmin.email;
             userAuthDto.password = createdAdmin.password;
 
-            return userAuthDto;
+            return true;
         }catch(error){
             console.error(error);
             throw new InternalServerErrorException();
@@ -75,7 +75,7 @@ export class AuthService {
     async registerStudent (
         userRegister: UserRegisterDto,
         studentRegister: StudentRegisterDto
-    ): Promise <UserAuthJwtDto>{
+    ): Promise <boolean>{
         try {
             const hashedPassword = await argon2.hash(userRegister.password);
             const createdStudent = await this.prisma.user.create({
@@ -102,7 +102,7 @@ export class AuthService {
             userAuth.usernameOrEmail = createdStudent.email;
             userAuth.password = createdStudent.password;
     
-            return userAuth;
+            return true;
         }catch(error){
             console.error(error);
             throw new InternalServerErrorException();
