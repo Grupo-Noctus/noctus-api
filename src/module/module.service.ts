@@ -15,6 +15,7 @@ export class ModuleService {
             where: {idCourse: idCourse},
             select: {order: true}
         });
+        if(orders == null) return false;
         return orders.some(module => module.order === order);
     }
 
