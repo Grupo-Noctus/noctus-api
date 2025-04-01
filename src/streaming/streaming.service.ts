@@ -60,11 +60,11 @@ export class StreamingService {
 
   generateUniqueKey(filename: string): string {
     try{
-      const slugifiledName = slugify(filename, { lower: true, strict: true });
+      const slugifiedName = slugify(filename, { lower: true, strict: true, replacement: '-' });
 
       const uniqueId = uuidv4();
 
-      return `${slugifiledName}-${uniqueId}`;
+      return `${slugifiedName}-${uniqueId}`;
     }catch (error){
       console.error(error);
       throw new InternalServerErrorException();
