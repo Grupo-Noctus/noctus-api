@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateMaterialDto } from './dto/create-material.dto';
-import { UpdateMaterialDto } from './dto/update-material.dto';
+import { MaterialRequestDto } from './dto/material-resquest.dto';
+import { MaterialResponseDto } from './dto/material-response.dto';
 import { EncryptionService } from '../encryption/encryption.service';
+import { MaterialPaginationResponseDto } from './dto/material-pagination-response.dto';
 
 @Injectable()
 export class MaterialService {
@@ -11,51 +12,60 @@ export class MaterialService {
     private readonly encryptionService: EncryptionService
   ) {}
 
-  async create(createMaterialDto: CreateMaterialDto) {
+  async createMaterial(
+    courseResponse: MaterialRequestDto, 
+    userId: number, 
+    file?: Express.Multer.File
+  ): Promise<boolean> {
     try {
-      return await this.prisma.material.create({
-        data: {
-          name: this.encryptionService.encryptAES(createMaterialDto.name),
-          description: this.encryptionService.encryptAES(createMaterialDto.description),
-          filename: this.encryptionService.encryptAES(createMaterialDto.filename),
-          type: createMaterialDto.type,
-          link: this.encryptionService.encryptAES(createMaterialDto.link),
-          createdBy: createMaterialDto.createdBy,
-          updatedBy: createMaterialDto.createdBy,
-          course: {
-            connect: { id: createMaterialDto.idCourse },
-          },
-        },
+      const encryptedData = Object.fromEntries(
+        Object.entries(courseResponse).map(([key, value]) => [
+          key, 
+          this.encryptionService.encrypt(String(value))
+        ])
+      );
+
+      const filePath = file ? `/uploads/${file.filename}` : null;
+      console.log('Saving material:', {
+        ...encryptedData,
+        userId,
+        filePath,
       });
+
+      return true;
     } catch (error) {
-      throw new Error(`Error creating material: ${error.message}`);
+      console.error('Error while creating material:', error);
+      throw new InternalServerErrorException('Failed to process request');
     }
   }
 
-  async findAll(title?: string, page: number = 1, limit: number = 10) {
-    const skip = (page - 1) * limit;
-  
-    // Buscar materiais criptografados
-    const materials = await this.prisma.material.findMany({
-      where: title
-        ? { name: { contains: this.encryptionService.encryptAES(title) } }
-        : {},
-      take: limit,
-      skip: skip,
-      orderBy: { createdAt: 'desc' },
-    });
-  
-    // Descriptografar os materiais antes de retornar
-    return materials.map((material) => ({
-      ...material,
-      name: this.encryptionService.decryptAES(material.name),
-      description: this.encryptionService.decryptAES(material.description),
-      filename: this.encryptionService.decryptAES(material.filename),
-      link: this.encryptionService.decryptAES(material.link),
-    }));
-  }
 
-  async findOne(id: number) {
+  async findManyMaterial(pageNumber: number): Promise<MaterialPaginationResponseDto>{
+    try{
+      const PAGE_SIZE = 10;
+      const page = (PAGE_SIZE * (pageNumber - 1));
+
+      const totalCount = await this.prisma.course.count(); 
+      const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+      const materials = await this.prisma.$queryRaw<
+        MaterialResponseDto[]
+      >`
+        SELECT c.name, c.description, c.image, c.startDate, c.endDate
+        FROM Course c
+        ORDER BY name ASC
+        LIMIT ${PAGE_SIZE} OFFSET ${page}
+      `;
+      if(!materials || materials.length == 0){
+        throw new NotFoundException('No courses found.');
+      }
+      return { materials, totalPages};
+    } catch (error) {
+      console.error (error);
+      throw new NotFoundException();
+    }
+  }
+  async findOneMaterial(id: number) {
     const material = await this.prisma.material.findUnique({
       where: { id },
     });
@@ -63,8 +73,7 @@ export class MaterialService {
     if (!material) {
       throw new NotFoundException(`Material with ID ${id} not found`);
     }
-
-    // Descriptografar os dados antes de retornar
+    try {
     return {
       ...material,
       name: this.encryptionService.decryptAES(material.name),
@@ -72,26 +81,13 @@ export class MaterialService {
       filename: this.encryptionService.decryptAES(material.filename),
       link: this.encryptionService.decryptAES(material.link),
     };
+  } catch (error) {
+    console.error(error);
+    throw new NotFoundException();
   }
+}
 
-  async update(id: number, updateMaterialDto: UpdateMaterialDto) {
-    try {
-      return await this.prisma.material.update({
-        where: { id },
-        data: {
-          name: this.encryptionService.encryptAES(updateMaterialDto.name),
-          description: this.encryptionService.encryptAES(updateMaterialDto.description),
-          filename: this.encryptionService.encryptAES(updateMaterialDto.filename),
-          link: this.encryptionService.encryptAES(updateMaterialDto.link),
-          updatedBy: updateMaterialDto.updatedBy,
-        },
-      });
-    } catch (error) {
-      throw new Error(`Error updating material: ${error.message}`);
-    }
-  }
-
-  async remove(id: number) {
+  async deleteMaterial(id: number) {
     try {
       return await this.prisma.material.delete({
         where: { id },

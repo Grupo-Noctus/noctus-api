@@ -49,9 +49,9 @@ describe('MaterialService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('create', () => {
+  describe('createMaterial', () => {
     it('should create a new material', async () => {
-      const result = await service.create(mockMaterial);
+      const result = await service.createMaterial(mockMaterial, 1);
       expect(result).toEqual(mockMaterial);
       expect(prisma.material.create).toHaveBeenCalledWith({
         data: {
@@ -64,7 +64,7 @@ describe('MaterialService', () => {
 
   describe('findAll', () => {
     it('should return an array of materials', async () => {
-      const result = await service.findAll();
+      const result = await service.findManyMaterial(10);
       expect(result).toEqual([mockMaterial]);
       expect(prisma.material.findMany).toHaveBeenCalled();
     });
@@ -72,27 +72,27 @@ describe('MaterialService', () => {
 
   describe('findOne', () => {
     it('should return a material by id', async () => {
-      const result = await service.findOne(1);
+      const result = await service.findOneMaterial(1);
       expect(result).toEqual(mockMaterial);
       expect(prisma.material.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
     });
 
     it('should throw NotFoundException if material not found', async () => {
       jest.spyOn(prisma.material, 'findUnique').mockResolvedValueOnce(null);
-      await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
+      await expect(service.findOneMaterial(999)).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('remove', () => {
     it('should delete a material', async () => {
-      const result = await service.remove(1);
+      const result = await service.deleteMaterial(1);
       expect(result).toEqual(mockMaterial);
       expect(prisma.material.delete).toHaveBeenCalledWith({ where: { id: 1 } });
     });
 
     it('should throw NotFoundException if material does not exist', async () => {
       jest.spyOn(prisma.material, 'delete').mockRejectedValue(new NotFoundException('Material not found'));
-      await expect(service.remove(999)).rejects.toThrow(NotFoundException);
+      await expect(service.deleteMaterial(999)).rejects.toThrow(NotFoundException);
     });
   });
 });

@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MaterialController } from './material.controller';
 import { MaterialService } from './material.service';
-import { CreateMaterialDto } from './dto/create-material.dto';
-import { UpdateMaterialDto } from './dto/update-material.dto';
+import { MaterialResponseDto } from './dto/material-response.dto';
+import { MaterialPaginationResponseDto } from './dto/material-pagination-response.dto';
 
 describe('MaterialController', () => {
   let controller: MaterialController;
@@ -10,7 +10,7 @@ describe('MaterialController', () => {
 
   const mockMaterialService = {
     create: jest.fn((dto) => ({ id: 1, ...dto })),
-    findAll: jest.fn(() => [{ id: 1, name: 'Test Material' }]),
+    findAllMaterial: jest.fn(),
     findOne: jest.fn((id) => ({ id, name: 'Test Material' })),
     update: jest.fn((id, dto) => ({ id, ...dto })),
     remove: jest.fn((id) => ({ id })),
@@ -31,7 +31,7 @@ describe('MaterialController', () => {
   });
 
   it('should create a material', async () => {
-    const dto: CreateMaterialDto = { 
+    const dto: MaterialResponseDto = { 
       name: 'Test Material',
       description: 'Test Description',
       filename: 'test.pdf',
@@ -41,22 +41,45 @@ describe('MaterialController', () => {
       idCourse: 1,
       updatedBy: null,
     };
-    expect(await controller.uploadMaterial(dto)).toEqual({ id: 1, ...dto });
-    expect(service.create).toHaveBeenCalledWith(dto);
+    const mockFile: Express.Multer.File = {
+      fieldname: 'file',
+      originalname: 'test.pdf',
+      encoding: '7bit',
+      mimetype: 'application/pdf',
+      buffer: Buffer.from('mock file content'),
+      size: 1024,
+      destination: '',
+      filename: 'test.pdf',
+      path: '',
+      stream: null,
+    };
+    
+    expect(await controller.createMaterial(dto, 1, mockFile)).toEqual({ id: 1, ...dto });
+    expect(service.createMaterial).toHaveBeenCalledWith(dto);
   });
 
-  it('should return all materials', async () => {
-    expect(await controller.findAllMaterial()).toEqual([{ id: 1, name: 'Test Material' }]);
-    expect(service.findAll).toHaveBeenCalled();
+  describe('findManyMaterial', () => {
+      it('should return paginated courses', async () => {
+        const mockPagination: MaterialPaginationResponseDto = {
+          materials: [],
+          totalPages: 1,
+        };
+        mockMaterialService.findAllMaterial.mockResolvedValue(mockPagination);
+        
+      const result = await controller.findManyMaterial(1);
+      expect(service.findManyMaterial).toHaveBeenCalledWith(1);
+      expect(result).toEqual(mockPagination);
+    });
   });
+
 
   it('should return a material by id', async () => {
     expect(await controller.findOneMaterial('1')).toEqual({ id: 1, name: 'Test Material' });
-    expect(service.findOne).toHaveBeenCalledWith(1);
+    expect(service.findOneMaterial).toHaveBeenCalledWith(1);
   });
 
   it('should delete a material', async () => {
-    expect(await controller.removeMaterial('1')).toEqual({ id: 1 });
-    expect(service.remove).toHaveBeenCalledWith(1);
+    expect(await controller.deleteMaterial('1')).toEqual({ id: 1 });
+    expect(service.deleteMaterial).toHaveBeenCalledWith(1);
   });
 });

@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import * as CryptoJS from 'crypto-js';
 
 @Injectable()
 export class EncryptionService {
+  encrypt(arg0: string): any {
+    throw new Error('Method not implemented.');
+  }
   private readonly secretKey = process.env.ENCRYPTION_SECRET || 'chave-secreta';
 
   encryptAES(text: string): string {
