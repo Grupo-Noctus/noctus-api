@@ -18,8 +18,9 @@ export class MaterialService {
     file?: Express.Multer.File
   ): Promise<boolean> {
     try {
+      console.log('File uploaded:', file?.filename);
       const encryptedData = Object.fromEntries(
-        Object.entries(courseResponse).map(([key, value]) => [
+        Object.entries(courseResponse).map( ([key, value]) => [
           key, 
           this.encryptionService.encrypt(String(value))
         ])

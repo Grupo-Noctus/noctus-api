@@ -1,14 +1,14 @@
 import { Controller, Get, Post, Body, Put, Param, Delete, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { CourseService } from './course.service';
-import { UpdateCourseDto } from './dto/update-course.dto';
-import { CreateCourseDto } from './dto/create-course.dto';
-import { Public } from 'src/auth/decorator/public.decorator';
+import { CourseUpdateDto } from './dto/course-update.dto';
+import { CourseRequestDto } from './dto/course-request.dto';
 import { Roles } from 'src/auth/decorator/role.decorator';
 import { Role } from '@prisma/client';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CourseResponseDto } from './dto/course-response.dto';
 import { CoursePaginationResponseDto } from './dto/course-pagination-response.dto';
+import { Public } from 'src/auth/decorator/public.decorator';
 
 @ApiTags('Course')
 @Controller('course')
