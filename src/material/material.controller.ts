@@ -27,6 +27,7 @@ export class MaterialController {
   @ApiResponse({status:400, description:'Bad Request'})
   @ApiResponse({status: 401, description: 'Unauthorized'})
   @UseInterceptors(FileInterceptor('file', {
+    limits: {fileSize: 10 * 1024 * 1024},
     storage: diskStorage({
       destination: './uploads',
       filename: (req, file, callback) => {
