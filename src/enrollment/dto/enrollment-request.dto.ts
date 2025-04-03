@@ -1,56 +1,64 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsInt } from 'class-validator';
+import { IsBoolean, IsDateString, IsInt, IsNotEmpty, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class EnrollmentRequestDto {
-
+  
+  @IsNotEmpty()
+  @IsInt()
+  @IsOptional()
   @ApiProperty({
     description: 'Student\s ID',
     example: 123,
     type: Number,
   })
-  @IsInt()
-  idStudent: number;
+  idStudent?: number;
 
+  @IsNotEmpty()
+  @IsInt()
+  @IsOptional()
   @ApiProperty({
     description: 'Course\s ID',
     example: 1,
     type: Number,
   })
-  @IsInt()
-  idCourse: number;
-    
+  idCourse?: number;
+  
+  @IsBoolean()
+  @IsOptional()
   @ApiProperty({
     description: 'Enrollment activation status',
     example: true,
     type: Boolean,
   })
-  @IsBoolean()
-  active: boolean;
+  active?: boolean;
 
+  @IsBoolean()
+  @IsOptional()
   @ApiProperty({
     description: 'Enrollment completion status',
     example: true,
     type: Boolean,
   })
-  @IsBoolean()
-  completed: boolean;
+  completed?: boolean;
 
-  @ApiProperty({
-    description: 'Registration start date',
-     example: '2025-03-22T10:00:00Z',
-    type: Date,
-  })
   @Type(() => Date)
   @IsDateString()
-  startDate: Date;
-
+  @IsOptional()
   @ApiProperty({
-    description: 'Enrollment end date',
-    example: '2025-06-22T10:00:00Z',
+    description: 'Registration start date in ISO format (YYYY-MM-DD)',
+     example: '2023-03-23T15:00:00.000Z',
     type: Date,
   })
+  startDate?: Date;
+
   @Type(() => Date)
   @IsDateString()
-  endDate: Date;
+  @IsOptional()
+  @ApiProperty({
+    description: 'Enrollment end date in ISO format (YYYY-MM-DD)',
+    example: '2023-03-23T15:00:00.000Z',
+    type: Date,
+  })
+  endDate?: Date;
 }

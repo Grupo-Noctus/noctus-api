@@ -69,7 +69,7 @@ model Enrollment {
   id        Int      @id @default(autoincrement())
   idStudent Int
   idCourse  Int
-  active    Boolean
+  active    Boolean @default(true)
   completed Boolean
   startDate DateTime
   endDate   DateTime

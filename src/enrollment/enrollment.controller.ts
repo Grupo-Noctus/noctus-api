@@ -1,59 +1,79 @@
-import { Body, Controller, Get, Param, Post, Put, Delete } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Delete, HttpStatus, HttpCode, Query } from '@nestjs/common';
 import { EnrollmentService } from './enrollment.service';
 import { Roles } from 'src/auth/decorator/role.decorator';
 import { Role } from '@prisma/client';
 import { ApiTags, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { EnrollmentRequestDto } from './dto/enrollment-request.dto';
 import { EnrollmentUpdateDto } from './dto/enrollment-update.dto';
-import { Public } from 'src/auth/decorator/public.decorator';
-
+import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
+import { EnrollmentResponseDto } from './dto/enrollment-response.dto';
+import { EnrollmentPaginationResponseDto } from './dto/enrollment-pagination-response.dto';
 
 @ApiTags('Enrollment')
 @Controller('enrollment')
 export class EnrollmentController {
   constructor(private readonly enrollmentService: EnrollmentService) {}
 
-  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
   @Post('create')
-  @ApiOperation({
-    summary: 'Create a new enrollment'
-  })
-  @ApiResponse({ status: 200, description: 'Enrollment created successfully' })
-  @ApiResponse({ status: 404, description: 'Error creating enrollment' })
-  @ApiBody({ type: EnrollmentRequestDto })
-  async createEnrollment(@Body() enrollmentDto: EnrollmentRequestDto) {
-    return await this.enrollmentService.createEnrollment(enrollmentDto);
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Create a new enrollment'})
+  @ApiResponse({ status: 200, description:'Success'})
+  @ApiResponse({status:400, description:'Bad Request'})
+  @ApiResponse({status: 401, description: 'Unauthorized'})
+  async createEnrollment(@Body() enrollmentResponse: EnrollmentRequestDto, @CurrentUser() user: number): Promise<boolean> {
+    return await this.enrollmentService.createEnrollment(enrollmentResponse, user);
   }
 
+  @HttpCode(HttpStatus.OK)
+  @Get('get-one/:id')
   @Roles(Role.ADMIN)
-  @Get('get/:id')
   @ApiOperation({ summary: 'Get enrollment by ID' })
-  @ApiResponse({ status: 200, description: 'Enrollment found' })
-  @ApiResponse({ status: 404, description: 'Enrollment not found' })
-  async getEnrollmentById(@Param('id') id: string) {
-    return await this.enrollmentService.getEnrollmentById(+id); 
+  @ApiResponse({ status: 200, description:'Success', type: EnrollmentResponseDto})
+  @ApiResponse({status:400, description: 'Bad Request'})
+  @ApiResponse({status: 401, description: 'Unauthorized'})
+  @ApiResponse({ status: 404, description: 'Not Found'})
+  async getEnrollmentById(@Param('id') idEnrollment: string): Promise<EnrollmentResponseDto> {
+    return await this.enrollmentService.getEnrollmentById(+idEnrollment); 
   }
   
-  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
   @Put('update/:id')
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Update an existing enrollment' })
   @ApiBody({ type: EnrollmentUpdateDto })
-  @ApiResponse({ status: 200, description: 'Enrollment updated successfully.' })
-  @ApiResponse({ status: 404, description: 'Enrollment not found.' })
+  @ApiResponse({ status: 200, description:'Success', type: Boolean})
+  @ApiResponse({status:400, description: 'Bad Request'})
+  @ApiResponse({status: 401, description: 'Unauthorized'})
+  @ApiResponse({ status: 404, description: 'Not Found'})
   async updateEnrollment(
-    @Param('id') id: number, 
-    @Body() enrollmentDto: EnrollmentUpdateDto,  
-  ) {
-    return await this.enrollmentService.updateEnrollment(id, enrollmentDto);
+    @Param('id') idEnrollment: String, 
+    @Body() updateEnrollment: EnrollmentUpdateDto,
+    @CurrentUser() user: number 
+  ): Promise<boolean> {
+    return await this.enrollmentService.updateEnrollment(+idEnrollment, updateEnrollment, user);
   }
   
-  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('delete/:id')
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Delete an enrollment by ID' })
-  @ApiResponse({ status: 200, description: 'Enrollment deleted successfully.' })
-  @ApiResponse({ status: 404, description: 'Enrollment not found.' })
-  async deleteEnrollment(@Param('id') id: string) {
-    return await this.enrollmentService.deleteEnrollment(+id);
-}
+  @ApiResponse({ status: 200, description:'Success'})
+  @ApiResponse({status:400, description: 'Bad Request'})
+  @ApiResponse({status: 401, description: 'Unauthorized'})
+  @ApiResponse({ status: 404, description: 'Not Found'})
+  async deleteEnrollment(@Param('id') idEnrollment: string): Promise<void> {
+    await this.enrollmentService.deleteEnrollment(+idEnrollment);
+  }
 
+  @HttpCode(HttpStatus.OK)
+  @Get('find-many')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Find many enrollments' })
+  @ApiResponse({ status: 200, description:'Success', type: EnrollmentPaginationResponseDto })
+  @ApiResponse({status: 401, description: 'Unauthorized'})
+  @ApiResponse({ status: 404, description: 'Not Found'})
+  async findManyEnrollment(@Query() page: number): Promise<EnrollmentPaginationResponseDto> {
+    return await this.enrollmentService.findManyEnrollment(page);
+  }
 }
