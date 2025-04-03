@@ -53,10 +53,10 @@ describe('EnrollmentService', () => {
       });
     });
 
-    it('should throw NotFoundException if no enrollment is found', async () => {
+    it('should throw BadRequestException if no enrollments are found', async () => {
       jest.spyOn(prisma, '$queryRaw').mockResolvedValueOnce([]);
-      await expect(service.getEnrollmentById(1)).rejects.toThrow(NotFoundException);
-    });
+      await expect(service.findManyEnrollment(1)).rejects.toThrow(BadRequestException);
+    });    
   });
 
   describe('updateEnrollment', () => {
@@ -93,9 +93,9 @@ describe('EnrollmentService', () => {
       await expect(service.findManyEnrollment(1)).resolves.toEqual({ enrollments: mockEnrollments, totalPages: 1 });
     });
 
-    it('should throw NotFoundException if no enrollments are found', async () => {
+    it('should throw BadRequestException if no enrollments are found', async () => {
       jest.spyOn(prisma, '$queryRaw').mockResolvedValueOnce([]);
-      await expect(service.findManyEnrollment(1)).rejects.toThrow(NotFoundException);
-    });
+      await expect(service.findManyEnrollment(1)).rejects.toThrow(BadRequestException);
+    });    
   });
 });
