@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, HttpCode, HttpStatus, Query, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CourseUpdateDto } from './dto/course-update.dto';
 import { CourseRequestDto } from './dto/course-request.dto';
@@ -72,8 +72,11 @@ export class CourseController {
   @ApiResponse({ status: 200, description:'Success', type: CoursePaginationResponseDto })
   @ApiResponse({status: 401, description: 'Unauthorized'})
   @ApiResponse({ status: 404, description: 'Not Found'})
-  async findManyCourse(@Query() page: number): Promise<CoursePaginationResponseDto> {
-    return await this.courseService.findManyCourse(page);
+  async findManyCourse(
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number, 
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number
+  ): Promise<CoursePaginationResponseDto> {
+    return await this.courseService.findManyCourse(limit, page);
   }
 }
 

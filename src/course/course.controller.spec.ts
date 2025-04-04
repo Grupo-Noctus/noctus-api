@@ -97,8 +97,8 @@ describe('CourseController', () => {
       };
       mockService.findManyCourse.mockResolvedValue(mockPagination);
 
-      const result = await controller.findManyCourse(1);
-      expect(service.findManyCourse).toHaveBeenCalledWith(1);
+      const result = await controller.findManyCourse(10, 1);
+      expect(service.findManyCourse).toHaveBeenCalledWith(10, 1);
       expect(result).toEqual(mockPagination);
     });
   });
