@@ -9,6 +9,8 @@ import { StreamingUpdate } from './dto/streaming-update.dto';
 import { StreamingResponseDto } from './dto/streaming-response.dto';
 import * as path from 'path';
 import * as fs from 'fs';
+import { Roles } from 'src/auth/decorator/role.decorator';
+import { Role } from '@prisma/client';
 
 @ApiTags('Streaming')
 @Controller('streaming')
@@ -17,6 +19,7 @@ export class StreamingController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post('upload')
+  @Roles(Role.ADMIN)
   @UseInterceptors(FileInterceptor('link'))
   @ApiOperation({ summary: 'Upload a video file' })
   @ApiResponse({ status: 200, description: 'Video file uploaded successfully.', type: Boolean})
@@ -32,6 +35,7 @@ export class StreamingController {
 
   @HttpCode(HttpStatus.OK)
   @Post('update/:id')
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Update video data' })
   @ApiResponse({ status: 200, description: 'Video data updated successfully.' })
   @ApiResponse({ status: 400, description: 'Bad request. Could not update video data.' })
@@ -47,6 +51,7 @@ export class StreamingController {
 
   @HttpCode(HttpStatus.PARTIAL_CONTENT)
   @Get(':id')
+  @Roles(Role.ADMIN, Role.STUDENT)
   @ApiOperation({ summary: 'Stream a video file' })
   @ApiResponse({ status: 206, description: 'Partial content (video stream)'})
   @ApiResponse({ status: 400, description: 'Invalid range header.'})
@@ -98,6 +103,7 @@ export class StreamingController {
 
   @HttpCode(HttpStatus.OK)
   @Get('findMany/:id')
+  @Roles(Role.ADMIN, Role.STUDENT)
   @ApiOperation({ summary: 'Get multiple video lectures by module ID' })
   @ApiResponse({ status: 200, description: 'List of video lectures for the given module ID', type: [StreamingResponseDto] })
   @ApiParam({ name: 'id', description: 'The ID of the module to get the videos from', type: Number })
@@ -107,6 +113,7 @@ export class StreamingController {
 
   @HttpCode(HttpStatus.NO_CONTENT) 
   @Delete('delete/:id') @ApiOperation({ summary: 'Delete a video lecture by ID' }) 
+  @Roles(Role.ADMIN)
   @ApiResponse({ status: 204, description: 'Video lecture deleted successfully.' }) 
   @ApiResponse({ status: 400, description: 'Bad request. Could not delete the video lecture.' }) 
   @ApiResponse({ status: 404, description: 'Video lecture not found.' }) 
