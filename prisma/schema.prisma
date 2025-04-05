@@ -142,8 +142,12 @@ model VideoLecture {
   name        String
   description String
   duration    Int
-  link        String
-  order       Int
+  key         String
+  url         String  
+  mimetype    String  
+  size        Int     
+  order       Int     
+  thumbnail   String?
   createdAt   DateTime @default(now())
   createdBy   Int
   updatedAt   DateTime @updatedAt
