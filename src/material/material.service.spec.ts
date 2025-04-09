@@ -4,6 +4,9 @@ import { PrismaService } from '../prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
 import { TypeMidia } from '@prisma/client';
 
+const user = {
+  id: 1,
+}
 const mockMaterial = {
   id: 1,
   name: 'Material Test',
@@ -17,6 +20,18 @@ const mockMaterial = {
   createdAt: new Date(),
   updatedAt: new Date(),
 };
+
+const mockFile = {
+  fieldname: 'file',
+  originalname: 'file.pdf',
+  encoding: '7bit',
+  mimetype: 'application/pdf',
+  size: 1024,
+  destination: './uploads',
+  filename: 'file.pdf',
+  path: './uploads/file.pdf',
+  buffer: Buffer.from('mock file'),
+} as Express.Multer.File;
 
 describe('MaterialService', () => {
   let service: MaterialService;
@@ -51,7 +66,7 @@ describe('MaterialService', () => {
 
   describe('createMaterial', () => {
     it('should create a new material', async () => {
-      const result = await service.createMaterial(mockMaterial, 1);
+      const result = await service.createMaterial(mockMaterial, user, mockFile);
       expect(result).toEqual(mockMaterial);
       expect(prisma.material.create).toHaveBeenCalledWith({
         data: {

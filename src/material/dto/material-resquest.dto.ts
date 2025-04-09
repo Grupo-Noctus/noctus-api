@@ -1,56 +1,28 @@
-import { IsInt, IsString, IsEnum, IsOptional, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsEnum, IsInt } from 'class-validator';
 import { TypeMidia } from '@prisma/client';
 
 export class MaterialRequestDto {
-  @ApiProperty({ 
-    description: 'ID of the course associated with the material',
-    example: 1 })
-  @IsInt()
-  idCourse: number;
-
-  @ApiProperty({ 
-    description: 'Name of the material',
-    example: 'Mathematics Workbook' })
+  @ApiProperty({ example: 'Matemática Aula 1' })
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ 
-    description: 'Description of the material', 
-    example: 'Supplementary material for the Mathematics course' })
+  @ApiProperty({ example: 'Material introdutório de matemática' })
   @IsString()
   @IsNotEmpty()
   description: string;
 
-  @ApiProperty({ 
-    description: 'Filename of the material', 
-    example: 'mathematics_workbook.pdf' })
-  @IsString()
-  @IsNotEmpty()
-  filename: string;
-
-  @ApiProperty({ 
-    description: 'Type of media for the material', 
-    enum: TypeMidia })
-  @IsNotEmpty()
-  type: TypeMidia;
-
-  @ApiProperty({ 
-    description: 'Link to access the material', 
-    example: 'https://example.com/materials/mathematics' })
+  @ApiProperty({ example: 'https://link.com/material', description: 'Link para acesso do material' })
   @IsString()
   @IsNotEmpty()
   link: string;
 
-  @ApiProperty({ 
-    description: 'ID of the user who created the material', 
-    example: 42 })
-  @IsInt()
-  createdBy: number;
+  @ApiProperty({ enum: TypeMidia, example: TypeMidia.PDF })
+  @IsEnum(TypeMidia)
+  type: TypeMidia;
 
-  @IsOptional()
+  @ApiProperty({ example: 1, description: 'ID do curso associado ao material' })
   @IsInt()
-  updatedBy: number;
+  idCourse: number;
 }
-    

@@ -31,16 +31,7 @@ describe('MaterialController', () => {
   });
 
   it('should create a material', async () => {
-    const dto: MaterialResponseDto = { 
-      name: 'Test Material',
-      description: 'Test Description',
-      filename: 'test.pdf',
-      type: 'PDF',
-      link: 'http://example.com',
-      createdBy: 1,
-      idCourse: 1,
-      updatedBy: null,
-    };
+
     const mockFile: Express.Multer.File = {
       fieldname: 'file',
       originalname: 'test.pdf',
@@ -52,9 +43,24 @@ describe('MaterialController', () => {
       filename: 'test.pdf',
       path: '',
       stream: null,
+    } as Express.Multer.File;
+
+    const dto: MaterialResponseDto = { 
+      name: 'Test Material',
+      description: 'Test Description',
+      filename: 'test.pdf',
+      type: 'PDF',
+      link: 'http://example.com',
+      createdBy: 1,
+      idCourse: 1,
+      updatedBy: null,
+      file: mockFile,
     };
+    const userId = 1;
     
-    expect(await controller.createMaterial(dto, 1, mockFile)).toEqual({ id: 1, ...dto });
+    
+    expect(await controller.createMaterial(dto, {id: userId}, mockFile)).toEqual({ id: 1, ...dto });
+
     expect(service.createMaterial).toHaveBeenCalledWith(dto);
   });
 

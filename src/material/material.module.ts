@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MaterialService } from './material.service';
 import { MaterialController } from './material.controller';
-import { EncryptionService } from 'src/encryption/encryption.service';
+import { EncryptionService } from 'src/interceptors/encryption.service';
 
 @Module({
   controllers: [MaterialController],
