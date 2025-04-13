@@ -1,14 +1,13 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { StreamingRequest } from './dto/streaming-request.dto';
-import { v4 as uuidv4 } from 'uuid';
 import * as ffmpeg from 'fluent-ffmpeg';
 import ffmpegStatic from 'ffmpeg-static';
 import getVideoDurationInSeconds from 'get-video-duration';
-import slugify from 'slugify';
 import { StreamingDto } from './dto/streaming.dto';
 import { StreamingUpdate } from './dto/streaming-update.dto';
 import { StreamingResponseDto } from './dto/streaming-response.dto';
+import { generateUniqueKey } from 'src/utils/genarate-unique-key';
 
 @Injectable()
 export class StreamingService {
@@ -25,7 +24,7 @@ export class StreamingService {
 
       const { filename, mimetype, size, path } = file;
       
-      const uniqueKey = this.generateUniqueKey(filename);
+      const uniqueKey = generateUniqueKey(filename);
 
       const pathS3 = path; //adicionar url gerada após salvar na s3
       
@@ -55,19 +54,6 @@ export class StreamingService {
     } catch (error) {
       console.log(error);
       throw new BadRequestException();
-    }
-  }
-
-  generateUniqueKey(filename: string): string {
-    try{
-      const slugifiedName = slugify(filename, { lower: true, strict: true, replacement: '-' });
-
-      const uniqueId = uuidv4();
-
-      return `${slugifiedName}-${uniqueId}`;
-    }catch (error){
-      console.error(error);
-      throw new InternalServerErrorException();
     }
   }
 

@@ -5,7 +5,7 @@ import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [MulterModule.register({
-    dest: "./uploads"
+    dest: "./uploads/lectures"
   })],
   controllers: [StreamingController],
   providers: [StreamingService],

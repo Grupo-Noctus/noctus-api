@@ -39,7 +39,7 @@ model Student {
   gender                      Gender
   hasDisability               Boolean        @default(false)
   disabilityType              String?
-  needsSupportResources       Boolean        @default(false)
+  needsSupportResources       Boolean?        @default(false)
   supportResourcesDescription String?
   user                        User           @relation(fields: [idUser], references: [id])
   
