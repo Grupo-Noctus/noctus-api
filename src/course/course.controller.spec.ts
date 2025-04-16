@@ -21,7 +21,9 @@ describe('CourseController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CourseController],
-      providers: [{ provide: CourseService, useValue: mockService }],
+      providers: [
+        { provide: CourseService, useValue: mockService },
+      ],
     }).compile();
 
     controller = module.get<CourseController>(CourseController);
@@ -44,7 +46,7 @@ describe('CourseController', () => {
       };
       mockService.createCourse.mockResolvedValue(true);
 
-      const result = await controller.createCourse(dto, 1);
+      const result = await controller.createCourse(dto, { id: 1 });
       expect(service.createCourse).toHaveBeenCalledWith(dto, 1);
       expect(result).toBe(true);
     });
@@ -74,7 +76,7 @@ describe('CourseController', () => {
       };
       mockService.updateCourse.mockResolvedValue(true);
 
-      const result = await controller.updateCourse('1', dto, 1);
+      const result = await controller.updateCourse('1', dto, { id: 1 });
       expect(service.updateCourse).toHaveBeenCalledWith(1, dto, 1);
       expect(result).toBe(true);
     });

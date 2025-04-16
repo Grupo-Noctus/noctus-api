@@ -40,7 +40,7 @@ describe('AuthController', () => {
 
       const response = await controller.signIn(loginDto);
       expect(response).toEqual(result);
-      expect(authService.singIn).toHaveBeenCalledWith(loginDto);
+      expect(authService.signIn).toHaveBeenCalledWith(loginDto);
     });
   });
 
@@ -76,7 +76,7 @@ describe('AuthController', () => {
 
       expect(response).toEqual(result);
       expect(authService.registerStudent).toHaveBeenCalledWith(registerDto.user, registerDto.student);
-      expect(authService.singIn).toHaveBeenCalledWith(createdUser);
+      expect(authService.signIn).toHaveBeenCalledWith(createdUser);
     });
 
     it('should register an admin and return an access_token', async () => {
@@ -101,7 +101,7 @@ describe('AuthController', () => {
 
       expect(response).toEqual(result);
       expect(authService.registerAdmin).toHaveBeenCalledWith(registerDto.user, Role.ADMIN);
-      expect(authService.singIn).toHaveBeenCalledWith(createdUser);
+      expect(authService.signIn).toHaveBeenCalledWith(createdUser);
     });
 
     it('should throw BadRequestException if student data is missing for non-admin', async () => {

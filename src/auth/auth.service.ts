@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { UserRegisterDto } from './dto/user-register.dto';
@@ -46,6 +46,20 @@ export class AuthService {
 
     async registerAdmin(userRegister: UserRegisterDto, role: Role, photo: Express.Multer.File): Promise<boolean> {
         try {
+
+            const existingUser = await this.prisma.user.findFirst({
+                where: {
+                    OR: [
+                        { username: userRegister.username },
+                        { email: userRegister.email }
+                    ]
+                }
+            });
+    
+            if (existingUser) {
+                throw new BadRequestException('Username or Email already exists');
+            }
+   
             if (photo){
                 var { filename, mimetype, size, path } = photo;    
                 //if (size > que alguma coisa){otimiza}
@@ -54,7 +68,9 @@ export class AuthService {
             } else {
                 pathS3 = null;
             }
+
             const hashedPassword = await argon2.hash(userRegister.password); 
+            
             const createdAdmin = await this.prisma.user.create({
                 data: {
                     ...userRegister,
@@ -69,18 +85,18 @@ export class AuthService {
                     password: true,
                 }
             });
-
+    
             const userAuthDto = new UserAuthJwtDto();
             userAuthDto.id = createdAdmin.id;
             userAuthDto.usernameOrEmail = createdAdmin.email;
             userAuthDto.password = createdAdmin.password;
-
             return true;
         }catch(error){
             console.error(error);
-            throw new InternalServerErrorException();
+            throw new InternalServerErrorException('Error registering user');
         }
     }
+    
 
     async registerStudent (
         userRegister: UserRegisterDto,

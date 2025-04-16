@@ -59,7 +59,7 @@ describe('AuthService', () => {
       mockUserService.findByUsernameOrEmailForAuth.mockResolvedValue(mockUser);
       mockJwtService.signAsync.mockResolvedValue('jwt-token');
 
-      const result = await service.singIn(userAuth);
+      const result = await service.signIn(userAuth);
 
       expect(result).toEqual({ access_token: 'jwt-token' });
       expect(mockUserService.findByUsernameOrEmailForAuth).toHaveBeenCalledWith('john@example.com');
@@ -77,7 +77,7 @@ describe('AuthService', () => {
       });
 
       await expect(
-        service.singIn({ usernameOrEmail: 'user', password: 'wrong' })
+        service.signIn({ usernameOrEmail: 'user', password: 'wrong' })
       ).rejects.toThrow(UnauthorizedException);
     });
   });
