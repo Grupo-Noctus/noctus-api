@@ -15,6 +15,7 @@ export class CourseService {
   ) {}
 
   async createCourse(courseResponse: CourseRequestDto, user: number, image: Express.Multer.File): Promise<boolean> {
+
     try {
       if (image){
         var { filename, mimetype, size, path } = image;    
@@ -91,13 +92,13 @@ export class CourseService {
     }
   }
 
-  async findManyCoursePagination(pageNumber: number): Promise<CoursePaginationResponseDto>{
-    try{
-      const PAGE_SIZE = 10;
-      const page = (PAGE_SIZE * (pageNumber - 1));
 
-      const totalCount = await this.prisma.course.count(); 
-      const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  async findManyCoursePagination( limit: number, pageNumber: number): Promise<CoursePaginationResponseDto>{
+    try{
+      const page = (limit * (pageNumber - 1)); 
+
+      const totalCount = await this.prisma.course.count();
+      const totalPages = Math.ceil(totalCount / limit);
 
       const courses = await this.prisma.$queryRaw<
         CourseResponseDto[]
@@ -105,7 +106,7 @@ export class CourseService {
         SELECT c.name, c.description, c.image, c.startDate, c.endDate
         FROM Course c
         ORDER BY name ASC
-        LIMIT ${PAGE_SIZE} OFFSET ${page}
+        LIMIT ${limit} OFFSET ${page}
       `;
       return {courses, totalPages};
     }catch (error){

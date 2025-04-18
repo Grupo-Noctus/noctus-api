@@ -10,6 +10,7 @@ import { CourseResponseDto } from './dto/course-response.dto';
 import { CoursePaginationResponseDto } from './dto/course-pagination-response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
+
 @ApiTags('Course')
 @Controller('course')
 export class CourseController {
@@ -81,9 +82,10 @@ export class CourseController {
   @ApiResponse({status: 401, description: 'Unauthorized'})
   @ApiResponse({ status: 404, description: 'Not Found'})
   async findManyCoursePagination(
-    @Query('page') page?: number
+    @Query('page') page?: number,
+    @Query('limit') limit?: number
   ): Promise<CoursePaginationResponseDto> {
-    return await this.courseService.findManyCoursePagination(page);
+    return await this.courseService.findManyCoursePagination(limit, page);
   }
 
   @HttpCode(HttpStatus.OK)
