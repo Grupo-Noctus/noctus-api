@@ -154,8 +154,7 @@ describe('CourseService', () => {
           endDate: new Date(),
         },
       ]);
-
-      const result = await service.findManyCourse(1);
+      const result = await service.findManyCourse(10, 1);
 
       expect(result).toHaveProperty('courses');
       expect(result).toHaveProperty('totalPages');
@@ -168,14 +167,14 @@ describe('CourseService', () => {
       mockPrisma.course.count.mockResolvedValueOnce(0);
       mockPrisma.$queryRaw.mockResolvedValueOnce([]);
 
-      await expect(service.findManyCourse(1)).rejects.toThrow(NotFoundException);
+      await expect(service.findManyCourse(10, 1)).rejects.toThrow(NotFoundException);
     });
 
     it('should throw NotFoundException on query error', async () => {
       mockPrisma.course.count.mockResolvedValueOnce(10);
       mockPrisma.$queryRaw.mockRejectedValueOnce(new Error('fail'));
 
-      await expect(service.findManyCourse(1)).rejects.toThrow(NotFoundException);
+      await expect(service.findManyCourse(10, 1)).rejects.toThrow(NotFoundException);
     });
   });
 });

@@ -71,13 +71,12 @@ export class CourseService {
     }
   }
 
-  async findManyCourse(pageNumber: number): Promise<CoursePaginationResponseDto>{
+  async findManyCourse( limit: number,pageNumber: number): Promise<CoursePaginationResponseDto>{
     try{
-      const PAGE_SIZE = 10;
-      const page = (PAGE_SIZE * (pageNumber - 1));
+      const page = (limit * (pageNumber - 1)); 
 
-      const totalCount = await this.prisma.course.count(); 
-      const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+      const totalCount = await this.prisma.course.count();
+      const totalPages = Math.ceil(totalCount / limit);
 
       const courses = await this.prisma.$queryRaw<
         CourseResponseDto[]
@@ -85,9 +84,9 @@ export class CourseService {
         SELECT c.name, c.description, c.image, c.startDate, c.endDate
         FROM Course c
         ORDER BY name ASC
-        LIMIT ${PAGE_SIZE} OFFSET ${page}
+        LIMIT ${limit} OFFSET ${page}
       `;
-      if(!courses || courses.length == 0){
+      if(!courses || courses.length === 0){
         throw new NotFoundException('No courses found.');
       }
       return {courses, totalPages};
