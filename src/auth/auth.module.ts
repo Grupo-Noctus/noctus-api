@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   controllers: [AuthController],
@@ -13,6 +14,9 @@ import { JwtModule } from '@nestjs/jwt';
       global: true,
       secret: process.env.JWT_SECRET,
       signOptions: {expiresIn: '1h'}
+    }),
+    MulterModule.register({
+      dest:'./uploads/images-users'
     })
   ]
 })

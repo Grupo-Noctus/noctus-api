@@ -8,6 +8,7 @@ import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CourseResponseDto } from './dto/course-response.dto';
 import { CoursePaginationResponseDto } from './dto/course-pagination-response.dto';
+import { Public } from 'src/auth/decorator/public.decorator';
 
 @ApiTags('Course')
 @Controller('course')
@@ -21,7 +22,7 @@ export class CourseController {
   @ApiResponse({ status: 200, description:'Success'})
   @ApiResponse({status:400, description:'Bad Request'})
   @ApiResponse({status: 401, description: 'Unauthorized'})
-  async createCourse(@Body() courseResponse: CourseRequestDto, @CurrentUser() user: number): Promise<boolean> {
+  async createCourse(@Body() courseResponse: CourseRequestDto, @CurrentUser() user: {id: number}): Promise<boolean> {
     return await this.courseService.createCourse(courseResponse, user);
   }
 
@@ -48,9 +49,9 @@ export class CourseController {
   async updateCourse(
     @Param('id') idCourse: string,
     @Body() updateCourse: CourseUpdateDto,
-    @CurrentUser() user: number
+    @CurrentUser() user: {id: number}
   ): Promise<boolean>{
-    return await this.courseService.updateCourse(+idCourse, updateCourse, user);
+    return await this.courseService.updateCourse(+idCourse, updateCourse, user.id);
   }
   
   @HttpCode(HttpStatus.NO_CONTENT)

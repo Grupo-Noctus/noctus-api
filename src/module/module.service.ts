@@ -15,26 +15,29 @@ export class ModuleService {
             where: {idCourse: idCourse},
             select: {order: true}
         });
+        if(orders == null) return false;
         return orders.some(module => module.order === order);
     }
 
     async createModule(moduleRequest: ModuleRequstDto, user: number): Promise <boolean>{
         try{
             const {idCourse, ...restModule} = moduleRequest
-            const isOrderUsed = await this.verifyOrder(idCourse, restModule.order);
-            if(isOrderUsed){
-                throw new BadRequestException('The module order is already being used.')
-            }
-            await this.prisma.module.create({
+            const lastModule = await this.prisma.module.findFirst({
+                where: { idCourse },
+                orderBy: { order: 'desc' },
+              });
+          
+              const newOrder = lastModule ? lastModule.order + 1 : 1;
+          
+              await this.prisma.module.create({
                 data: {
-                    course:{
-                        connect: {id: moduleRequest.idCourse}
-                    },
-                    ...restModule,
-                    createdBy: user,
-                    updatedBy: user
-                }
-            });
+                  course: { connect: { id: idCourse } },
+                  ...restModule,
+                  order: newOrder,
+                  createdBy: user,
+                  updatedBy: user,
+                },
+              });
             return true;
         } catch (error) {
             console.error(error);

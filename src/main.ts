@@ -9,9 +9,12 @@ async function bootstrap() {
     .setTitle('Noctus')
     .setDescription('Noctus API')
     .setVersion('1.0')
+    .addTag('Autenticação')
+    .addTag('Enrollment')
     .addTag('Auth')
     .addTag('Course')
     .addTag('Module')
+    .addTag('Streaming')
     .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);

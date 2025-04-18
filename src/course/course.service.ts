@@ -9,13 +9,13 @@ import { CoursePaginationResponseDto } from './dto/course-pagination-response.dt
 export class CourseService {
   constructor(private prisma: PrismaService) {}
 
-  async createCourse(courseResponse: CourseRequestDto, user: number): Promise<boolean> {
+  async createCourse(courseResponse: CourseRequestDto, user: {id: number}): Promise<boolean> {
     try {
       await this.prisma.course.create({
         data: {
           ...courseResponse,
-          createdBy: user,
-          updatedBy: user
+          createdBy: user.id,
+          updatedBy: user.id,
         }
       }); 
       return true;
