@@ -54,7 +54,7 @@ export class AuthController {
       if (!student) {
         throw new BadRequestException('O usuário é estudante e os dados do estudante não foram encontrados.');
       }
-      return await this.authService.registerStudent(user, student);
+      return await this.authService.registerStudent(user, student, file);
     } else {
       return await this.authService.registerAdmin(user, Role.ADMIN, file);
     }

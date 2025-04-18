@@ -24,9 +24,9 @@ export class StreamingService {
 
       const { filename, mimetype, size, path } = file;
       
-      const uniqueKey = generateUniqueKey(filename);
+      const uniqueKey = generateUniqueKey(filename, mimetype);
 
-      const pathS3 = path; //adicionar url gerada após salvar na s3
+      const pathS3 = uniqueKey; //adicionar url gerada após salvar na s3
       
       const durationVideo = await getVideoDurationInSeconds(pathS3);
 

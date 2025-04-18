@@ -1,9 +1,12 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EnrollmentRequestDto } from './dto/enrollment-request.dto';
 import { EnrollmentUpdateDto } from './dto/enrollment-update.dto'; 
 import { EnrollmentResponseDto } from './dto/enrollment-response.dto';
 import { EnrollmentPaginationResponseDto } from './dto/enrollment-pagination-response.dto';
+import { CourseResponseDto } from 'src/course/dto/course-response.dto';
+import { connect } from 'http2';
+import { EnrolledCourseDto } from './dto/enrollmente-course,dto';
 
 @Injectable()
 export class EnrollmentService {
@@ -117,5 +120,49 @@ export class EnrollmentService {
       console.error(error);
       throw new BadRequestException();
     }
+  }
+
+  async findCoursePerEnrollment (user: number): Promise<EnrolledCourseDto[] | []> {
+    try {
+      const enrrolmentsAndCourses = await this.prisma.$queryRaw<EnrolledCourseDto[]>`
+        SELECT 
+          c.id AS courseId, 
+          c.name AS courseName, 
+          c.description AS courseDescription, 
+          c.image AS courseImage, 
+          c.startDate AS courseStartDate, 
+          c.endDate AS courseEndDate,
+          e.id AS enrollmentId, 
+          e.active, e.completed, 
+          e.startDate AS enrollmentStartDate, 
+          e.endDate AS enrollmentEndDate
+        from User u 
+        INNER JOIN Student s ON u.id  = s.idUser
+        INNER JOIN Enrollment e ON e.idStudent = s.id
+        INNER JOIN Course c ON c.id = e.idCourse
+        WHERE u.id = ${user};
+      `;
+    
+      if (enrrolmentsAndCourses.length === 0) {
+        return [];
+      }
+    
+      return enrrolmentsAndCourses.map((e) => ({
+        enrollmentId: e.enrollmentId,           
+        active: e.active,                       
+        completed: e.completed,                 
+        enrollmentStartDate: e.enrollmentStartDate, 
+        enrollmentEndDate: e.enrollmentEndDate,   
+        courseId: e.courseId,                   
+        courseName: e.courseName,               
+        courseDescription: e.courseDescription,  
+        courseImage: e.courseImage,             
+        courseStartDate: e.courseStartDate,     
+        courseEndDate: e.courseEndDate,         
+      }));
+    } catch (error) {
+      console.error('Error fetching courses: ', error);
+      return [];
+    }    
   }
 }

@@ -64,6 +64,7 @@ export class ModuleService {
             return await this.prisma.module.findUnique({
                 where: {id: idModule},
                 select: {
+                    id: true,
                     name: true,
                     description: true,
                     order: true
@@ -86,11 +87,12 @@ export class ModuleService {
         }
     }
 
-    async findManyModule(idCourse: number): Promise<ModuleResponseDto[]>{
+    async findManyModule(idCourse: number): Promise<ModuleResponseDto[] | []>{
         try {
             const modules = await this.prisma.module.findMany({
                 where: { idCourse: idCourse},
                 select: {
+                    id: true,
                     name: true,
                     description: true,
                     order: true
@@ -98,7 +100,7 @@ export class ModuleService {
             });
 
             if(!modules || modules.length === 0){
-                throw new NotFoundException('Not found modules to course.');
+                return [];
             }
 
             return modules;

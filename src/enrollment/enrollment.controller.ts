@@ -8,6 +8,8 @@ import { EnrollmentUpdateDto } from './dto/enrollment-update.dto';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { EnrollmentResponseDto } from './dto/enrollment-response.dto';
 import { EnrollmentPaginationResponseDto } from './dto/enrollment-pagination-response.dto';
+import { CourseResponseDto } from 'src/course/dto/course-response.dto';
+import { EnrolledCourseDto } from './dto/enrollmente-course,dto';
 
 @ApiTags('Enrollment')
 @Controller('enrollment')
@@ -75,5 +77,16 @@ export class EnrollmentController {
   @ApiResponse({ status: 404, description: 'Not Found'})
   async findManyEnrollment(@Query() page: number): Promise<EnrollmentPaginationResponseDto> {
     return await this.enrollmentService.findManyEnrollment(page);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('course')
+  @Roles(Role.STUDENT, Role.ADMIN)
+  @ApiOperation({ summary: 'Find couse per enrollments' })
+  @ApiResponse({ status: 200, description:'Success', type: [EnrolledCourseDto] })
+  @ApiResponse({status: 401, description: 'Unauthorized'})
+  @ApiResponse({ status: 404, description: 'Not Found'})
+  async findCoursePerEnrollment(@CurrentUser() user: number): Promise<EnrolledCourseDto[] | []> {
+    return await this.enrollmentService.findCoursePerEnrollment(user);
   }
 }

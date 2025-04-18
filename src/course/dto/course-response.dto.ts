@@ -3,6 +3,12 @@ import { IsNotEmpty, IsString, IsUrl, IsDateString, IsOptional } from 'class-val
 
 export class CourseResponseDto {
   @ApiProperty({
+    example: '1',
+    description: 'Id of course.'
+  })
+  id: number;
+
+  @ApiProperty({
     example: 'Full-Stack Web Development',
     description: 'The name of the course.'
   })

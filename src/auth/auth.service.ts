@@ -49,8 +49,8 @@ export class AuthService {
             if (photo){
                 var { filename, mimetype, size, path } = photo;    
                 //if (size > que alguma coisa){otimiza}
-                var uniqueKey = generateUniqueKey(filename);
-                var pathS3 = path; //adicionar url gerada após salvar na s3
+                var uniqueKey = generateUniqueKey(filename, mimetype);
+                var pathS3 = uniqueKey; //adicionar url gerada após salvar na s3
             } else {
                 pathS3 = null;
             }
@@ -84,9 +84,19 @@ export class AuthService {
 
     async registerStudent (
         userRegister: UserRegisterDto,
-        studentRegister: StudentRegisterDto
+        studentRegister: StudentRegisterDto,
+        photo: Express.Multer.File
     ): Promise <boolean>{
         try {
+            if (photo){
+                var { filename, mimetype, size, path } = photo;    
+                //if (size > que alguma coisa){otimiza}
+                var uniqueKey = generateUniqueKey(filename, mimetype);
+                var pathS3 = uniqueKey; //adicionar url gerada após salvar na s3
+            } else {
+                pathS3 = null;
+            }
+
             const { dateBirth } = studentRegister
             const hashedPassword = await argon2.hash(userRegister.password);
             const createdStudent = await this.prisma.user.create({
@@ -95,6 +105,7 @@ export class AuthService {
                     role: Role.STUDENT,
                     active: true,
                     password: hashedPassword, 
+                    image: pathS3,
                     student:{
                         create: {
                             ...studentRegister,
