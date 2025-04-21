@@ -130,13 +130,12 @@ export class EnrollmentService {
           c.name AS courseName, 
           c.description AS courseDescription, 
           c.image AS courseImage, 
-          c.startDate AS courseStartDate, 
-          c.endDate AS courseEndDate,
+          c.durationInDays,
           e.id AS enrollmentId, 
           e.active, e.completed, 
           e.startDate AS enrollmentStartDate, 
           e.endDate AS enrollmentEndDate
-        from User u 
+        FROM User u 
         INNER JOIN Student s ON u.id  = s.idUser
         INNER JOIN Enrollment e ON e.idStudent = s.id
         INNER JOIN Course c ON c.id = e.idCourse

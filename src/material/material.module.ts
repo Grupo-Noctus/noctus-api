@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MaterialService } from './material.service';
 import { MaterialController } from './material.controller';
-import { EncryptionService } from 'src/interceptors/encryption.service';
 
 @Module({
   controllers: [MaterialController],
-  providers: [MaterialService, EncryptionService],
+  providers: [MaterialService],
 })
 export class MaterialModule {}

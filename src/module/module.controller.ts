@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Query } from '@nestjs/common';
 import { ModuleService } from './module.service';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { Roles } from 'src/auth/decorator/role.decorator';
 import { ModuleRequstDto } from './dto/module-request.dto';
@@ -13,17 +13,19 @@ export class ModuleController {
   constructor(private readonly moduleService: ModuleService) {}
 
   @HttpCode(HttpStatus.CREATED)
+  @Post('create/:idCourse')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Created Module of course'})
   @ApiResponse({ status: 200, description:'Success', type: Boolean})
   @ApiResponse({status:400, description:'Bad Request'})
   @ApiResponse({status: 401, description: 'Unauthorized'})
-  @Post('create')
+  @ApiParam({  name: 'idCourse', type: String, description: 'ID of course of module' })
   async createModule(
+    @Param('idCourse') idCourse: number,
     @Body() moduleRequst: ModuleRequstDto, 
     @CurrentUser() user: number
   ): Promise<boolean>{
-    return await this.moduleService.createModule(moduleRequst, user);
+    return await this.moduleService.createModule(+idCourse, moduleRequst, user);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -60,8 +62,8 @@ export class ModuleController {
   @ApiResponse({status:400, description: 'Bad Request'})
   @ApiResponse({status: 401, description: 'Unauthorized'})
   @ApiResponse({ status: 404, description: 'Not Found'})
-  async deleteCourse(@Param('idModule') idModule: string): Promise<void> {
-    await this.moduleService.deleteCourse(+idModule);
+  async deletemodule(@Param('idModule') idModule: string): Promise<void> {
+    await this.moduleService.deleteModule(+idModule);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -71,7 +73,7 @@ export class ModuleController {
   @ApiResponse({ status: 200, description:'Success', type: [ModuleResponseDto]})
   @ApiResponse({status: 401, description: 'Unauthorized'})
   @ApiResponse({ status: 404, description: 'Not Found'})
-  async findManyCourse(@Param('idCourse')idCourse: string): Promise<ModuleResponseDto[] | []> {
+  async findManyModule(@Param('idCourse')idCourse: string): Promise<ModuleResponseDto[] | []> {
     return await this.moduleService.findManyModule(+idCourse);
   } 
 }

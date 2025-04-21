@@ -1,53 +1,58 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsDate } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsInt,
+  Min,
+} from 'class-validator';
 
 export class CourseRequestDto {
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: 'Name must be a string' })
+  @IsNotEmpty({ message: 'Name is required' })
   @ApiProperty({
     example: 'Full-Stack Web Development',
-    description: 'The name of the course.'
+    description: 'The name of the course.',
   })
   name: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: 'Description must be a string' })
+  @IsNotEmpty({ message: 'Description is required' })
   @ApiProperty({
     example: 'Learn to build web applications using React, Node.js, and MongoDB.',
-    description: 'A short description summarizing the course content and goals.'
+    description: 'A short description summarizing the course content and goals.',
   })
   description: string;
 
-  @IsNotEmpty()
-  @IsString()
   @IsOptional()
+  @IsString({ message: 'Image must be a string (URL)' })
   @ApiProperty({
     example: 'https://example.com/images/fullstack-course.png',
-    description: 'Optional URL of the course cover image.'
+    description: 'Optional URL of the course cover image.',
+    nullable: true,
+    required: false,
   })
-  image: string;
+  image?: string;
 
-  @IsNotEmpty()
-  @IsDate()
+  @IsInt({ message: 'Duration in days must be an integer' })
+  @Min(1, { message: 'Duration in days must be at least 1' })
+  @Transform(({ value }) => Number(value))
   @ApiProperty({
-    example: '2023-03-23T15:00:00.000Z',
-    description: 'Start date of course in ISO format (YYYY-MM-DD)',
+    example: 21,
+    description: 'Duration of course in days',
   })
-  startDate: Date;
+  durationInDays: number;
 
-  @IsNotEmpty()
-  @IsDate()
-  @ApiProperty({
-    example: '2023-06-23T15:00:00.000Z',
-    description: 'End date of course in ISO format (YYYY-MM-DD)',
-  })
-  endDate: Date;
-
-  @IsString()
   @IsOptional()
+  @IsString({ message: 'Certificate model must be a string (HTML)' })
   @ApiProperty({
-    example: '<html><body><h1>Certificate of Completion</h1><p>This certifies that {{name}} has completed the {{courseName}} course.</p></body></html>',
-    description: 'HTML template used to generate the course completion certificate PDF. Supports variables like {{name}}, {{courseName}}, and {{date}}.'
+    example:
+      '<html><body><h1>Certificate of Completion</h1><p>This certifies that {{name}} has completed the course.</p></body></html>',
+    description:
+      'HTML template used to generate the course completion certificate PDF. Supports variables like {{name}}.',
+    nullable: true,
+    required: false,
   })
-  certificateModel: string;
+  certificateModel?: string;
 }

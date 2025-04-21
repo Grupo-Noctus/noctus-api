@@ -13,6 +13,8 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
 import { ModuleModule } from './module/module.module';
 import { MaterialModule } from './material/material.module';
 import { StreamingModule } from './streaming/streaming.module';
+import { UploadService } from './upload/upload.service';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -28,7 +30,7 @@ import { StreamingModule } from './streaming/streaming.module';
         blockDuration: 5000,
       }
     ]),
-
+    UploadModule,
     ModuleModule,
     MaterialModule,
     StreamingModule,

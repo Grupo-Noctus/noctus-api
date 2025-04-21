@@ -33,18 +33,8 @@ export class CourseResponseDto {
   image: string;
 
   @ApiProperty({
-    example: '2023-03-23T15:00:00.000Z',
-    description: 'Start date of course in ISO format (YYYY-MM-DD)',
+    example: 21,
+    description: 'Duration of course in days',
   })
-  @IsNotEmpty()
-  @IsDateString()
-  startDate: Date;
-
-  @ApiProperty({
-    example: '2023-06-23T15:00:00.000Z',
-    description: 'End date of course in ISO format (YYYY-MM-DD)',
-  })
-  @IsNotEmpty()
-  @IsDateString()
-  endDate: Date;
+  durationInDays: number;
 }

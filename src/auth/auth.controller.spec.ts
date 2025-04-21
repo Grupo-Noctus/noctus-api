@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { UserAuthDto } from './dto/user-auth.dto';
+import { UserAuthDto } from './dto/login-request.dto';
 import { RegisterDto } from './dto/register.dto';
 import { Role } from '@prisma/client';
 

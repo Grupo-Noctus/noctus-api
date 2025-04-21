@@ -1,49 +1,36 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { StreamingRequest } from './dto/streaming-request.dto';
-import * as ffmpeg from 'fluent-ffmpeg';
-import ffmpegStatic from 'ffmpeg-static';
-import getVideoDurationInSeconds from 'get-video-duration';
 import { StreamingDto } from './dto/streaming.dto';
 import { StreamingUpdate } from './dto/streaming-update.dto';
 import { StreamingResponseDto } from './dto/streaming-response.dto';
-import { generateUniqueKey } from 'src/utils/genarate-unique-key';
+import { VideoMetadata } from 'src/upload/dto/video-metadata.dto';
+import { handlePrismaError } from 'src/utils/handle-prisma.error';
+import { handleHttpError } from 'src/utils/handle-http.error';
+import { UploadService } from 'src/upload/upload.service';
 
 @Injectable()
 export class StreamingService {
-  constructor(private readonly prisma: PrismaService){}
+  private readonly logger = new Logger(StreamingService.name);
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly uploadService: UploadService
+  ){}
 
-  onModuleInit() {
-    ffmpeg.setFfmpegPath(ffmpegStatic as string);
-    ffmpeg.setFfprobePath(ffmpegStatic as string);
-  }
-
-  async createVideoLecture( file: Express.Multer.File, streamingRequest: StreamingRequest, user: number): Promise<boolean> {
+  async createVideoLecture( idModule: number, videoMetadata: VideoMetadata, thumbnail: string, streamingRequest: StreamingRequest, user: number): Promise<boolean> {
     try {
-      const {idModule, order, ...rest} = streamingRequest;
-
-      const { filename, mimetype, size, path } = file;
-      
-      const uniqueKey = generateUniqueKey(filename, mimetype);
-
-      const pathS3 = uniqueKey; //adicionar url gerada após salvar na s3
-      
-      const durationVideo = await getVideoDurationInSeconds(pathS3);
-
+      const {order} = streamingRequest
       const videoData = {
         data: {
           module: {
             connect: {
-              id: Number(+idModule)
+              id: idModule
             }
           },
-          ...rest,
+          ...streamingRequest,
+          ...videoMetadata,
+          thumbnail: thumbnail,
           order: +order,
-          duration: durationVideo,
-          key: uniqueKey,
-          url: pathS3,
-          mimetype: mimetype,
-          size: size,
           createdBy: user,
           updatedBy: user
         }
@@ -52,8 +39,10 @@ export class StreamingService {
       await this.prisma.videoLecture.create(videoData);
       return true;
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException();
+      this.logger.error(`Failed to create video lecture for module`, error);
+      if (videoMetadata) await this.uploadService.deleteFile(videoMetadata.key);
+      handlePrismaError(error);
+      handleHttpError(error);
     }
   }
 
@@ -70,8 +59,9 @@ export class StreamingService {
         }
       });
     } catch (error) {
-      console.error(error);
-      throw new NotFoundException();
+      this.logger.error(`Failed to fetch video lectures for module ID ${idModule}`, error);
+      handlePrismaError(error);
+      handleHttpError(error);
     }
   }
 
@@ -86,8 +76,9 @@ export class StreamingService {
       });
       return true;
     } catch (error) {
-      console.log (error);
-      throw new BadRequestException();
+      this.logger.error(`Failed to update video lecture with ID ${idVideo}`, error);
+      handlePrismaError(error);
+      handleHttpError(error);
     }
   }
 
@@ -108,21 +99,32 @@ export class StreamingService {
 
       return videoData;
     } catch (error){
-      console.error(error);
-      throw new InternalServerErrorException();
+      this.logger.error(`Failed to retrieve video lecture with ID ${id}`, error);;
+      handlePrismaError(error);
+      handleHttpError(error);
     }
   }
 
-  async deleteVideo (idVideo): Promise<void>{
+  async deleteVideo (idVideo: number): Promise<void>{
     try {
-      await this.prisma.videoLecture.delete({
+      const video = await this.prisma.videoLecture.findUnique({
         where: {id: idVideo},
+        select: {url: true}
       });
 
-      //incluir lógica para excluir da s3
+      if (!video) {
+        throw new NotFoundException(`video with ID ${idVideo} not found.`);
+      }
+  
+      if (video.url) {
+        await this.uploadService.deleteFile(video.url);
+      }
+  
+      await this.prisma.videoLecture.delete({ where: { id: idVideo } });
     } catch (error) {
-      console.error(error);
-      throw new NotFoundException();
+      this.logger.error(`Failed to delete video lecture with ID ${idVideo}`, error);
+      handlePrismaError(error);
+      handleHttpError(error);
     }
   }
 }
