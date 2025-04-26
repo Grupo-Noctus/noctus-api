@@ -2,13 +2,6 @@ import { ApiProperty } from "@nestjs/swagger"
 import { IsInt, IsString } from "class-validator"
 
 export class ModuleRequstDto {
-    @IsInt()
-    @ApiProperty({
-        example: '1',
-        description: 'id of course'
-    })
-    idCourse: number
-
     @IsString()
     @ApiProperty({
         example: 'Full-stack Web development',
@@ -22,11 +15,4 @@ export class ModuleRequstDto {
         description:'Description of module of course'
     })
     description: string
-
-    @IsInt()
-    @ApiProperty({
-        example: '1',
-        description: 'Order of module in the course'
-    })
-    order: number
 }

@@ -1,98 +1,167 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CourseRequestDto } from './dto/course-request.dto';
 import { CourseUpdateDto } from './dto/course-update.dto';
 import { CourseResponseDto } from './dto/course-response.dto';
 import { CoursePaginationResponseDto } from './dto/course-pagination-response.dto';
-
+import { EnrollmentService } from 'src/enrollment/enrollment.service';
+import { UploadService } from 'src/upload/upload.service';
+import { handlePrismaError } from 'src/utils/handle-prisma.error';
+import { handleHttpError } from 'src/utils/handle-http.error';
 @Injectable()
 export class CourseService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(CourseService.name);
 
-  async createCourse(courseResponse: CourseRequestDto, user: {id: number}): Promise<boolean> {
+  constructor(
+    private prisma: PrismaService,
+    private enrollmentService: EnrollmentService,
+    private readonly uploadService: UploadService,
+  ) {}
+
+  async createCourse(courseRequest: CourseRequestDto, user: number, image: string): Promise<boolean> {
     try {
+      const { durationInDays } = courseRequest;
       await this.prisma.course.create({
         data: {
-          ...courseResponse,
-          createdBy: user.id,
-          updatedBy: user.id,
-        }
-      }); 
-      return true;
-    } catch (error) {
-      console.error(error);
-      throw new BadRequestException();
-    }
-  }
-
-  async updateCourse(idCourse: number, updateCourse: CourseUpdateDto, user: number): Promise<boolean> {
-    try {
-      await this.prisma.course.update({
-        where: { id: idCourse},
-        data: {
-          ...updateCourse,
-          updatedBy:user
+          ...courseRequest,
+          durationInDays: +durationInDays,
+          image,
+          createdBy: user,
+          updatedBy: user,
         },
       });
       return true;
     } catch (error) {
-      console.error(error);
-      throw new BadRequestException();
+      this.logger.error('Error while creating course', error);
+      if (image) await this.uploadService.deleteFile(image);
+      handlePrismaError(error);
+      handleHttpError(error);
     }
   }
   
-
-  async deleteCourse(idCourse: number): Promise<void> {
+  async updateCourse(idCourse: number, updateCourse: CourseUpdateDto, user: number, image: string): Promise<boolean> {
     try {
-      await this.prisma.course.delete({
-        where: {id: idCourse}
+      const existingCourse = await this.prisma.course.findUnique({ where: { id: idCourse } });
+      if (!existingCourse) {
+        throw new NotFoundException('Course not found');
+      }
+  
+      if (updateCourse.durationInDays != null) {
+        updateCourse.durationInDays = Number(updateCourse.durationInDays);
+      }
+  
+      if (image) {
+        updateCourse.image = image;
+      }
+  
+      await this.prisma.course.update({
+        where: { id: idCourse },
+        data: {
+          ...updateCourse,
+          updatedBy: user,
+        },
       });
+      return true;
     } catch (error) {
-      console.error(error);
-      throw new NotFoundException();
+      this.logger.error('Error while updating course', error);
+      if (image) await this.uploadService.deleteFile(image);
+      handlePrismaError(error);
+      handleHttpError(error);
     }
   }
-
+  
+  async deleteCourse(idCourse: number): Promise<void> {
+    try {
+      const course = await this.prisma.course.findUnique({
+        where: { id: idCourse },
+        select: { image: true },
+      });
+  
+      if (!course) {
+        throw new NotFoundException(`Course with ID ${idCourse} not found.`);
+      }
+  
+      if (course.image) {
+        await this.uploadService.deleteFile(course.image);
+      }
+  
+      await this.prisma.course.delete({ where: { id: idCourse } });
+    } catch (error) {
+      this.logger.error('Error while deleting course', error);
+      handlePrismaError(error);
+      handleHttpError(error);
+    }
+  }
+  
   async findOneCourse(idCourse: number): Promise<CourseResponseDto> {
-    try{
-      return await this.prisma.course.findUnique({
-        where: {id: idCourse},
+    try {
+      const course = await this.prisma.course.findUnique({
+        where: { id: idCourse },
         select: {
+          id: true,
           name: true,
           description: true,
           image: true,
-          startDate: true,
-          endDate: true,
-        }
+          durationInDays: true,
+        },
       });
+  
+      if (!course) {
+        throw new NotFoundException(`Course with ID ${idCourse} not found.`);
+      }
+  
+      return course;
     } catch (error) {
-      console.error(error);
-      throw new NotFoundException();
+      this.logger.error('Error while fetching single course', error);
+      handlePrismaError(error);
+      handleHttpError(error);
     }
   }
-
-  async findManyCourse( limit: number,pageNumber: number): Promise<CoursePaginationResponseDto>{
-    try{
-      const page = (limit * (pageNumber - 1)); 
-
+  
+  async findManyCoursePagination(limit: number, pageNumber: number): Promise<CoursePaginationResponseDto> {
+    try {
+      if (limit <= 0 || pageNumber <= 0) {
+        throw new BadRequestException('Limit and page number must be greater than zero.');
+      }
+  
+      const offset = limit * (pageNumber - 1);
       const totalCount = await this.prisma.course.count();
       const totalPages = Math.ceil(totalCount / limit);
-
-      const courses = await this.prisma.$queryRaw<
-        CourseResponseDto[]
-      >`
-        SELECT c.name, c.description, c.image, c.startDate, c.endDate
+  
+      const courses = await this.prisma.$queryRaw<CourseResponseDto[]>`
+        SELECT c.id, c.name, c.description, c.image, c.durationInDays
         FROM Course c
         ORDER BY name ASC
-        LIMIT ${limit} OFFSET ${page}
+        LIMIT ${limit} OFFSET ${offset}
       `;
-      if(!courses || courses.length === 0){
-        throw new NotFoundException('No courses found.');
-      }
-      return {courses, totalPages};
-    }catch (error){
-      console.error (error);
-      throw new NotFoundException();
+  
+      return { courses, totalPages };
+    } catch (error) {
+      this.logger.error('Error fetching courses with pagination', error);
+      handlePrismaError(error);
+      handleHttpError(error);
     }
   }
+  
+  async findManyCourse(user: number): Promise<CourseResponseDto[]> {
+    try {
+      const enrolledCourses = await this.enrollmentService.findCoursePerEnrollment(user);
+      const enrolledCourseIds = enrolledCourses.map(course => course.courseId);
+  
+      return await this.prisma.course.findMany({
+        where: { id: { notIn: enrolledCourseIds } },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          image: true,
+          durationInDays: true,
+        },
+      });
+    } catch (error) {
+      this.logger.error('Error fetching courses for user', error);
+      handlePrismaError(error);
+      handleHttpError(error);
+    }
+  }  
 }
