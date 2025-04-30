@@ -1,6 +1,6 @@
-import { Controller, Post, Body, Get, Param, UseInterceptors, UploadedFile, HttpStatus, HttpCode, Res, Req, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, UseInterceptors, HttpStatus, HttpCode, Res, Req, Delete, UploadedFiles } from '@nestjs/common';
 import { ApiBody, ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { Response, Request } from 'express';
 import { StreamingRequest } from './dto/streaming-request.dto';
 import { StreamingService } from './streaming.service';
@@ -11,38 +11,81 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { Roles } from 'src/auth/decorator/role.decorator';
 import { Role } from '@prisma/client';
+import { UploadService } from 'src/upload/upload.service';
+import { VideoMetadata } from 'src/upload/dto/video-metadata.dto';
+import { multerFieldsOptions } from 'src/upload/helper/multer-file-options.helper';
 
 @ApiTags('Streaming')
 @Controller('streaming')
 export class StreamingController {
-  constructor(private readonly streamingService: StreamingService) { }
+  constructor(
+    private readonly streamingService: StreamingService,
+    private readonly uploadService: UploadService
+  ) { }
 
   @HttpCode(HttpStatus.CREATED)
-  @Post('upload')
+  @Post('upload/:idModule')
   @Roles(Role.ADMIN)
-  @UseInterceptors(FileInterceptor('link'))
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'video', maxCount: 1 },
+    { name: 'thumbnail', maxCount: 1 },
+  ], multerFieldsOptions({
+    video: {
+      destination: './uploads/videos-lectures',
+      allowedMimeTypes: /^video\/(mp4|webm|ogg|quicktime)$/,
+    },
+    thumbnail: {
+      destination: './uploads/thumbnails',
+      allowedMimeTypes: /^image\/(jpeg|jpg|png|webp)$/,
+    },
+  })))
   @ApiOperation({ summary: 'Upload a video file' })
   @ApiResponse({ status: 200, description: 'Video file uploaded successfully.', type: Boolean})
   @ApiResponse({ status: 400, description: 'Bad request or missing file.'})
+  @ApiParam({ name: 'idModule', description: 'ID of the module where the video is', type: Number })
   @ApiBody({ description: 'Data to create the video information.', type: StreamingRequest })
   async uploadFile(
-    @UploadedFile() file: Express.Multer.File,
+    @Param('idModule') idModule: string,
+    @UploadedFiles() files: { video?: Express.Multer.File[]; thumbnail?: Express.Multer.File[] },
     @Body() streamingRequest: StreamingRequest,
     @CurrentUser() user: number
   ) {
-    return await this.streamingService.createVideoLecture( file, streamingRequest, user);
+    const videoFile = files.video?.[0];
+    const thumbnailFile = files.thumbnail?.[0];
+
+    let videoVideoMetadata: VideoMetadata = null;
+    let thumbnailPath: string = null;
+
+    if (videoFile) {
+      videoVideoMetadata = await this.uploadService.uploadVideoMetadata(
+        videoFile,
+        './uploads/videos-lectures'
+      );
+    }
+
+    if (thumbnailFile) {
+      thumbnailPath = await this.uploadService.uploadFileMetadata(
+        thumbnailFile,
+        './uploads/thumbnails',
+      );
+    }
+
+    if (thumbnailPath) {
+      streamingRequest.thumbnail = thumbnailPath;
+    }
+    return await this.streamingService.createVideoLecture( +idModule, videoVideoMetadata, thumbnailPath, streamingRequest, user);
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('update/:id')
+  @Post('update/:idVideo')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Update video data' })
   @ApiResponse({ status: 200, description: 'Video data updated successfully.' })
   @ApiResponse({ status: 400, description: 'Bad request. Could not update video data.' })
-  @ApiParam({ name: 'id', description: 'ID of the video to be updated', type: Number })
+  @ApiParam({ name: 'idVideo', description: 'ID of the video to be updated', type: Number })
   @ApiBody({ description: 'Data to update the video information.', type: StreamingUpdate })
   async updateVideoData (
-    @Param('id') idVideo: number,
+    @Param('idVideo') idVideo: number,
     @Body() streamingUpdate: StreamingUpdate,
     @CurrentUser() user: number
   ): Promise<boolean> {
@@ -50,12 +93,13 @@ export class StreamingController {
   }
 
   @HttpCode(HttpStatus.PARTIAL_CONTENT)
-  @Get(':id')
+  @Get(':idVideo')
   @Roles(Role.ADMIN, Role.STUDENT)
   @ApiOperation({ summary: 'Stream a video file' })
   @ApiResponse({ status: 206, description: 'Partial content (video stream)'})
   @ApiResponse({ status: 400, description: 'Invalid range header.'})
   @ApiResponse({ status: 416, description: 'Requested range is not satisfiable.'})
+  @ApiParam({ name: 'idVideo', description: 'ID of the video lecture to be streamed', type: Number })
   @ApiHeader({
     name: 'Range',
     description: 'The byte range for video streaming',
@@ -63,13 +107,12 @@ export class StreamingController {
     example: 'bytes=0-999999',
   })
   async streamingVideo(
-    @Param('id') id: string,
+    @Param('idVideo') idVideo: string,
     @Res() res: Response,
     @Req() req: Request
   ): Promise <void> {
-    const {url, mimetype, size} = await this.streamingService.findVideo(+id);
+    const {url, mimetype, size} = await this.streamingService.findVideo(+idVideo);
     const videoPath = path.resolve(url);
-
 
     const stat = fs.statSync(videoPath);
     const range = req.headers.range;
@@ -112,13 +155,13 @@ export class StreamingController {
   }
 
   @HttpCode(HttpStatus.NO_CONTENT) 
-  @Delete('delete/:id') @ApiOperation({ summary: 'Delete a video lecture by ID' }) 
+  @Delete('delete/:idVideo') @ApiOperation({ summary: 'Delete a video lecture by ID' }) 
   @Roles(Role.ADMIN)
   @ApiResponse({ status: 204, description: 'Video lecture deleted successfully.' }) 
   @ApiResponse({ status: 400, description: 'Bad request. Could not delete the video lecture.' }) 
   @ApiResponse({ status: 404, description: 'Video lecture not found.' }) 
-  @ApiParam({ name: 'id', description: 'ID of the video lecture to be deleted', type: Number }) 
-  async deleteVideoLecture (@Param('id') idVideo: number): Promise<void> {
+  @ApiParam({ name: 'idVideo', description: 'ID of the video lecture to be deleted', type: Number }) 
+  async deleteVideoLecture (@Param('idVideo') idVideo: number): Promise<void> {
     await this.streamingService.deleteVideo(+idVideo);
   }
 }

@@ -1,21 +1,21 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { EducationLevel, Ethnicity, Gender, State } from '@prisma/client';
 import {
   IsNotEmpty,
-  IsDateString,
   IsEnum,
   IsBoolean,
-  IsOptional,
   IsString,
+  IsDateString,
+  ValidateIf,
 } from 'class-validator';
-import { EducationLevel, State, Ethnicity, Gender } from '@prisma/client';
 
 export class StudentRegisterDto {
   @ApiProperty({
     example: '2005-03-23T15:00:00.000Z',
     description: "Student's date of birth in ISO format (YYYY-MM-DD)",
   })
-  @IsNotEmpty()
-  @IsDateString()
+  @IsNotEmpty({ message: 'Date of birth must not be empty.' })
+  @IsDateString({}, { message: 'Date of birth must be a valid ISO date string.' })
   dateBirth: string;
 
   @ApiProperty({
@@ -23,8 +23,8 @@ export class StudentRegisterDto {
     enumName: 'EducationLevel',
     description: "Student's education level",
   })
-  @IsNotEmpty()
-  @IsEnum(EducationLevel)
+  @IsNotEmpty({ message: 'Education level must not be empty.' })
+  @IsEnum(EducationLevel, { message: 'Education level must be a valid enum value.' })
   educationLevel: EducationLevel;
 
   @ApiProperty({
@@ -32,8 +32,8 @@ export class StudentRegisterDto {
     enumName: 'State',
     description: "Student's state of residence",
   })
-  @IsNotEmpty()
-  @IsEnum(State)
+  @IsNotEmpty({ message: 'State must not be empty.' })
+  @IsEnum(State, { message: 'State must be a valid enum value.' })
   state: State;
 
   @ApiProperty({
@@ -41,8 +41,8 @@ export class StudentRegisterDto {
     enumName: 'Ethnicity',
     description: "Student's ethnicity",
   })
-  @IsNotEmpty()
-  @IsEnum(Ethnicity)
+  @IsNotEmpty({ message: 'Ethnicity must not be empty.' })
+  @IsEnum(Ethnicity, { message: 'Ethnicity must be a valid enum value.' })
   ethnicity: Ethnicity;
 
   @ApiProperty({
@@ -50,39 +50,41 @@ export class StudentRegisterDto {
     enumName: 'Gender',
     description: "Student's gender",
   })
-  @IsNotEmpty()
-  @IsEnum(Gender)
+  @IsNotEmpty({ message: 'Gender must not be empty.' })
+  @IsEnum(Gender, { message: 'Gender must be a valid enum value.' })
   gender: Gender;
 
   @ApiProperty({
     description: 'Indicates whether the student has a disability',
     example: true,
   })
-  @IsNotEmpty()
-  @IsBoolean()
+  @IsNotEmpty({ message: 'Disability status must not be empty.' })
+  @IsBoolean({ message: 'Disability status must be a boolean.' })
   hasDisability: boolean;
 
   @ApiPropertyOptional({
     description: 'Type of disability (if applicable)',
     example: 'Visual',
   })
-  @IsOptional()
-  @IsString()
+  @ValidateIf((o) => o.hasDisability === true)
+  @IsNotEmpty({ message: 'Disability type must not be empty when hasDisability is true.' })
+  @IsString({ message: 'Disability type must be a string.' })
   disabilityType?: string;
 
   @ApiProperty({
     description: 'Indicates whether the student requires support resources',
     example: false,
   })
-  @IsNotEmpty()
-  @IsBoolean()
+  @IsNotEmpty({ message: 'Support resource status must not be empty.' })
+  @IsBoolean({ message: 'Support resource status must be a boolean.' })
   needsSupportResources: boolean;
 
   @ApiPropertyOptional({
     description: 'Description of required support resources (if applicable)',
     example: 'Screen reader',
   })
-  @IsOptional()
-  @IsString()
+  @ValidateIf((o) => o.needsSupportResources === true)
+  @IsNotEmpty({ message: 'Support resource description must not be empty when needed.' })
+  @IsString({ message: 'Support resource description must be a string.' })
   supportResourcesDescription?: string;
 }

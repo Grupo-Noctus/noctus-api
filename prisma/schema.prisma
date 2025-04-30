@@ -48,11 +48,10 @@ model Student {
 
 model Course {
   id               Int      @id @default(autoincrement())
-  name             String
+  name             String   @unique
   description      String
   image            String
-  startDate        DateTime
-  endDate          DateTime
+  durationInDays   Int 
   certificateModel String?
   createdAt        DateTime @default(now())
   createdBy        Int

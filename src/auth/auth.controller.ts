@@ -1,62 +1,91 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, HttpCode, HttpStatus, Logger, Post, UnauthorizedException, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UserAuthDto } from './dto/user-auth.dto';
+import { LoginRequestDto } from './dto/login-request.dto';
 import { Public } from './decorator/public.decorator';
-import { UserRegisterDto } from './dto/user-register.dto';
-import { StudentRegisterDto } from './dto/student-register.dto';
-import { Role } from '@prisma/client';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
-import { UserAuthJwtDto } from './dto/user-auth-jwt.dto';
 import { RegisterDto } from './dto/register.dto';
+import { isEmailFromMatera } from 'src/utils/is-matera';
 import { FileInterceptor } from '@nestjs/platform-express';
-
+import { UploadService } from 'src/upload/upload.service';
+import { multerFileOptions } from 'src/upload/helper/multer-file-options.helper';
+import { handlePrismaError } from 'src/utils/handle-prisma.error';
+import { handleHttpError } from 'src/utils/handle-http.error';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  private readonly logger = new Logger(AuthController.name)
+
+  constructor(
+    private readonly authService: AuthService,
+    private readonly uploadService: UploadService
+  ) {}
 
   @HttpCode(HttpStatus.OK)
   @Public()
   @Post('login')
   @ApiOperation({ summary: 'Login' })
-  @ApiResponse({ status: 200, description: 'Success', type: String })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiBody({ type: UserAuthDto })
-  async signIn (
-    @Body() userAuth: UserAuthDto,
-  ): Promise <{access_token: string}>{
-    return await this.authService.signIn(userAuth);
+  @ApiResponse({ status: 200, description: 'Login successful', type: 'access_token' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - invalid credentials' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiBody({ type: LoginRequestDto })
+  async signIn(
+    @Body() userAuth: LoginRequestDto,
+  ): Promise<{ access_token: string }> {
+    try {
+      return await this.authService.signIn(userAuth);
+    } catch (error) {
+      this.logger.error('Error occurred during login attempt', error);
+      handlePrismaError(error);
+      handleHttpError(error);
+    }
   }
 
   @HttpCode(HttpStatus.CREATED)
   @Public()
   @Post('register')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FileInterceptor('file', multerFileOptions('./uploads/images-users', /^image\/(jpeg|png|jpg|webp)$/)))
   @ApiOperation({ summary: 'Register new user' })
-  @ApiResponse({ status: 201, description: 'Success', type: Boolean })
-  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 201, description: 'User created successfully', type: Boolean })
+  @ApiResponse({ status: 400, description: 'Missing or invalid user/student data' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiBody({ type: RegisterDto })
   async register(
-    @Body() body: any,
     @UploadedFile() file: Express.Multer.File,
+    @Body() body: RegisterDto,
   ): Promise<boolean> {
-    let user, student;
-    user = typeof body.user === 'string' ? JSON.parse(body.user) : body.user;
-    student = typeof body.student === 'string' ? JSON.parse(body.student) : body.student;
+    let imageKey = null
+    try {
+      const user = typeof body.user === 'string' ? JSON.parse(body.user) : body.user;
+      const student = typeof body.student === 'string' ? JSON.parse(body.student) : body.student;
 
-    if (!user) {
-      throw new BadRequestException('Dados de usuário não encontrados');
-    }
-
-    const isAdmin = this.authService.isEmailFromMatera(user.email);
-
-    if (!isAdmin) {
-      if (!student) {
-        throw new BadRequestException('O usuário é estudante e os dados do estudante não foram encontrados.');
+      if (file) {
+        imageKey = await this.uploadService.uploadFileMetadata(
+        file,
+        'images-users'
+      );
       }
-      return await this.authService.registerStudent(user, student);
-    } else {
-      return await this.authService.registerAdmin(user, Role.ADMIN, file);
+      if (!user) {
+        throw new BadRequestException('User data not found');
+      }
+
+      const isAdmin = isEmailFromMatera(user.email);
+
+      if (!isAdmin) {
+        if (!student) {
+          throw new BadRequestException('Student data is required for non-admin users');
+        }
+
+        return await this.authService.registerStudent(user, student, imageKey);
+      }
+
+      return await this.authService.registerAdmin(user, imageKey);
+    } catch (error) {
+      this.logger.error('Error occurred during user registration', error)
+      if (imageKey) {
+        await this.uploadService.deleteFile(imageKey);
+      }
+      handlePrismaError(error);
+      handleHttpError(error);
     }
   }
 }

@@ -4,16 +4,6 @@ import { Transform } from 'class-transformer';
 
 export class StreamingRequest {
   @ApiProperty({
-    description: 'The ID of the module the video belongs to',
-    type: Number,
-    example: 1,
-  })
-  @IsInt()
-  @IsNotEmpty()
-  @Transform(({ value }) => parseInt(value, 10))
-  idModule: number;
-
-  @ApiProperty({
     description: 'The name of the video',
     type: String,
     example: 'Introduction to NestJS',

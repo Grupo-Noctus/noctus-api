@@ -32,7 +32,7 @@ export class AuthGuard implements CanActivate {
                 }
             );
 
-            request['user'] = payload
+            request['user'] = {id: payload.sub, role: payload.role,}
         } catch {
             throw new UnauthorizedException();
         }

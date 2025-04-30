@@ -3,6 +3,12 @@ import { IsString, IsInt, IsNotEmpty, Min } from 'class-validator';
 
 export class ModuleResponseDto {
   @ApiProperty({
+    example: '1',
+    description: 'Id of module.',
+  })
+  id: number;
+
+  @ApiProperty({
     example: 'Full-stack Web Development',
     description: 'The name of the module in the course.',
   })
