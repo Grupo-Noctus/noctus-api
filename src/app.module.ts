@@ -12,6 +12,8 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { EnrollmentModule } from './enrollment/enrollment.module';
 import { ModuleModule } from './module/module.module';
 import { StreamingModule } from './streaming/streaming.module';
+import { ExamModule } from './Question/exam.module';
+import { QuestionModule } from './question/question.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { StreamingModule } from './streaming/streaming.module';
     ModuleModule,
     StreamingModule,
     EnrollmentModule,
+    ExamModule,
+    QuestionModule,
 
   ],
   controllers: [AppController],
