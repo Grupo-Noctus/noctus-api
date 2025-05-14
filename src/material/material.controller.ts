@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, UseInterceptors, HttpCode, HttpStatus, UseGuards, Query, UploadedFile, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseInterceptors, HttpCode, HttpStatus, UseGuards, Query, UploadedFile, Logger, Res, NotFoundException } from '@nestjs/common';
 import { MaterialService } from './material.service';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
@@ -9,14 +9,17 @@ import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { Roles } from 'src/auth/decorator/role.decorator';
 import { Role } from '@prisma/client';
 import { handleHttpError } from 'src/utils/handle-http.error';
-import { MaterialResponseDto } from './dto/material-response.dto';
 import { handlePrismaError } from 'src/utils/handle-prisma.error';
 import { multerFileOptions } from 'src/upload/helper/multer-file-options.helper';
+import { FindMaterialDto } from './dto/find-material-dto';
+import { join } from 'path';
+import { Response } from 'express';
 
 @ApiTags('Material')
 @Controller('material')
 @UseGuards(AuthGuard)
 export class MaterialController {
+  private readonly logger = new Logger(MaterialController.name);
   constructor(private readonly materialService: MaterialService) {}
 
   @Post('create')
@@ -36,7 +39,7 @@ export class MaterialController {
       return await this.materialService.createMaterial(materialResponse, user, file);
     } catch( error ) {
 
-      console.error(`Error to create a Material `, error);
+      this.logger.error(`Error to create a Material `, error);
       handlePrismaError(error);
       handleHttpError(error);
     }
@@ -49,15 +52,12 @@ export class MaterialController {
   @ApiResponse({ status: 200, description: 'Success', type: MaterialPaginationResponseDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findManyMaterial(@Query() page: number, material: MaterialResponseDto): Promise<MaterialPaginationResponseDto> {
+  async findManyMaterial(@Query() query: FindMaterialDto
+    ): Promise<MaterialPaginationResponseDto> {
     try {
-      return await this.materialService.findManyMaterial(page);
+      return await this.materialService.findManyMaterial(query);
     } catch(error) {
-      if (!material || material.length === 0) {
-        throw new NotFoundException('No courses found.');
-      }
-
-      console.error(`Error to find Materials `, error);
+      this.logger.error('Error in find the Materials', error)
       handlePrismaError(error);
       handleHttpError(error);
     }
@@ -71,12 +71,22 @@ export class MaterialController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiParam({ name: 'idMaterial', type: String, description: 'ID Material'})
-  async findOneMaterial(@Param('id') id: string) {
+  async findOneMaterial(
+    @Param('idMaterial') id: string,
+    @Res() res: Response,
+  ) {
     try {
-      return this.materialService.findOneMaterial(+id);
+      const material = await this.materialService.findOneMaterial(+id);
+
+      if(!material.filename) {
+        throw new NotFoundException('This material has no file available for download.');
+      }
+
+      const filePath = join(process.cwd(), 'uploads', 'materials', material.filename);
+      return res.download(filePath, material.filename);
     } catch(error) {
 
-      console.error(`Error to find a material: '${id}' `, error);
+      this.logger.error(`Failed to download file for material with ID ${id}`, error)
       handlePrismaError(error);
       handleHttpError(error);
     }
@@ -91,12 +101,12 @@ export class MaterialController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiParam({ name: 'idMaterial', type: String, description: 'ID Material'})
-  async deleteMaterial(@Param('id') id: string): Promise<void> {
+  async deleteMaterial(@Param('idMaterial') id: string): Promise<void> {
     try {
       await this.materialService.deleteMaterial(+id);
     } catch (error) {
 
-      console.error('Error deleting material:', error);
+      this.logger.error('Error deleting material:', error);
       handlePrismaError(error);
       handleHttpError(error);
     }

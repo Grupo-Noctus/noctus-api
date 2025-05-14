@@ -79,7 +79,7 @@ describe('MaterialService', () => {
 
   describe('findAll', () => {
     it('should return an array of materials', async () => {
-      const result = await service.findManyMaterial(10);
+      const result = await service.findManyMaterial(1);
       expect(result).toEqual([mockMaterial]);
       expect(prisma.material.findMany).toHaveBeenCalled();
     });

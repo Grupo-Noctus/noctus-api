@@ -7,10 +7,4 @@ export class MaterialPaginationResponseDto {
         type: [MaterialResponseDto],
     })
     materials: MaterialResponseDto[];
-
-    @ApiProperty({
-        description: 'Total number of pages based on the current page size.',
-        example: 5,
-    })
-    totalPages: number;
 }
