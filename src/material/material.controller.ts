@@ -3,7 +3,7 @@ import { MaterialService } from './material.service';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
 import { ApiResponse, ApiOperation, ApiTags, ApiParam } from '@nestjs/swagger';
-import { MaterialPaginationResponseDto } from './dto/material-pagination-response.dto';
+import { MaterialResponseDto } from './dto/material-response.dto';
 import { MaterialRequestDto } from './dto/material-resquest.dto';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { Roles } from 'src/auth/decorator/role.decorator';
@@ -29,10 +29,10 @@ export class MaterialController {
   @ApiResponse({ status: 201, description: 'Success' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseInterceptors(FileInterceptor('file', multerFileOptions(' ./uploads/materials', /^image\/(jpeg|png|jpg|webp)$/)))
+  @UseInterceptors(FileInterceptor('file', multerFileOptions('./uploads/materials', /^image\/(jpeg|png|jpg|webp)$/)))
   async createMaterial(
     @Body() materialResponse: MaterialRequestDto,
-    @CurrentUser() user: {id: number},
+    @CurrentUser() user: number,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<number> {
     try {
@@ -46,16 +46,16 @@ export class MaterialController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('find-many')
+  @Get('find-many/:idCourse')
   @Roles(Role.ADMIN, Role.STUDENT)
-  @ApiOperation({ summary: 'Find many Materials' })
-  @ApiResponse({ status: 200, description: 'Success', type: MaterialPaginationResponseDto })
+  @ApiOperation({ summary: 'Find many Materials by IdCourse' })
+  @ApiResponse({ status: 200, description: 'Success', type: [MaterialResponseDto] })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findManyMaterial(@Query() query: FindMaterialDto
-    ): Promise<MaterialPaginationResponseDto> {
+  async findManyMaterial(@Param('idCourse') idCourse: string
+    ): Promise<MaterialResponseDto[]> {
     try {
-      return await this.materialService.findManyMaterial(query);
+      return await this.materialService.findManyMaterial({idCourse: +idCourse});
     } catch(error) {
       this.logger.error('Error in find the Materials', error)
       handlePrismaError(error);
