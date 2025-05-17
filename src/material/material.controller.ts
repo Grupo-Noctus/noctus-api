@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, UseInterceptors, HttpCode, HttpStatus, UseGuards, Query, UploadedFile, Logger, Res, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseInterceptors, HttpCode, HttpStatus, UseGuards, Query, UploadedFile, Logger, Res, NotFoundException, BadRequestException } from '@nestjs/common';
 import { MaterialService } from './material.service';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
@@ -29,13 +29,19 @@ export class MaterialController {
   @ApiResponse({ status: 201, description: 'Success' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseInterceptors(FileInterceptor('file', multerFileOptions('./uploads/materials', /^image\/(jpeg|png|jpg|webp)$/)))
+  @UseInterceptors(FileInterceptor('file', multerFileOptions('./uploads/materials', /^image\/(jpeg|png|jpg|webp)$|^application\/pdf$|^application\/msword$|^application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document$/
+)))
   async createMaterial(
     @Body() materialResponse: MaterialRequestDto,
     @CurrentUser() user: number,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<number> {
     try {
+      const blockedExtensions = ['.exe', '.sh', '.bat', '.cmd'];
+
+      if (blockedExtensions.some(ext => file.originalname.endsWith(ext))) {
+        throw new BadRequestException('File type not allowed');
+      }
       return await this.materialService.createMaterial(materialResponse, user, file);
     } catch( error ) {
 
