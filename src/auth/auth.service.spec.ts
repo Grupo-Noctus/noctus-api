@@ -4,66 +4,74 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UnauthorizedException } from '@nestjs/common';
-import { Role } from '@prisma/client';
-import { UserAuthDto } from './dto/login-request.dto';
+import * as argon2 from 'argon2';
+import { EducationLevel, Role } from '@prisma/client';
+import { LoginRequestDto } from './dto/login-request.dto';
 import { UserRegisterDto } from './dto/user-register.dto';
 import { StudentRegisterDto } from './dto/student-register.dto';
 
+jest.mock('argon2');
+
 describe('AuthService', () => {
   let service: AuthService;
-
-  const mockJwtService = {
-    signAsync: jest.fn(),
-  };
-
-  const mockUserService = {
-    findByUsernameOrEmailForAuth: jest.fn(),
-  };
-
-  const mockPrisma = {
-    user: {
-      create: jest.fn(),
-    },
-  };
+  let jwtService: JwtService;
+  let userService: UserService;
+  let prisma: PrismaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
-        { provide: JwtService, useValue: mockJwtService },
-        { provide: UserService, useValue: mockUserService },
-        { provide: PrismaService, useValue: mockPrisma },
+        {
+          provide: JwtService,
+          useValue: {
+            signAsync: jest.fn().mockResolvedValue('mocked-token'),
+          },
+        },
+        {
+          provide: UserService,
+          useValue: {
+            findByUsernameOrEmailForAuth: jest.fn(),
+          },
+        },
+        {
+          provide: PrismaService,
+          useValue: {
+            user: {
+              create: jest.fn(),
+            },
+          },
+        },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+    jwtService = module.get<JwtService>(JwtService);
+    userService = module.get<UserService>(UserService);
+    prisma = module.get<PrismaService>(PrismaService);
   });
 
-  afterEach(() => jest.clearAllMocks());
-
   describe('signIn', () => {
-    it('should return access token when credentials are valid', async () => {
-      const userAuth: UserAuthDto = {
-        usernameOrEmail: 'john@example.com',
-        password: '123456',
+    it('should return access token on valid credentials', async () => {
+      const loginDto: LoginRequestDto = {
+        usernameOrEmail: 'joao',
+        password: 'password123',
       };
 
       const mockUser = {
         id: 1,
-        username: 'john',
-        password: '123456',
-        role: Role.STUDENT,
+        username: 'joao',
+        password: 'hashed-password',
+        role: Role.ADMIN,
         active: true,
       };
 
-      mockUserService.findByUsernameOrEmailForAuth.mockResolvedValue(mockUser);
-      mockJwtService.signAsync.mockResolvedValue('jwt-token');
+      (userService.findByUsernameOrEmailForAuth as jest.Mock).mockResolvedValue(mockUser);
+      (argon2.verify as jest.Mock).mockResolvedValue(true);
 
-      const result = await service.signIn(userAuth);
-
-      expect(result).toEqual({ access_token: 'jwt-token' });
-      expect(mockUserService.findByUsernameOrEmailForAuth).toHaveBeenCalledWith('john@example.com');
-      expect(mockJwtService.signAsync).toHaveBeenCalledWith({
+      const result = await service.signIn(loginDto);
+      expect(result).toEqual({ access_token: 'mocked-token' });
+      expect(jwtService.signAsync).toHaveBeenCalledWith({
         sub: mockUser.id,
         username: mockUser.username,
         role: mockUser.role,
@@ -71,117 +79,93 @@ describe('AuthService', () => {
       });
     });
 
-    it('should throw UnauthorizedException if password is invalid', async () => {
-      mockUserService.findByUsernameOrEmailForAuth.mockResolvedValue({
-        password: 'correct',
-      });
+    it('should throw UnauthorizedException if user is not found', async () => {
+      (userService.findByUsernameOrEmailForAuth as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        service.signIn({ usernameOrEmail: 'user', password: 'wrong' })
-      ).rejects.toThrow(UnauthorizedException);
-    });
-  });
-
-  describe('isEmailFromMatera', () => {
-    it('should return true for Matera email', () => {
-      expect(service.isEmailFromMatera('admin@matera')).toBe(true);
+      await expect(service.signIn({ usernameOrEmail: 'fail', password: 'fail' }))
+        .rejects
+        .toThrow(UnauthorizedException);
     });
 
-    it('should return false for non-Matera email', () => {
-      expect(service.isEmailFromMatera('user@gmail.com')).toBe(false);
+    it('should throw UnauthorizedException if password is incorrect', async () => {
+      const mockUser = { id: 1, username: 'joao', password: 'hash', role: Role.ADMIN, active: true };
+
+      (userService.findByUsernameOrEmailForAuth as jest.Mock).mockResolvedValue(mockUser);
+      (argon2.verify as jest.Mock).mockResolvedValue(false);
+
+      await expect(service.signIn({ usernameOrEmail: 'joao', password: 'wrong' }))
+        .rejects
+        .toThrow(UnauthorizedException);
     });
   });
 
   describe('registerAdmin', () => {
-    it('should create and return UserAuthDto for admin', async () => {
-      const userRegister: UserRegisterDto = {
-        email: 'admin@matera',
-        name: 'Admin',
+    it('should create an admin user', async () => {
+      const dto: UserRegisterDto = {
         username: 'admin',
+        name: 'Admin User',
+        email: 'admin@example.com',
         password: 'admin123',
-        image: 'admin.jpg',
+        phoneNumber: '+5511912345678',
       };
 
-      mockPrisma.user.create.mockResolvedValue({
-        id: 1,
-        email: userRegister.email,
-        password: userRegister.password,
-      });
+      (argon2.hash as jest.Mock).mockResolvedValue('hashed-password');
+      (prisma.user.create as jest.Mock).mockResolvedValue(true);
 
-      const result = await service.registerAdmin(userRegister, Role.ADMIN);
-
-      expect(result).toEqual({
-        id: 1,
-        usernameOrEmail: userRegister.email,
-        password: userRegister.password,
-      });
-
-      expect(mockPrisma.user.create).toHaveBeenCalledWith({
+      const result = await service.registerAdmin(dto, 'image.png');
+      expect(prisma.user.create).toHaveBeenCalledWith({
         data: {
-          ...userRegister,
+          ...dto,
           role: Role.ADMIN,
           active: true,
-        },
-        select: {
-          id: true,
-          email: true,
-          password: true,
+          password: 'hashed-password',
+          image: 'image.png',
         },
       });
+      expect(result).toBe(true);
     });
   });
 
   describe('registerStudent', () => {
-    it('should create and return UserAuthDto for student', async () => {
-      const userRegister: UserRegisterDto = {
-        email: 'student@gmail.com',
-        name: 'Student',
+    it('should create a student user with student data', async () => {
+      const userDto: UserRegisterDto = {
         username: 'student1',
+        name: 'Student One',
+        email: 'student@example.com',
         password: 'pass123',
-        image: 'student.jpg',
+        phoneNumber: '+5511912345678',
       };
 
-      const studentRegister: StudentRegisterDto = {
-        dateBirth: '2001-01-01',
-        educationLevel: 'SECONDARY_COMPLETE',
+      const studentDto: StudentRegisterDto = {
+        dateBirth: '2005-03-23T15:00:00.000Z',
+        educationLevel: EducationLevel.PRIMARY_INCOMPLETE,
         state: 'SP',
         ethnicity: 'WHITE',
-        gender: 'FEMALE',
+        gender: 'MALE',
         hasDisability: false,
         needsSupportResources: false,
       };
 
-      mockPrisma.user.create.mockResolvedValue({
-        id: 2,
-        email: userRegister.email,
-        password: userRegister.password,
-      });
+      (argon2.hash as jest.Mock).mockResolvedValue('hashed-password');
+      (prisma.user.create as jest.Mock).mockResolvedValue(true);
 
-      const result = await service.registerStudent(userRegister, studentRegister);
-
-      expect(result).toEqual({
-        id: 2,
-        usernameOrEmail: userRegister.email,
-        password: userRegister.password,
-      });
-
-      expect(mockPrisma.user.create).toHaveBeenCalledWith({
+      const result = await service.registerStudent(userDto, studentDto, 'image.jpg');
+      expect(prisma.user.create).toHaveBeenCalledWith({
         data: {
-          ...userRegister,
+          ...userDto,
           role: Role.STUDENT,
           active: true,
+          password: 'hashed-password',
+          image: 'image.jpg',
           student: {
             create: {
-              ...studentRegister,
+              ...studentDto,
+              dateBirth: new Date(studentDto.dateBirth),
             },
           },
         },
-        select: {
-          id: true,
-          email: true,
-          password: true,
-        },
       });
+      expect(result).toBe(true);
     });
   });
 });

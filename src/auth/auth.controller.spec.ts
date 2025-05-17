@@ -1,123 +1,105 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { UserAuthDto } from './dto/login-request.dto';
+import { UploadService } from 'src/upload/upload.service';
+import { LoginRequestDto } from './dto/login-request.dto';
 import { RegisterDto } from './dto/register.dto';
-import { Role } from '@prisma/client';
+import { BadRequestException } from '@nestjs/common';
 
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: AuthService;
+  let uploadService: UploadService;
 
   const mockAuthService = {
-    singIn: jest.fn(),
-    isEmailFromMatera: jest.fn(),
+    signIn: jest.fn(),
     registerStudent: jest.fn(),
     registerAdmin: jest.fn(),
+  };
+
+  const mockUploadService = {
+    uploadFileMetadata: jest.fn(),
+    deleteFile: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [{ provide: AuthService, useValue: mockAuthService }],
+      providers: [
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: UploadService, useValue: mockUploadService },
+      ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(AuthService);
+    uploadService = module.get<UploadService>(UploadService);
   });
 
-  afterEach(() => jest.clearAllMocks());
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
 
   describe('signIn', () => {
-    it('should return an access_token on successful login', async () => {
-      const loginDto: UserAuthDto = {
-        usernameOrEmail: 'joao@email.com',
-        password: 'senhaSegura123',
+    it('should return access_token on successful login', async () => {
+      const dto: LoginRequestDto = {
+        usernameOrEmail: 'user@example.com',
+        password: 'securePass123',
       };
 
-      const result = { access_token: 'token123' };
-      mockAuthService.singIn.mockResolvedValue(result);
+      const mockToken = { access_token: 'jwt-token' };
+      jest.spyOn(authService, 'signIn').mockResolvedValue(mockToken);
 
-      const response = await controller.signIn(loginDto);
-      expect(response).toEqual(result);
-      expect(authService.signIn).toHaveBeenCalledWith(loginDto);
+      const result = await controller.signIn(dto);
+      expect(result).toEqual(mockToken);
+      expect(authService.signIn).toHaveBeenCalledWith(dto);
     });
   });
 
   describe('register', () => {
-    it('should register a student and return an access_token', async () => {
-      const registerDto: RegisterDto = {
-        user: {
-          username: 'joaosilva',
-          name: 'João da Silva',
-          email: 'joao@email.com',
-          password: 'senhaSegura123',
-          image: '',
-        },
-        student: {
-          dateBirth: '2005-03-23T15:00:00.000Z',
-          educationLevel: 'HIGHER_COMPLETE',
-          state: 'SP',
-          ethnicity: 'WHITE',
-          gender: 'MALE',
-          hasDisability: false,
-          needsSupportResources: false,
-        },
-      };
+    it('should register an admin when email is from Matera', async () => {
+      const dto: RegisterDto = {
+        user: { email: 'admin@matera.com', password: 'securePass123', name: 'Admin' },
+      } as any;
 
-      const createdUser = { id: '123', email: 'joao@email.com' };
-      const result = { access_token: 'student-token' };
+      jest.spyOn(authService, 'registerAdmin').mockResolvedValue(true);
 
-      mockAuthService.isEmailFromMatera.mockReturnValue(false);
-      mockAuthService.registerStudent.mockResolvedValue(createdUser);
-      mockAuthService.singIn.mockResolvedValue(result);
-
-      const response = await controller.register(registerDto);
-
-      expect(response).toEqual(result);
-      expect(authService.registerStudent).toHaveBeenCalledWith(registerDto.user, registerDto.student);
-      expect(authService.signIn).toHaveBeenCalledWith(createdUser);
+      const result = await controller.register(undefined, dto);
+      expect(result).toBe(true);
+      expect(authService.registerAdmin).toHaveBeenCalledWith(dto.user, null);
     });
 
-    it('should register an admin and return an access_token', async () => {
-      const registerDto: RegisterDto = {
-        user: {
-          username: 'adminuser',
-          name: 'Admin',
-          email: 'admin@matera.com',
-          password: 'adminPass123',
-          image: '',
-        },
-      };
+    it('should register a student when email is not from Matera', async () => {
+      const dto: RegisterDto = {
+        user: { email: 'student@gmail.com', password: 'securePass123', name: 'Student' },
+        student: { ra: '123456' },
+      } as any;
 
-      const createdUser = { id: '999', email: 'admin@matera.com' };
-      const result = { access_token: 'admin-token' };
+      jest.spyOn(authService, 'registerStudent').mockResolvedValue(true);
 
-      mockAuthService.isEmailFromMatera.mockReturnValue(true);
-      mockAuthService.registerAdmin.mockResolvedValue(createdUser);
-      mockAuthService.singIn.mockResolvedValue(result);
-
-      const response = await controller.register(registerDto);
-
-      expect(response).toEqual(result);
-      expect(authService.registerAdmin).toHaveBeenCalledWith(registerDto.user, Role.ADMIN);
-      expect(authService.signIn).toHaveBeenCalledWith(createdUser);
+      const result = await controller.register(undefined, dto);
+      expect(result).toBe(true);
+      expect(authService.registerStudent).toHaveBeenCalledWith(dto.user, dto.student, null);
     });
 
-    it('should throw BadRequestException if student data is missing for non-admin', async () => {
-      const registerDto: RegisterDto = {
-        user: {
-          username: 'aluno',
-          name: 'Aluno Exemplo',
-          email: 'aluno@gmail.com',
-          password: 'senha123',
-          image: '',
-        },
-      };
+    it('should throw BadRequestException if user is missing', async () => {
+      const dto: any = { user: null };
 
-      mockAuthService.isEmailFromMatera.mockReturnValue(false);
+      await expect(controller.register(undefined, dto)).rejects.toThrow(BadRequestException);
+    });
 
-      await expect(controller.register(registerDto)).rejects.toThrow('The user is student and your data not found.');
+    it('should delete image if error occurs during registration', async () => {
+      const dto: RegisterDto = {
+        user: { email: 'admin@matera.com', password: 'securePass123', name: 'Admin' },
+      } as any;
+
+      const image = { originalname: 'pic.jpg' } as Express.Multer.File;
+      jest.spyOn(uploadService, 'uploadFileMetadata').mockResolvedValue('image-key');
+      jest.spyOn(authService, 'registerAdmin').mockRejectedValue(new Error('fail'));
+      jest.spyOn(uploadService, 'deleteFile').mockResolvedValue(undefined);
+
+      await expect(controller.register(image, dto)).rejects.toThrow();
+      expect(uploadService.deleteFile).toHaveBeenCalledWith('image-key');
     });
   });
 });
