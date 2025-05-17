@@ -14,6 +14,7 @@ export class EnrollmentService {
 
   async createEnrollment(dto: EnrollmentRequestDto, user: number): Promise<boolean> {
     try{
+      const expiresAt = await this.calculateExpiredAt(dto.idCourse);
       await this.prisma.enrollment.create({
         data: {
           student: {
@@ -26,10 +27,9 @@ export class EnrollmentService {
                   id:dto.idCourse
               }
           },
-          active: dto.active,
-          completed: dto.completed,
-          startDate: dto.startDate,
-          endDate: dto.endDate, 
+          expiresAt,
+          active: true,
+          completed: false, 
         },
       });
       return true;
@@ -130,7 +130,7 @@ export class EnrollmentService {
           c.name AS courseName, 
           c.description AS courseDescription, 
           c.image AS courseImage, 
-          c.durationInDays,
+          c.duration,
           e.id AS enrollmentId, 
           e.active, e.completed, 
           e.startDate AS enrollmentStartDate, 
@@ -163,5 +163,17 @@ export class EnrollmentService {
       console.error('Error fetching courses: ', error);
       return [];
     }    
+  }
+
+  private async calculateExpiredAt(idCourse: number) {
+    const courseDuration = await this.prisma.course.findUnique({
+        where: {id: idCourse},
+        select: {duration: true}
+      })
+
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + courseDuration.duration);
+
+      return expiresAt;
   }
 }

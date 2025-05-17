@@ -43,14 +43,13 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Public()
   @Post('register')
-  @UseInterceptors(FileInterceptor('file', multerFileOptions('./uploads/images-users', /^image\/(jpeg|png|jpg|webp)$/)))
+  @UseInterceptors(FileInterceptor('imageUser', multerFileOptions('./uploads/images-users', /^image\/(jpeg|png|jpg|webp)$/)))
   @ApiOperation({ summary: 'Register new user' })
   @ApiResponse({ status: 201, description: 'User created successfully', type: Boolean })
   @ApiResponse({ status: 400, description: 'Missing or invalid user/student data' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
-  @ApiBody({ type: RegisterDto })
   async register(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() imageUser: Express.Multer.File,
     @Body() body: RegisterDto,
   ): Promise<boolean> {
     let imageKey = null
@@ -58,9 +57,9 @@ export class AuthController {
       const user = typeof body.user === 'string' ? JSON.parse(body.user) : body.user;
       const student = typeof body.student === 'string' ? JSON.parse(body.student) : body.student;
 
-      if (file) {
+      if (imageUser) {
         imageKey = await this.uploadService.uploadFileMetadata(
-        file,
+        imageUser,
         'images-users'
       );
       }

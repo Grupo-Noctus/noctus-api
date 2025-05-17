@@ -24,21 +24,20 @@ export class CourseController {
   @HttpCode(HttpStatus.CREATED)
   @Post('create')
   @Roles(Role.ADMIN)
-  @UseInterceptors(FileInterceptor('file', multerFileOptions('./uploads/images-courses', /^image\/(jpeg|png|jpg|webp)$/)))
+  @UseInterceptors(FileInterceptor('imageCourse', multerFileOptions('./uploads/images-courses', /^image\/(jpeg|png|jpg|webp)$/)))
   @ApiOperation({summary: 'Create course'})
   @ApiResponse({ status: 200, description:'Success'})
   @ApiResponse({status:400, description:'Bad Request'})
   @ApiResponse({status: 401, description: 'Unauthorized'})
-  @ApiBody({ type: CourseRequestDto })
   async createCourse(
     @Body() courseResponse: CourseRequestDto,
     @CurrentUser() user: number,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() imageCourse: Express.Multer.File,
   ): Promise<boolean> {
     let imageKey = null;
-    if (file) {
+    if (imageCourse) {
       imageKey = await this.uploadService.uploadFileMetadata(
-        file,
+        imageCourse,
         'images-courses'
       );
     }
@@ -61,7 +60,7 @@ export class CourseController {
   @HttpCode(HttpStatus.OK)
   @Put('update/:idCourse')
   @Roles(Role.ADMIN)
-  @UseInterceptors(FileInterceptor('file', multerFileOptions('./uploads/images-courses', /^image\/(jpeg|png|jpg|webp)$/)))
+  @UseInterceptors(FileInterceptor('imageCourse', multerFileOptions('./uploads/images-courses', /^image\/(jpeg|png|jpg|webp)$/)))
   @ApiOperation({summary: 'Update course'})
   @ApiResponse({ status: 200, description:'Success', type: Boolean})
   @ApiResponse({status:400, description: 'Bad Request'})
@@ -72,12 +71,12 @@ export class CourseController {
     @Param('idCourse') idCourse: string,
     @Body() updateCourse: CourseUpdateDto,
     @CurrentUser() user: number,
-    @UploadedFile() file: Express.Multer.File
+    @UploadedFile() imageCourse: Express.Multer.File
   ): Promise<boolean>{
     let imageKey = null;
-    if (file) {
+    if (imageCourse) {
       imageKey = await this.uploadService.uploadFileMetadata(
-        file,
+        imageCourse,
         'images-courses'
       );
     }

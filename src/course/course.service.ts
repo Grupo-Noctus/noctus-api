@@ -20,11 +20,11 @@ export class CourseService {
 
   async createCourse(courseRequest: CourseRequestDto, user: number, image: string): Promise<boolean> {
     try {
-      const { durationInDays } = courseRequest;
+      const { duration } = courseRequest;
       await this.prisma.course.create({
         data: {
           ...courseRequest,
-          durationInDays: +durationInDays,
+          duration: +duration,
           image,
           createdBy: user,
           updatedBy: user,
@@ -39,25 +39,23 @@ export class CourseService {
     }
   }
   
-  async updateCourse(idCourse: number, updateCourse: CourseUpdateDto, user: number, image: string): Promise<boolean> {
+  async updateCourse(idCourse: number, updateCourse: CourseUpdateDto, user: number, image?: string): Promise<boolean> {
     try {
       const existingCourse = await this.prisma.course.findUnique({ where: { id: idCourse } });
       if (!existingCourse) {
         throw new NotFoundException('Course not found');
       }
+      const finalImage = image ?? existingCourse.image;
   
-      if (updateCourse.durationInDays != null) {
-        updateCourse.durationInDays = Number(updateCourse.durationInDays);
-      }
-  
-      if (image) {
-        updateCourse.image = image;
+      if (updateCourse.duration != null) {
+        updateCourse.duration = Number(updateCourse.duration);
       }
   
       await this.prisma.course.update({
         where: { id: idCourse },
         data: {
           ...updateCourse,
+          image: finalImage,
           updatedBy: user,
         },
       });
@@ -102,7 +100,7 @@ export class CourseService {
           name: true,
           description: true,
           image: true,
-          durationInDays: true,
+          duration: true,
         },
       });
   
@@ -129,7 +127,7 @@ export class CourseService {
       const totalPages = Math.ceil(totalCount / limit);
   
       const courses = await this.prisma.$queryRaw<CourseResponseDto[]>`
-        SELECT c.id, c.name, c.description, c.image, c.durationInDays
+        SELECT c.id, c.name, c.description, c.image, c.duration
         FROM Course c
         ORDER BY name ASC
         LIMIT ${limit} OFFSET ${offset}
@@ -155,7 +153,7 @@ export class CourseService {
           name: true,
           description: true,
           image: true,
-          durationInDays: true,
+          duration: true,
         },
       });
     } catch (error) {

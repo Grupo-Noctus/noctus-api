@@ -13,7 +13,7 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
 
   async onModuleInit() {
     await this.$connect();
-    this.logger.log('Prisma conectado');
+    this.logger.log('Prisma connected');
 
     this.$on('query', (e) => {
       this.logger.debug(`[QUERY] ${e.query}`);

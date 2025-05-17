@@ -25,16 +25,6 @@ export class CourseRequestDto {
   })
   description: string;
 
-  @IsOptional()
-  @IsString({ message: 'Image must be a string (URL)' })
-  @ApiProperty({
-    example: 'https://example.com/images/fullstack-course.png',
-    description: 'Optional URL of the course cover image.',
-    nullable: true,
-    required: false,
-  })
-  image?: string;
-
   @IsInt({ message: 'Duration in days must be an integer' })
   @Min(1, { message: 'Duration in days must be at least 1' })
   @Transform(({ value }) => Number(value))
@@ -42,7 +32,7 @@ export class CourseRequestDto {
     example: 21,
     description: 'Duration of course in days',
   })
-  durationInDays: number;
+  duration: number;
 
   @IsOptional()
   @IsString({ message: 'Certificate model must be a string (HTML)' })

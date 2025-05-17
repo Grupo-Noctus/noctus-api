@@ -36,5 +36,5 @@ export class CourseResponseDto {
     example: 21,
     description: 'Duration of course in days',
   })
-  durationInDays: number;
+  duration: number;
 }

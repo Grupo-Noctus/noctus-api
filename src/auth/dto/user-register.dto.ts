@@ -64,13 +64,4 @@ export class UserRegisterDto {
     message: 'The phone number must be at most 20 characters long.',
   })
   phoneNumber: string;
-
-  @ApiProperty({
-    example: 'https://exemple.com/imagens/exemple.png',
-    description: 'URL of the user profile image (optional)',
-    required: false,
-  })
-  @IsOptional()
-  @IsUrl({}, { message: 'The profile image must be a valid URL.' })
-  image: string;
 }
