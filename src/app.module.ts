@@ -13,9 +13,7 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
 import { ModuleModule } from './module/module.module';
 import { MaterialModule } from './material/material.module';
 import { StreamingModule } from './streaming/streaming.module';
-import { UploadService } from './upload/upload.service';
 import { UploadModule } from './upload/upload.module';
-import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -36,7 +34,6 @@ import { ChatModule } from './chat/chat.module';
     MaterialModule,
     StreamingModule,
     EnrollmentModule,
-    ChatModule,
   ],
   controllers: [AppController],
   providers: [
