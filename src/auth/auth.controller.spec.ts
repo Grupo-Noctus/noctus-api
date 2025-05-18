@@ -6,6 +6,7 @@ import { LoginRequestDto } from './dto/login-request.dto';
 import { RegisterDto } from './dto/register.dto';
 import { BadRequestException } from '@nestjs/common';
 
+
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: AuthService;
@@ -15,6 +16,12 @@ describe('AuthController', () => {
     signIn: jest.fn(),
     registerStudent: jest.fn(),
     registerAdmin: jest.fn(),
+    registerStudent: jest.fn(),
+  };
+
+  const mockUploadService = {
+    uploadFileMetadata: jest.fn(),
+    deleteFile: jest.fn(),
   };
 
   const mockUploadService = {
@@ -53,6 +60,7 @@ describe('AuthController', () => {
       const result = await controller.signIn(dto);
       expect(result).toEqual(mockToken);
       expect(authService.signIn).toHaveBeenCalledWith(dto);
+
     });
   });
 
@@ -100,6 +108,7 @@ describe('AuthController', () => {
 
       await expect(controller.register(image, dto)).rejects.toThrow();
       expect(uploadService.deleteFile).toHaveBeenCalledWith('image-key');
+
     });
   });
 });

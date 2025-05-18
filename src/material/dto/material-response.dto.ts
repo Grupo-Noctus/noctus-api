@@ -54,6 +54,6 @@ export class MaterialResponseDto {
   updatedBy: number;
   
   @IsOptional()
-  file: Express.Multer.File;
+  file?: Express.Multer.File;
 }
 
