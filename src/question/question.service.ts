@@ -187,6 +187,12 @@ async createQuestion(idModule: number,idExam: number,questionRequest: QuestionRe
     });
     if (!question) throw new NotFoundException('Question not found or does not belong to this exam');
 
+      await this.prisma.questionOptions.deleteMany({
+        where: {
+        idQuestion: idQuestion
+        },
+      });
+
 
       await this.prisma.question.delete({
         where: { id: idQuestion },

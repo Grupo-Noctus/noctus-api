@@ -68,12 +68,13 @@ export class ExamService {
     }
   } 
 
-  async findManyExams(idModule: number, idExam: number):Promise <ExamResponseDto[]> {
+  async findManyExams(idModule: number, idExam?: number):Promise <ExamResponseDto[]> {
     try{
       const exams = await this.prisma.exam.findMany({
         where: {
-          id: idExam,
           idModule: idModule,
+          ...(idExam ? { id: idExam } : {}),
+
         },
         include:{
           questions:{
