@@ -4,8 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { UploadService } from 'src/upload/upload.service';
 import { EnrollmentService } from 'src/enrollment/enrollment.service';
 import { NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { handlePrismaError } from 'src/utils/handle-prisma.error';
-import { handleHttpError } from 'src/utils/handle-http.error';
+import { handleAppError } from 'src/utils/handle-app-error.error';
 
 jest.mock('src/utils/handle-prisma.error');
 jest.mock('src/utils/handle-http.error');
@@ -78,8 +77,7 @@ describe('CourseService', () => {
       prisma.course.create.mockRejectedValueOnce(new Error('fail'));
       await service.createCourse(dto, user, image);
       expect(uploadService.deleteFile).toHaveBeenCalledWith(image);
-      expect(handlePrismaError).toHaveBeenCalled();
-      expect(handleHttpError).toHaveBeenCalled();
+      expect(handleAppError).toHaveBeenCalled();
     });
   });
 

@@ -1,16 +1,21 @@
-import { BadRequestException, Injectable, Logger, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ModuleRequstDto } from './dto/module-request.dto';
 import { ModuleUpdateDto } from './dto/module-update.dto';
 import { ModuleResponseDto } from './dto/module-response.dto';
-import { handlePrismaError } from 'src/utils/handle-prisma.error';
-import { handleHttpError } from 'src/utils/handle-http.error';
+import { handleAppError } from 'src/utils/handle-app-error.error';
+import { ModuleWithVideosResponseDto } from './dto/module-and-video-response.dto';
+import { Prisma, Role } from '@prisma/client';
+import { StreamingService } from 'src/streaming/streaming.service';
 
 @Injectable()
 export class ModuleService {
   private readonly logger = new Logger(ModuleService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly streamingService: StreamingService,
+  ) {}
 
   async createModule(idCourse: number, moduleRequest: ModuleRequstDto, user: number): Promise<boolean> {
     try {
@@ -33,8 +38,7 @@ export class ModuleService {
       return true;
     } catch (error) {
       this.logger.error('Error while creating module', error);
-      handlePrismaError(error);
-      handleHttpError(error);
+      handleAppError(error);
     }
   }
 
@@ -50,8 +54,7 @@ export class ModuleService {
       return true;
     } catch (error) {
       this.logger.error('Error while updating module', error);
-      handlePrismaError(error);
-      handleHttpError(error);
+      handleAppError(error);
     }
   }
 
@@ -74,8 +77,7 @@ export class ModuleService {
       return module;
     } catch (error) {
       this.logger.error('Error while fetching module', error);
-      handlePrismaError(error);
-      handleHttpError(error);
+      handleAppError(error);
     }
   }
 
@@ -86,28 +88,60 @@ export class ModuleService {
       });
     } catch (error) {
       this.logger.error('Error while deleting module', error);
-      handlePrismaError(error);
-      handleHttpError(error);
+      handleAppError(error);
     }
   }
 
-  async findManyModule(idCourse: number): Promise<ModuleResponseDto[] | []> {
+  async findModulesWithVideos(
+    idCourse: number,
+    user: number,
+    role: Role
+  ): Promise<ModuleWithVideosResponseDto[]> {
     try {
       const modules = await this.prisma.module.findMany({
         where: { idCourse },
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          order: true,
-        },
+        orderBy: { order: 'asc' },
       });
 
-      return modules;
+      const result: ModuleWithVideosResponseDto[] = [];
+
+      for (const module of modules) {
+        const videos = await this.streamingService.findManyVideos(idCourse, module.id, user, role);
+
+        result.push({
+          id: module.id,
+          name: module.name,
+          description: module.description,
+          order: module.order,
+          videos: videos.map(video => ({
+            id: video.id,
+            name: video.name,
+            description: video.description,
+            duration: video.duration,
+            idProgressVideo: (video as any).idProgressVideo ?? null,
+            viewed : (video as any).viewed  ?? null,
+          })),
+        });
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error('Error while fetching modules and videos', error);
+      handleAppError(error);
+    }
+  }
+
+  async getModulesOfCourse(idCourse: number): Promise<number[] | null> {
+    try {
+      const modules = await this.prisma.module.findMany({
+        where: { idCourse },
+        select: { id: true },
+      });
+
+      return modules.map((module) => module.id);
     } catch (error) {
       this.logger.error('Error while fetching modules for course', error);
-      handlePrismaError(error);
-      handleHttpError(error);
+      handleAppError(error);
     }
   }
 }

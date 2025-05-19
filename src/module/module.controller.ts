@@ -44,7 +44,7 @@ export class ModuleController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.STUDENT)
   @ApiOperation({ summary: 'Find One Module of course'})
   @ApiResponse({ status: 200, description:'Success', type: ModuleResponseDto})
   @ApiResponse({status:400, description:'Bad Request'})
@@ -73,7 +73,11 @@ export class ModuleController {
   @ApiResponse({ status: 200, description:'Success', type: [ModuleResponseDto]})
   @ApiResponse({status: 401, description: 'Unauthorized'})
   @ApiResponse({ status: 404, description: 'Not Found'})
-  async findManyModule(@Param('idCourse')idCourse: string): Promise<ModuleResponseDto[] | []> {
-    return await this.moduleService.findManyModule(+idCourse);
+  async findManyModule(
+    @Param('idCourse')idCourse: string,
+    @CurrentUser() user: number,
+    @CurrentUser('role') userRole: Role
+  ): Promise<ModuleResponseDto[] | []> {
+    return await this.moduleService.findModulesWithVideos(+idCourse, user, userRole);
   } 
 }

@@ -29,8 +29,5 @@ export class EnrolledCourseDto {
   courseImage: string;
 
   @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
-  courseStartDate: Date;
-
-  @ApiProperty({ example: '2024-03-01T00:00:00.000Z' })
-  courseEndDate: Date;
+  expiresAt: Date;
 }

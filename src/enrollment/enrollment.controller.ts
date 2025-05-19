@@ -9,12 +9,16 @@ import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { EnrollmentResponseDto } from './dto/enrollment-response.dto';
 import { EnrollmentPaginationResponseDto } from './dto/enrollment-pagination-response.dto';
 import { CourseResponseDto } from 'src/course/dto/course-response.dto';
-import { EnrolledCourseDto } from './dto/enrollmente-course,dto';
+import { EnrolledCourseDto } from './dto/enrollmente-course.dto';
+import { GetEnrolledCourseInfoService } from './get-enrolled-course-info.service';
 
 @ApiTags('Enrollment')
 @Controller('enrollment')
 export class EnrollmentController {
-  constructor(private readonly enrollmentService: EnrollmentService) {}
+  constructor(
+    private readonly enrollmentService: EnrollmentService,
+    private readonly getEnrolledCourseInfoService: GetEnrolledCourseInfoService,
+  ) {}
 
   @HttpCode(HttpStatus.CREATED)
   @Post('create')
@@ -87,6 +91,6 @@ export class EnrollmentController {
   @ApiResponse({status: 401, description: 'Unauthorized'})
   @ApiResponse({ status: 404, description: 'Not Found'})
   async findCoursePerEnrollment(@CurrentUser() user: number): Promise<EnrolledCourseDto[] | []> {
-    return await this.enrollmentService.findCoursePerEnrollment(user);
+    return await this.getEnrolledCourseInfoService.findCoursePerEnrollment(user);
   }
 }

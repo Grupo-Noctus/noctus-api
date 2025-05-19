@@ -26,8 +26,14 @@ export class StreamingResponseDto {
   duration: number;
 
   @ApiProperty({
-    description: 'The display order of the video lecture in the module',
+    description: 'Unique identifier of the video progress record',
     example: 1,
   })
-  order: number;
+  idProgressVideo?: number | null;
+
+  @ApiProperty({
+    description: 'Amount of the video in percentage the student has watched',
+    example: 1,
+  })
+  viewed?: number | null;
 }

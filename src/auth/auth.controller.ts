@@ -8,8 +8,7 @@ import { isEmailFromMatera } from 'src/utils/is-matera';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from 'src/upload/upload.service';
 import { multerFileOptions } from 'src/upload/helper/multer-file-options.helper';
-import { handlePrismaError } from 'src/utils/handle-prisma.error';
-import { handleHttpError } from 'src/utils/handle-http.error';
+import { handleAppError } from 'src/utils/handle-app-error.error';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
@@ -35,8 +34,7 @@ export class AuthController {
       return await this.authService.signIn(userAuth);
     } catch (error) {
       this.logger.error('Error occurred during login attempt', error);
-      handlePrismaError(error);
-      handleHttpError(error);
+      handleAppError(error);
     }
   }
 
@@ -83,8 +81,7 @@ export class AuthController {
       if (imageKey) {
         await this.uploadService.deleteFile(imageKey);
       }
-      handlePrismaError(error);
-      handleHttpError(error);
+      handleAppError(error);
     }
   }
 }

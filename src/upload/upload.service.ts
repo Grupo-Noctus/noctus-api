@@ -4,6 +4,7 @@ import * as fs from 'fs/promises';
 import { IUploadService } from './interface/upload.interface';
 import getVideoDuration from 'get-video-duration';
 import { VideoMetadata } from './dto/video-metadata.dto';
+import { join } from 'path';
 
 @Injectable()
 export class UploadService implements IUploadService{ 

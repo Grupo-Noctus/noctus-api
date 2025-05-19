@@ -8,8 +8,7 @@ import { MaterialRequestDto } from './dto/material-resquest.dto';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { Roles } from 'src/auth/decorator/role.decorator';
 import { Role } from '@prisma/client';
-import { handleHttpError } from 'src/utils/handle-http.error';
-import { handlePrismaError } from 'src/utils/handle-prisma.error';
+import { handleAppError } from 'src/utils/handle-app-error.error';
 import { multerFileOptions } from 'src/upload/helper/multer-file-options.helper';
 import { FindMaterialDto } from './dto/find-material-dto';
 import { join } from 'path';
@@ -46,8 +45,7 @@ export class MaterialController {
     } catch( error ) {
 
       this.logger.error(`Error to create a Material `, error);
-      handlePrismaError(error);
-      handleHttpError(error);
+      handleAppError(error);
     }
   }
 
@@ -64,8 +62,7 @@ export class MaterialController {
       return await this.materialService.findManyMaterial({idCourse: +idCourse});
     } catch(error) {
       this.logger.error('Error in find the Materials', error)
-      handlePrismaError(error);
-      handleHttpError(error);
+      handleAppError(error);
     }
   }
 
@@ -93,8 +90,7 @@ export class MaterialController {
     } catch(error) {
 
       this.logger.error(`Failed to download file for material with ID ${id}`, error)
-      handlePrismaError(error);
-      handleHttpError(error);
+      handleAppError(error);
     }
     
   }
@@ -113,8 +109,7 @@ export class MaterialController {
     } catch (error) {
 
       this.logger.error('Error deleting material:', error);
-      handlePrismaError(error);
-      handleHttpError(error);
+      handleAppError(error);
     }
   }
 }

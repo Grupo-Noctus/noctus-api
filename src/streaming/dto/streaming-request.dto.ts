@@ -22,16 +22,6 @@ export class StreamingRequest {
   description: string;
 
   @ApiProperty({
-    description: 'The display order of the video within the module',
-    type: Number,
-    example: 1,
-  })
-  @IsInt()
-  @IsNotEmpty()
-  @Transform(({ value }) => parseInt(value, 10))
-  order: number;
-
-  @ApiProperty({
     description: 'The URL or path of the thumbnail image',
     type: String,
     example: '/uploads/thumbnails/intro-thumbnail.jpg',
