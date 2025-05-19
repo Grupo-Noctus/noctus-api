@@ -1,8 +1,17 @@
+import { ApiProperty } from "@nestjs/swagger";
+import { IsBoolean, IsInt, IsString } from "class-validator";
+
 export class QuestionOptionDto{
+
+    @IsInt()
     id: number;
 
-    optionText: String;
+    @ApiProperty({ example: 'Option A' })
+    @IsString()
+    optionText: string;
 
-    correct: Boolean;
+    @ApiProperty({ example: true })
+    @IsBoolean()
+    correct: boolean;
 
 }

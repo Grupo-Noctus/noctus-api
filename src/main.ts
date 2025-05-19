@@ -20,6 +20,7 @@ async function bootstrap() {
     .addTag('Course')
     .addTag('Module')
     .addTag('Streaming')
+    .addTag('Exam')
     .addTag('Question')
     .addBearerAuth()
     .addServer('http://localhost:3000') 

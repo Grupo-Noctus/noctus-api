@@ -132,7 +132,7 @@ model Module {
 
   course       Course         @relation(fields: [idCourse], references: [id])
   videoLecture VideoLecture[]
-  questions    Question[]
+  exam    Exam[]
 }
 
 model VideoLecture {
@@ -155,20 +155,35 @@ model VideoLecture {
   module Module @relation(fields: [idModule], references: [id])
 }
 
+model Exam {
+  id          Int        @id @default(autoincrement())
+  idModule    Int
+  title       String
+  description String?
+  createdAt   DateTime   @default(now())
+  createdBy   Int?
+  updatedAt   DateTime   @updatedAt
+  updatedBy   Int
+
+  module      Module     @relation(fields: [idModule], references: [id])
+  questions   Question[]
+}
+
 model Question {
-  id           Int          @id @default(autoincrement())
-  idModule     Int
+  id           Int              @id @default(autoincrement())
+  idExam       Int
   questionText String
   type         TypeQuestion
   order        Int
-  createdAt    DateTime     @default(now())
+  createdAt    DateTime         @default(now())
   createdBy    Int
-  updatedAt    DateTime     @updatedAt
+  updatedAt    DateTime         @updatedAt
   updatedBy    Int
 
-  module  Module   @relation(fields: [idModule], references: [id])
-  options QuestionOptions[]
+  exam     Exam             @relation(fields: [idExam], references: [id])
+  options  QuestionOptions[]
 }
+
 
 model QuestionOptions {
   id         Int      @id @default(autoincrement())
