@@ -10,6 +10,8 @@ import { UploadService } from 'src/upload/upload.service';
 import { multerFileOptions } from 'src/upload/helper/multer-file-options.helper';
 import { handlePrismaError } from 'src/utils/handle-prisma.error';
 import { handleHttpError } from 'src/utils/handle-http.error';
+import { UserAutResDto } from 'src/user/dto/user-auth-response.dto';
+import { UserAuthJwtDto } from './dto/user-auth-jwt.dto';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
@@ -20,25 +22,26 @@ export class AuthController {
     private readonly uploadService: UploadService
   ) {}
 
-  @HttpCode(HttpStatus.OK)
-  @Public()
-  @Post('login')
-  @ApiOperation({ summary: 'Login' })
-  @ApiResponse({ status: 200, description: 'Login successful', type: 'access_token' })
-  @ApiResponse({ status: 401, description: 'Unauthorized - invalid credentials' })
-  @ApiResponse({ status: 500, description: 'Internal server error' })
-  @ApiBody({ type: LoginRequestDto })
-  async signIn(
-    @Body() userAuth: LoginRequestDto,
-  ): Promise<{ access_token: string }> {
-    try {
-      return await this.authService.signIn(userAuth);
-    } catch (error) {
-      this.logger.error('Error occurred during login attempt', error);
-      handlePrismaError(error);
-      handleHttpError(error);
-    }
+@HttpCode(HttpStatus.OK)
+@Public()
+@Post('login')
+@ApiOperation({ summary: 'Login' })
+@ApiResponse({ status: 200, description: 'Login successful', type: UserAuthJwtDto})
+@ApiResponse({ status: 401, description: 'Unauthorized - invalid credentials' })
+@ApiResponse({ status: 500, description: 'Internal server error' })
+@ApiBody({ type: LoginRequestDto })
+async signIn(
+  @Body() userAuth: LoginRequestDto,
+): Promise<{ user: UserAutResDto }> {
+  try {
+    return await this.authService.signIn(userAuth);
+  } catch (error) {
+    this.logger.error('Error occurred during login attempt', error);
+    handlePrismaError(error);
+    handleHttpError(error);
   }
+}
+
 
   @HttpCode(HttpStatus.CREATED)
   @Public()

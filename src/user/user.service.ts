@@ -1,20 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserAutResDto } from './dto/user-auth-response.dto';
+import { UserEntity } from './dto/user-entity';
 
 @Injectable()
 export class UserService {
     constructor(
-        private prisma : PrismaService,
-    ){}
+        private prisma: PrismaService,
+    ) { }
 
-    async findByUsernameOrEmailForAuth (usernameOrEmail: string): Promise < UserAutResDto > {
+    async findByUsernameOrEmailForAuth(usernameOrEmail: string): Promise<UserEntity | null> {
         return this.prisma.user.findFirst({
             where: {
-                OR: [
-                    { username: usernameOrEmail },
-                    { email: usernameOrEmail },
-                ],
+            OR: [{ email: usernameOrEmail }, { username: usernameOrEmail }],
             },
             select: {
                 id: true,
@@ -23,8 +21,10 @@ export class UserService {
                 email: true,
                 password: true,
                 role: true,
-                active : true,
-            }
+                active: true,
+                image: true,
+                phoneNumber: true,
+            },
         });
     }
 }

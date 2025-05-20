@@ -1,13 +1,13 @@
-import { Role } from "@prisma/client"
+import { Role } from "@prisma/client";
 
-export class UserAutResDto {
+export interface UserEntity {
   id: number;
   username: string;
   name: string;
   email: string;
+  password: string;
   role: Role;
   phoneNumber: string;
   image: string;
   active: boolean;
-  access_token: string;
 }
