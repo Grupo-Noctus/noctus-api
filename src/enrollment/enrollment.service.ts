@@ -1,31 +1,30 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EnrollmentRequestDto } from './dto/enrollment-request.dto';
 import { EnrollmentUpdateDto } from './dto/enrollment-update.dto'; 
 import { EnrollmentResponseDto } from './dto/enrollment-response.dto';
 import { EnrollmentPaginationResponseDto } from './dto/enrollment-pagination-response.dto';
-import { CourseResponseDto } from 'src/course/dto/course-response.dto';
-import { connect } from 'http2';
-import { EnrolledCourseDto } from './dto/enrollmente-course.dto';
 import { Prisma } from '@prisma/client';
+import { handleAppError } from 'src/utils/handle-app-error.error';
 
 @Injectable()
 export class EnrollmentService {
+  private readonly logger = new Logger (EnrollmentService.name);
   constructor(private readonly prisma: PrismaService) {}
 
-  async createEnrollment(dto: EnrollmentRequestDto, user: number): Promise<boolean> {
+  async createEnrollment(enrrolement: EnrollmentRequestDto, user: number): Promise<boolean> {
     try{
-      const expiresAt = await this.calculateExpiredAt(dto.idCourse);
+      const expiresAt = await this.calculateExpiredAt(enrrolement.idCourse);
       await this.prisma.enrollment.create({
         data: {
           student: {
               connect:{
-                  id:dto.idStudent
+                  id:enrrolement.idStudent
               }
           },
           course:{
               connect:{
-                  id:dto.idCourse
+                  id:enrrolement.idCourse
               }
           },
           expiresAt,
@@ -35,17 +34,16 @@ export class EnrollmentService {
       });
       return true;
     } catch (error){
-      console.error(error);
-      throw new BadRequestException(); 
+      this.logger.error('Error in create enrrollment: ', error);
+      handleAppError(error); 
     }
   }
 
   async getEnrollmentById(id: number): Promise<EnrollmentResponseDto> {
     try{
-      const enrollment = await this.prisma.$queryRaw<
-      { name: string; active: boolean; completed: boolean; startDate: Date; endDate: Date; nameCourse: String; }[]
-      >(Prisma.sql`
-        SELECT u.name, e.active, e.completed, e.startDate, e.endDate, c.name,
+      const enrollment = await this.prisma.$queryRaw<EnrollmentResponseDto>(
+      Prisma.sql`
+        SELECT u.name, e.active, e.completed, e.expiredAt, c.name,
           FROM Enrollment e
           INNER JOIN Student s ON s.id = e.idStudent
           INNER JOIN User u ON u.id = s.idUser
@@ -54,17 +52,10 @@ export class EnrollmentService {
       if (!enrollment) {
         throw new NotFoundException('Enrollment not found');
       }
-      return {
-        name: enrollment[0].name,
-        active: enrollment[0].active,
-        completed: enrollment[0].completed,
-        startDate: enrollment[0].startDate,
-        endDate: enrollment[0].endDate,
-        nameCourse: enrollment[0].nameCourse,
-      };
+      return enrollment;
     }catch (error){ 
-      console.error(error);
-      throw new BadRequestException();
+      this.logger.error(`Error fetching enrrollment by id ${id}: `, error);
+      handleAppError(error); 
     }   
   }
   
@@ -78,8 +69,8 @@ export class EnrollmentService {
     });
     return true;
     } catch (error) {
-      console.error(error);
-      throw new BadRequestException();
+      this.logger.error(`Error in update enrrollment by id ${idEnrollment}: `, error);
+      handleAppError(error);
     }
   }
 
@@ -89,8 +80,8 @@ export class EnrollmentService {
         where: { id: idEnrollment}
       });
     } catch (error){
-      console.error(error);
-      throw new BadRequestException()
+      this.logger.error(`Error deleting enrollment by id ${idEnrollment}: `, error);
+      handleAppError(error);
     }
   }
 
@@ -105,7 +96,7 @@ export class EnrollmentService {
       const enrollments = await this.prisma.$queryRaw<
         EnrollmentResponseDto[]
       >(Prisma.sql`
-      SELECT u.name as student_name, e.active, e.completed, e.startDate, e.endDate, c.name as course_name
+      SELECT u.name as student_name, e.active, e.completed, e.expiredAt, c.name as course_name
         FROM Enrollment e
         INNER JOIN Student s ON s.id = e.idStudent
         INNER JOIN User u ON u.id = s.idUser
@@ -118,8 +109,8 @@ export class EnrollmentService {
       }
       return { enrollments, totalPages };
     } catch (error){
-      console.error(error);
-      throw new BadRequestException();
+      this.logger.error(`Error while retrieving paginated enrollments (page ${pageNumber}): `, error);
+      handleAppError(error);
     }
   }
 

@@ -20,23 +20,7 @@ export class EnrollmentResponseDto {
   })
   completed: boolean;
 
-  @Type(() => Date)
-  @IsDateString()
-  @ApiProperty({
-    description: 'Registration start date in ISO format (YYYY-MM-DD)',
-    example: '2023-03-23T15:00:00.000Z',
-    type: Date,
-  })
-  startDate: Date;
-
-  @Type(() => Date)
-  @IsDateString()
-  @ApiProperty({
-    description: 'Enrollment end date in ISO format (YYYY-MM-DD)',
-    example: '2023-06-23T15:00:00.000Z',
-    type: Date,
-  })
-  endDate: Date;
+  expiresAt: Date;
 
   @IsString()
   @ApiProperty({

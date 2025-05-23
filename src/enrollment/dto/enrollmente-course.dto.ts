@@ -11,10 +11,7 @@ export class EnrolledCourseDto {
   completed: boolean;
 
   @ApiProperty({ example: '2024-01-10T00:00:00.000Z' })
-  enrollmentStartDate: Date;
-
-  @ApiProperty({ example: '2024-03-10T00:00:00.000Z' })
-  enrollmentEndDate: Date;
+  enrollmentExpiresAt: Date;
 
   @ApiProperty({ example: 3 })
   courseId: number;

@@ -6,6 +6,7 @@ export class UserAutResDto {
     name: string
     email: string
     password: string
+    image: string
     role: Role
     active: boolean
 }

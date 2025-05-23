@@ -16,7 +16,8 @@ export class GetEnrolledCourseInfoService {
 
     async findCoursePerEnrollment (user: number): Promise<EnrolledCourseDto[] | []> {
         try {
-            const enrrolmentsAndCourses = await this.prisma.$queryRaw<EnrolledCourseDto[]>(Prisma.sql`
+            const enrrolmentsAndCourses = await this.prisma.$queryRaw<EnrolledCourseDto[]>
+            (Prisma.sql`
                 SELECT 
                 c.id AS courseId, 
                 c.name AS courseName, 
@@ -38,18 +39,7 @@ export class GetEnrolledCourseInfoService {
                 return [];
             }
             
-            return enrrolmentsAndCourses.map((e) => ({
-                enrollmentId: e.enrollmentId,           
-                active: e.active,                       
-                completed: e.completed,                 
-                enrollmentStartDate: e.enrollmentStartDate, 
-                enrollmentEndDate: e.enrollmentEndDate,   
-                courseId: e.courseId,                   
-                courseName: e.courseName,               
-                courseDescription: e.courseDescription,  
-                courseImage: e.courseImage,             
-                expiresAt: e.expiresAt        
-            }));
+            return enrrolmentsAndCourses;
         } catch (error) {
             this.logger.error('Error fetching courses: ', error);
             handleAppError(error);

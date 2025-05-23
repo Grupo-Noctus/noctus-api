@@ -1,12 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
-import { UserRegisterDto } from './dto/user-register.dto';
-import { LoginRequestDto } from './dto/login-request.dto';
+import { UserRegisterDto } from './dto/request/user-register.request.dto';
+import { LoginRequestDto } from './dto/request/login.request.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { StudentRegisterDto } from './dto/student-register.dto';
+import { StudentRegisterDto } from './dto/request/student-register.request.dto';
 import { Role } from '@prisma/client';
 import * as argon2 from 'argon2';
+import { LoginResponseDto } from './dto/response/login.response.dto';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +18,7 @@ export class AuthService {
       private readonly prisma: PrismaService
   ){}
 
-  async signIn(login: LoginRequestDto): Promise<{ access_token: string }> {
+  async signIn(login: LoginRequestDto): Promise<LoginResponseDto> {
     const user = await this.userService.findByUsernameOrEmailForAuth(login.usernameOrEmail);
   
     if (!user) {
@@ -31,14 +32,16 @@ export class AuthService {
   
     const payload = {
       sub: user.id,
+      name: user.name,
       username: user.username,
+      image: user.image,
       role: user.role,
       active: user.active,
     };
   
     const access_token = await this.jwt.signAsync(payload);
   
-    return { access_token };
+    return { access_token, payload };
   }      
 
   async registerAdmin(

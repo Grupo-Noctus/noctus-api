@@ -25,6 +25,7 @@ export class UserService {
                     name: true,
                     email: true,
                     password: true,
+                    image: true,
                     role: true,
                     active : true,
                 }
