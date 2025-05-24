@@ -20,6 +20,11 @@ export class EnrollmentResponseDto {
   })
   completed: boolean;
 
+  @ApiProperty({
+    description: '',
+    example: '',
+    type: Date,
+  })
   expiresAt: Date;
 
   @IsString()

@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { StreamingRequest } from './dto/streaming-request.dto';
 import { StreamingDto } from './dto/streaming.dto';
@@ -8,7 +8,7 @@ import { VideoMetadata } from 'src/upload/dto/video-metadata.dto';
 import { handleAppError } from 'src/utils/handle-app-error.error';
 import { UploadService } from 'src/upload/upload.service';
 import { Role } from '@prisma/client';
-import { GetEnrolledCourseInfoService } from 'src/enrollment/get-enrolled-course-info.service';
+import { EnrolledCourseService } from 'src/enrollment/enrolled-course.service';
 import { ProgressVideoDto } from './dto/progress-video.dto';
 
 @Injectable()
@@ -17,7 +17,8 @@ export class StreamingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly uploadService: UploadService,
-    private readonly getEnrolledCourseInfoService: GetEnrolledCourseInfoService
+    @Inject('IEnrolledCourseService') 
+    private readonly getEnrolledCourseInfoService: EnrolledCourseService
   ){}
 
   async createVideoLecture( idModule: number, videoMetadata: VideoMetadata, thumbnail: string, streamingRequest: StreamingRequest, user: number): Promise<boolean> {

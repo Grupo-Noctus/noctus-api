@@ -18,6 +18,7 @@ async function bootstrap() {
     .setDescription('Noctus API')
     .setVersion('1.0')
     .addTag('Enrollment')
+    .addTag('EnrollmentCourse')
     .addTag('Auth')
     .addTag('Course')
     .addTag('CourseAdmin')

@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CourseRequestDto } from './dto/request/course.request.dto';
 import { CourseUpdateDto } from './dto/update/course.update.dto';
@@ -6,7 +6,7 @@ import { CourseResponseDto } from './dto/response/course.response.dto';
 import { CoursePaginationResponseDto } from './dto/response/course-pagination.response.dto';
 import { UploadService } from 'src/upload/upload.service';
 import { handleAppError } from 'src/utils/handle-app-error.error';
-import { GetEnrolledCourseInfoService } from 'src/enrollment/get-enrolled-course-info.service';
+import { EnrolledCourseService } from 'src/enrollment/enrolled-course.service';
 import { Prisma, Role } from '@prisma/client';
 import { ICourseService } from './interface/course.service.interface';
 import { coursePreviewDto } from './dto/response/course-preview.response';
@@ -17,8 +17,9 @@ export class CourseService implements ICourseService{
 
   constructor(
     private prisma: PrismaService,
+    @Inject('IEnrolledCourseService')
+    private enrolledCourseService: EnrolledCourseService,
     private readonly moduleService: ModuleService,
-    private getEnrolledCourseInfoService: GetEnrolledCourseInfoService,
     private readonly uploadService: UploadService,
   ) {}
 
@@ -94,7 +95,7 @@ export class CourseService implements ICourseService{
   
   async findManyCourse(user: number): Promise<CourseResponseDto[]> {
     try {
-      const enrolledCourses = await this.getEnrolledCourseInfoService.findCoursePerEnrollment(user);
+      const enrolledCourses = await this.enrolledCourseService.findCoursesPerEnrollment(user);
       const enrolledCourseIds = enrolledCourses.map(course => course.courseId);
 
       return await this.prisma.course.findMany({
@@ -118,7 +119,7 @@ export class CourseService implements ICourseService{
   
   async findManyCoursePagination(user: number, limit: number, pageNumber: number): Promise<CoursePaginationResponseDto> {
     try {
-      const enrolledCourses = await this.getEnrolledCourseInfoService.findCoursePerEnrollment(user);
+      const enrolledCourses = await this.enrolledCourseService.findCoursesPerEnrollment(user);
       const enrolledCourseIds = enrolledCourses.map(course => course.courseId);
 
       if (limit <= 0 || pageNumber <= 0) {

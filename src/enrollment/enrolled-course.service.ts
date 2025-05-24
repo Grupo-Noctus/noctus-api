@@ -1,20 +1,21 @@
 import { Injectable, Logger, NotFoundException } from "@nestjs/common"
 import { PrismaService } from "src/prisma/prisma.service";
-import { EnrolledCourseDto } from "./dto/enrollmente-course.dto";
+import { EnrolledCourseDto } from "./dto/response/enrolled-course.response.dto";
 import { handleAppError } from "src/utils/handle-app-error.error";
 import { UserService } from "src/user/user.service";
 import { Prisma } from "@prisma/client";
+import { IEnrolledCourseService } from "./interface/enrolled-course.interface";
 
 @Injectable()
-export class GetEnrolledCourseInfoService {
-    private readonly logger = new Logger(GetEnrolledCourseInfoService.name)
+export class EnrolledCourseService implements IEnrolledCourseService{
+    private readonly logger = new Logger(EnrolledCourseService.name)
     
     constructor(
         private readonly prisma: PrismaService,
         private readonly userService: UserService,
     ) {}
 
-    async findCoursePerEnrollment (user: number): Promise<EnrolledCourseDto[] | []> {
+    async findCoursesPerEnrollment (user: number): Promise<EnrolledCourseDto[] | []> {
         try {
             const enrrolmentsAndCourses = await this.prisma.$queryRaw<EnrolledCourseDto[]>
             (Prisma.sql`
@@ -42,7 +43,7 @@ export class GetEnrolledCourseInfoService {
             return enrrolmentsAndCourses;
         } catch (error) {
             this.logger.error('Error fetching courses: ', error);
-            handleAppError(error);
+            throw handleAppError(error);
         }    
     }
 
@@ -67,7 +68,7 @@ export class GetEnrolledCourseInfoService {
             return data.id;
         } catch (error) {
            this.logger.error('Error fetching enrrolement: ', error);
-            handleAppError(error);
+            throw handleAppError(error);
         }
     }
 }

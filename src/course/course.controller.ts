@@ -11,7 +11,10 @@ import { coursePreviewDto } from './dto/response/course-preview.response';
 @Controller('course')
 export class CourseController {
   private readonly logger = new Logger(CourseController.name)
-  constructor(@Inject('ICourseService') private readonly courseService: ICourseService) {}
+  constructor(
+    @Inject('ICourseService') 
+    private readonly courseService: ICourseService
+  ) {}
 
   @HttpCode(HttpStatus.OK)
   @Get('find-many')

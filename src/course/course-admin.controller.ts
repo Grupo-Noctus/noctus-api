@@ -19,7 +19,8 @@ import { CourseUpdateDto } from "./dto/update/course.update.dto";
 export class CourseAdminController {
   private readonly logger = new Logger(CourseAdminController.name)
   constructor(
-    @Inject('ICourseService') private readonly courseService: ICourseService,
+    @Inject('ICourseService') 
+    private readonly courseService: ICourseService,
     private readonly uploadService: UploadService
   ) {}
   
@@ -37,6 +38,7 @@ export class CourseAdminController {
   @ApiResponse({ status: 200, description:'Success'})
   @ApiResponse({status:400, description:'Bad Request'})
   @ApiResponse({status: 401, description: 'Unauthorized'})
+  @ApiResponse({status: 403, description: 'Forbidden'})
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async createCourse(
     @UploadedFile() imageCourse: Express.Multer.File,
@@ -63,9 +65,9 @@ export class CourseAdminController {
   @HttpCode(HttpStatus.OK)
   @Put('update/:idCourse')
   @UseInterceptors(FileInterceptor(
-      'imageCourse', 
-      multerFileOptions('./uploads/images-courses', /^image\/(jpeg|png|jpg|webp)$/)
-      ),
+    'imageCourse', 
+    multerFileOptions('./uploads/images-courses', /^image\/(jpeg|png|jpg|webp)$/)
+    ),
   )
   @ApiOperation({summary: 'Update course'})
   @ApiConsumes('multipart/form-data')
@@ -73,6 +75,7 @@ export class CourseAdminController {
   @ApiResponse({ status: 200, description:'Success', type: Boolean})
   @ApiResponse({status:400, description: 'Bad Request'})
   @ApiResponse({status: 401, description: 'Unauthorized'})
+  @ApiResponse({status: 403, description: 'Forbidden'})
   @ApiResponse({ status: 404, description: 'Not Found'})
   @ApiResponse({ status: 500, description: 'Internal server error' })
   @ApiParam({  name: 'idCourse', type: String, description: 'ID of course' })
@@ -105,10 +108,11 @@ export class CourseAdminController {
   @ApiResponse({ status: 200, description:'Success'})
   @ApiResponse({status:400, description: 'Bad Request'})
   @ApiResponse({status: 401, description: 'Unauthorized'})
+  @ApiResponse({status: 403, description: 'Forbidden'})
   @ApiResponse({ status: 404, description: 'Not Found'})
   @ApiResponse({ status: 500, description: 'Internal server error' })
   @ApiParam({  name: 'idCourse', type: String, description: 'ID of course' })
   async toggleCourseVisibility(@Param('idCourse') idCourse: string): Promise<void> {
-      await this.courseService.toggleCourseVisibility(+idCourse);
+    await this.courseService.toggleCourseVisibility(+idCourse);
   }
 }

@@ -83,6 +83,16 @@ model Enrollment {
   certificate Certificate?
 }
 
+model PreEnrollment {
+  id         Int      @id @default(autoincrement())
+  email      String
+  idCourse   Int
+  createdAt  DateTime @default(now())
+  createdBy  Int
+
+  @@unique([email, idCourse])
+}
+
 model Certificate {
   id               Int      @id @default(autoincrement())
   idEnrollment     Int      @unique

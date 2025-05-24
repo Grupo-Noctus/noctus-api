@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EnrollmentController } from './enrollment.controller';
-import { EnrollmentService } from './enrollment.service';
-import { EnrollmentRequestDto } from './dto/enrollment-request.dto';
-import { EnrollmentUpdateDto } from './dto/enrollment-update.dto';
-import { EnrollmentResponseDto } from './dto/enrollment-response.dto';
-import { EnrollmentPaginationResponseDto } from './dto/enrollment-pagination-response.dto';
+import { EnrollmentController } from '../enrollment.controller';
+import { EnrollmentService } from '../enrollment.service';
+import { EnrollmentRequestDto } from '../dto/request/enrollment.request.dto';
+import { EnrollmentUpdateDto } from '../dto/update/enrollment.update.dto';
+import { EnrollmentResponseDto } from '../dto/response/enrollment.response.dto';
+import { EnrollmentPaginationResponseDto } from '../dto/response/enrollment-pagination.response.dto';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('EnrollmentController', () => {
@@ -41,8 +41,7 @@ describe('EnrollmentController', () => {
       jest.spyOn(service, 'createEnrollment').mockResolvedValue(true);
       
       await expect(
-        controller.createEnrollment({ idStudent: 1, idCourse: 1, active: true, completed: false, startDate: new Date(), endDate: new Date() }, 1)
-      ).resolves.toBe(true);
+        controller.createEnrollment( idStudent: 1, idCourse: 1).resolves.toBe(true);
     });
   });
 

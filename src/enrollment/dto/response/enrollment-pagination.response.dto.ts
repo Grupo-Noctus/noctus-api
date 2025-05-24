@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { EnrollmentResponseDto } from "./enrollment-response.dto";
+import { EnrollmentResponseDto } from "./enrollment.response.dto";
 
 export class EnrollmentPaginationResponseDto{
     @ApiProperty({
