@@ -74,7 +74,7 @@ export class AuthService implements IAuthService{
   ): Promise<boolean> {
     const hashedPassword = await argon2.hash(userRegister.password);
 
-    const student = await this.prisma.user.create({
+    const createdStudent = await this.prisma.user.create({
     data: {
         ...userRegister,
         role: Role.STUDENT,
@@ -88,6 +88,10 @@ export class AuthService implements IAuthService{
           }
         }
       }
+    });
+    const { student } = await this.prisma.user.findUnique({
+      where: { id: createdStudent.id },
+      include: { student: true }
     });
 
     await this.enrollmentService.createEnrollmentByPreEnrrolment(student.id, userRegister.email);

@@ -37,7 +37,7 @@ export class EnrollmentService implements IEnrollmentService{
       return true;
     } catch (error){
       this.logger.error('Error in create enrrollment: ', error);
-      handleAppError(error); 
+      throw handleAppError(error); 
     }
   }
 
@@ -86,7 +86,7 @@ export class EnrollmentService implements IEnrollmentService{
       return true;
     } catch (error){
       this.logger.error('Error in create many enrrollments: ', error);
-      handleAppError(error); 
+      throw handleAppError(error); 
     }
   }
 
@@ -221,7 +221,7 @@ export class EnrollmentService implements IEnrollmentService{
       }      
     } catch (error){
       this.logger.error('Error in create enrrollment by pre enrollment: ', error);
-      handleAppError(error); 
+      throw handleAppError(error); 
     }
   }
 }
