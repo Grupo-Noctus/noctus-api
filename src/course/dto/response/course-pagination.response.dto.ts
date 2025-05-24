@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CourseResponseDto } from './course-response.dto';
+import { CourseResponseDto } from './course.response.dto';
 import { Type } from 'class-transformer';
 
 export class CoursePaginationResponseDto {

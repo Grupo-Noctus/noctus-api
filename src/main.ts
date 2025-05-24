@@ -20,6 +20,7 @@ async function bootstrap() {
     .addTag('Enrollment')
     .addTag('Auth')
     .addTag('Course')
+    .addTag('CourseAdmin')
     .addTag('Module')
     .addTag('Material')
     .addTag('Streaming')

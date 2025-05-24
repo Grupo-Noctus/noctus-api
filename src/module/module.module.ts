@@ -6,6 +6,7 @@ import { StreamingModule } from 'src/streaming/streaming.module';
 @Module({
   controllers: [ModuleController],
   providers: [ModuleService],
-  imports: [StreamingModule]
+  imports: [StreamingModule],
+  exports: [ModuleService],
 })
 export class ModuleModule {}

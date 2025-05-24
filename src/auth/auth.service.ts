@@ -8,14 +8,15 @@ import { StudentRegisterDto } from './dto/request/student-register.request.dto';
 import { Role } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { LoginResponseDto } from './dto/response/login.response.dto';
+import { IAuthService } from './interface/auth.service.interface';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements IAuthService{
     
   constructor( 
-      private jwt: JwtService,
-      private userService: UserService,
-      private readonly prisma: PrismaService
+    private jwt: JwtService,
+    private userService: UserService,
+    private readonly prisma: PrismaService
   ){}
 
   async signIn(login: LoginRequestDto): Promise<LoginResponseDto> {

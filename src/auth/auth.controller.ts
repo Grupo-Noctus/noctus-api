@@ -89,7 +89,10 @@ export class AuthController {
       }
 
       if (imageUser) {
-        imageKey = await this.uploadService.uploadFileMetadata(imageUser, 'images-users');
+        imageKey = await this.uploadService.uploadFileMetadata(
+          imageUser, 
+          'images-users'
+        );
       }
 
       if (isEmailFromMatera(userDto.email)) {

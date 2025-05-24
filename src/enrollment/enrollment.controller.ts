@@ -8,7 +8,7 @@ import { EnrollmentUpdateDto } from './dto/enrollment-update.dto';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { EnrollmentResponseDto } from './dto/enrollment-response.dto';
 import { EnrollmentPaginationResponseDto } from './dto/enrollment-pagination-response.dto';
-import { CourseResponseDto } from 'src/course/dto/course-response.dto';
+import { CourseResponseDto } from 'src/course/dto/response/course.response.dto';
 import { EnrolledCourseDto } from './dto/enrollmente-course.dto';
 import { GetEnrolledCourseInfoService } from './get-enrolled-course-info.service';
 

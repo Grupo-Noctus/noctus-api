@@ -54,6 +54,7 @@ model Course {
   image            String?
   duration         Int
   certificateModel String?
+  isHidden         Boolean
   createdAt        DateTime @default(now())
   createdBy        Int
   updatedAt        DateTime @updatedAt
