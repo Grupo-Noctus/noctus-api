@@ -7,6 +7,7 @@ import {
   Inject,
   Logger,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -101,7 +102,7 @@ export class CourseAdminController {
   @ApiResponse({ status: 500, description: 'Internal server error' })
   @ApiParam({ name: 'idCourse', type: String, description: 'ID of course' })
   async updateCourse(
-    @Param('idCourse') idCourse: string,
+    @Param('idCourse', ParseIntPipe) idCourse: number,
     @Body() body: any,
     @CurrentUser() user: number,
     @UploadedFile() imageCourse: Express.Multer.File,
@@ -113,7 +114,7 @@ export class CourseAdminController {
       }
       const updateCourse = plainToInstance(CourseUpdateDto, body);
       await validateOrReject(updateCourse, { whitelist: true, forbidNonWhitelisted: true });
-      return await this.courseService.updateCourse(+idCourse, updateCourse, user, imageKey);
+      return await this.courseService.updateCourse(idCourse, updateCourse, user, imageKey);
     } catch (error) {
       this.logger.error('Error in create course.', error);
       throw handleAppError(error);
@@ -130,8 +131,8 @@ export class CourseAdminController {
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   @ApiParam({ name: 'idCourse', type: String, description: 'ID of course' })
-  async toggleCourseVisibility(@Param('idCourse') idCourse: string): Promise<void> {
-    await this.courseService.toggleCourseVisibility(+idCourse);
+  async toggleCourseVisibility(@Param('idCourse', ParseIntPipe) idCourse: number): Promise<void> {
+    await this.courseService.toggleCourseVisibility(idCourse);
   }
 
   @HttpCode(HttpStatus.OK)

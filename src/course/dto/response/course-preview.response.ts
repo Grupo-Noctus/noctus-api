@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ModuleResponseDto } from 'src/module/dto/module-response.dto';
+import { ModuleResponseDto } from 'src/module/dto/response/module-response.dto';
 
 export class coursePreviewDto {
   @ApiProperty({

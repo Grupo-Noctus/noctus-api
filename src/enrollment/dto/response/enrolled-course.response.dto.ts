@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ModuleWithVideosResponseDto } from 'src/module/dto/module-and-video-response.dto';
+import { ModuleWithVideosResponseDto } from 'src/module/dto/response/module-and-video-response.dto';
 
 export class EnrolledCourseDto {
   @ApiProperty({ example: 12, description: 'Enrollment ID' })

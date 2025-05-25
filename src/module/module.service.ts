@@ -1,15 +1,16 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ModuleRequstDto } from './dto/module-request.dto';
-import { ModuleUpdateDto } from './dto/module-update.dto';
-import { ModuleResponseDto } from './dto/module-response.dto';
+import { ModuleRequstDto } from './dto/request/module-request.dto';
+import { ModuleUpdateDto } from './dto/update/module-update.dto';
+import { ModuleResponseDto } from './dto/response/module-response.dto';
 import { handleAppError } from 'src/utils/handle-app-error.error';
-import { ModuleWithVideosResponseDto } from './dto/module-and-video-response.dto';
+import { ModuleWithVideosResponseDto } from './dto/response/module-and-video-response.dto';
 import { Role } from '@prisma/client';
 import { StreamingService } from 'src/streaming/streaming.service';
+import { IModuleService } from './interface/module.interface';
 
 @Injectable()
-export class ModuleService {
+export class ModuleService implements IModuleService {
   private readonly logger = new Logger(ModuleService.name);
 
   constructor(
@@ -42,7 +43,7 @@ export class ModuleService {
       return true;
     } catch (error) {
       this.logger.error('Error while creating module', error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
@@ -62,7 +63,7 @@ export class ModuleService {
       return true;
     } catch (error) {
       this.logger.error('Error while updating module', error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
@@ -85,7 +86,7 @@ export class ModuleService {
       return module;
     } catch (error) {
       this.logger.error('Error while fetching module', error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
@@ -96,7 +97,7 @@ export class ModuleService {
       });
     } catch (error) {
       this.logger.error('Error while deleting module', error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
@@ -135,7 +136,7 @@ export class ModuleService {
       return result;
     } catch (error) {
       this.logger.error('Error while fetching modules and videos', error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
@@ -149,7 +150,7 @@ export class ModuleService {
       return modules.map(module => module.id);
     } catch (error) {
       this.logger.error('Error while fetching modules for course', error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 }

@@ -1,10 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EnrolledCourseDto } from './dto/response/enrolled-course.response.dto';
 import { handleAppError } from 'src/utils/handle-app-error.error';
 import { Prisma, Role } from '@prisma/client';
 import { IEnrolledCourseService } from './interface/enrolled-course.interface';
 import { ModuleService } from 'src/module/module.service';
+import { IModuleService } from 'src/module/interface/module.interface';
 
 @Injectable()
 export class EnrolledCourseService implements IEnrolledCourseService {
@@ -12,7 +13,8 @@ export class EnrolledCourseService implements IEnrolledCourseService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly moduleService: ModuleService,
+    @Inject('IModuleService')
+    private readonly moduleService: IModuleService,
   ) {}
 
   async findCoursesPerEnrollment(user: number, role: Role): Promise<EnrolledCourseDto[] | []> {

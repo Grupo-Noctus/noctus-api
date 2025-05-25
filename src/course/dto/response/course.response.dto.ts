@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsUrl, IsOptional } from 'class-validator';
-import { ModuleWithVideosResponseDto } from 'src/module/dto/module-and-video-response.dto';
+import { ModuleWithVideosResponseDto } from 'src/module/dto/response/module-and-video-response.dto';
 
 export class CourseResponseDto {
   @ApiProperty({
@@ -13,24 +13,18 @@ export class CourseResponseDto {
     example: 'Full-Stack Web Development',
     description: 'The name of the course.',
   })
-  @IsNotEmpty()
-  @IsString()
   name: string;
 
   @ApiProperty({
     example: 'Learn to build web applications using React, Node.js, and MongoDB.',
     description: 'A short description summarizing the course content and goals.',
   })
-  @IsNotEmpty()
-  @IsString()
   description: string;
 
   @ApiProperty({
     example: 'https://example.com/images/fullstack-course.png',
     description: 'Optional URL of the course cover image.',
   })
-  @IsOptional()
-  @IsUrl()
   image: string;
 
   @ApiProperty({

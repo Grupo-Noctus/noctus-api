@@ -10,8 +10,8 @@ import {
   HttpCode,
   Query,
   Inject,
+  ParseIntPipe,
 } from '@nestjs/common';
-import { EnrollmentService } from './enrollment.service';
 import { Roles } from 'src/auth/decorator/role.decorator';
 import { Role } from '@prisma/client';
 import { ApiTags, ApiBody, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
@@ -21,6 +21,7 @@ import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { EnrollmentResponseDto } from './dto/response/enrollment.response.dto';
 import { EnrollmentPaginationResponseDto } from './dto/response/enrollment-pagination.response.dto';
 import { PreEnrollmentDto } from './dto/request/pre-enrollment.request.dto';
+import { IEnrollmentService } from './interface/enrollment.interface';
 
 @ApiTags('Enrollment')
 @Controller('enrollment')
@@ -28,7 +29,7 @@ import { PreEnrollmentDto } from './dto/request/pre-enrollment.request.dto';
 export class EnrollmentController {
   constructor(
     @Inject('IEnrollmentService')
-    private readonly enrollmentService: EnrollmentService,
+    private readonly enrollmentService: IEnrollmentService,
   ) {}
 
   @HttpCode(HttpStatus.CREATED)
@@ -55,15 +56,15 @@ export class EnrollmentController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async createPreEnrollment(
-    @Param('idCourse') idCourse: string,
+    @Param('idCourse', ParseIntPipe) idCourse: number,
     @Body() enrollmentResponse: PreEnrollmentDto,
     @CurrentUser() user: number,
   ): Promise<boolean> {
-    return await this.enrollmentService.createPreEnrollment(+idCourse, enrollmentResponse, user);
+    return await this.enrollmentService.createPreEnrollment(idCourse, enrollmentResponse, user);
   }
 
   @HttpCode(HttpStatus.OK)
-  @Put('update/:id')
+  @Put('update/:idEnrrolment')
   @ApiOperation({ summary: 'Update an existing enrollment' })
   @ApiBody({ type: EnrollmentUpdateDto })
   @ApiResponse({ status: 200, description: 'Success', type: Boolean })
@@ -73,11 +74,11 @@ export class EnrollmentController {
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async updateEnrollment(
-    @Param('id') idEnrollment: string,
+    @Param('idEnrrolment', ParseIntPipe) idEnrollment: number,
     @Body() updateEnrollment: EnrollmentUpdateDto,
     @CurrentUser() user: number,
   ): Promise<boolean> {
-    return await this.enrollmentService.updateEnrollment(+idEnrollment, updateEnrollment, user);
+    return await this.enrollmentService.updateEnrollment(idEnrollment, updateEnrollment, user);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -103,15 +104,15 @@ export class EnrollmentController {
     type: Number,
   })
   async findManyEnrollment(
-    @Param('idCourse') idCourse: string,
+    @Param('idCourse', ParseIntPipe) idCourse: number,
     @Query('page') page: number = 0,
     @Query('limit') limit: number = 10,
   ): Promise<EnrollmentPaginationResponseDto> {
-    return await this.enrollmentService.findManyEnrollment(+idCourse, limit, page);
+    return await this.enrollmentService.findManyEnrollment(idCourse, limit, page);
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('get-one/:id')
+  @Get('find-one/:idEnrrolment')
   @ApiOperation({ summary: 'Get enrollment by ID' })
   @ApiResponse({ status: 200, description: 'Success', type: EnrollmentResponseDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -119,12 +120,14 @@ export class EnrollmentController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
-  async getEnrollmentById(@Param('id') idEnrollment: string): Promise<EnrollmentResponseDto> {
-    return await this.enrollmentService.getEnrollmentById(+idEnrollment);
+  async getEnrollmentById(
+    @Param('idEnrrolment', ParseIntPipe) idEnrollment: number,
+  ): Promise<EnrollmentResponseDto> {
+    return await this.enrollmentService.getEnrollmentById(idEnrollment);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete('delete/:id')
+  @Delete('delete/:idEnrollment')
   @ApiOperation({ summary: 'Delete an enrollment by ID' })
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -132,7 +135,7 @@ export class EnrollmentController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
-  async deleteEnrollment(@Param('id') idEnrollment: string): Promise<void> {
-    await this.enrollmentService.deleteEnrollment(+idEnrollment);
+  async deleteEnrollment(@Param('idEnrollment', ParseIntPipe) idEnrollment: number): Promise<void> {
+    await this.enrollmentService.deleteEnrollment(idEnrollment);
   }
 }

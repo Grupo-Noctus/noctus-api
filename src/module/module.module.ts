@@ -5,8 +5,13 @@ import { StreamingModule } from 'src/streaming/streaming.module';
 
 @Module({
   controllers: [ModuleController],
-  providers: [ModuleService],
+  providers: [
+    {
+      provide: 'IModuleService',
+      useClass: ModuleService,
+    },
+  ],
   imports: [StreamingModule],
-  exports: [ModuleService],
+  exports: ['IModuleService'],
 })
 export class ModuleModule {}

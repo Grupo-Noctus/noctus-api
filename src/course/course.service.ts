@@ -1,9 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CourseRequestDto } from './dto/request/course.request.dto';
 import { CourseUpdateDto } from './dto/update/course.update.dto';
@@ -14,14 +9,15 @@ import { handleAppError } from 'src/utils/handle-app-error.error';
 import { Prisma, Role } from '@prisma/client';
 import { ICourseService } from './interface/course.service.interface';
 import { coursePreviewDto } from './dto/response/course-preview.response';
-import { ModuleService } from 'src/module/module.service';
+import { IModuleService } from 'src/module/interface/module.interface';
 
 @Injectable()
 export class CourseService implements ICourseService {
   private readonly logger = new Logger(CourseService.name);
   constructor(
     private prisma: PrismaService,
-    private readonly moduleService: ModuleService,
+    @Inject('IModuleService')
+    private readonly moduleService: IModuleService,
     private readonly uploadService: UploadService,
   ) {}
 

@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Inject,
-} from '@nestjs/common';
+import { Controller, Get, Param, HttpCode, HttpStatus, Logger, Inject } from '@nestjs/common';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ICourseService } from './interface/course.service.interface';
@@ -24,7 +16,7 @@ export class CourseController {
 
   @HttpCode(HttpStatus.OK)
   @Get('preview/:idCourse')
-  @ApiOperation({ summary: 'Find one course' })
+  @ApiOperation({ summary: 'Find one course preview' })
   @ApiResponse({ status: 200, description: 'Success', type: coursePreviewDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })

@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ModuleController } from './module.controller';
 import { ModuleService } from './module.service';
-import { ModuleRequstDto } from './dto/module-request.dto';
-import { ModuleResponseDto } from './dto/module-response.dto';
+import { ModuleRequstDto } from './dto/request/module-request.dto';
+import { ModuleResponseDto } from './dto/response/module-response.dto';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('ModuleController', () => {
