@@ -14,7 +14,7 @@ import { Role } from '@prisma/client';
 import { UploadService } from 'src/upload/upload.service';
 import { VideoMetadata } from 'src/upload/dto/video-metadata.dto';
 import { multerFieldsOptions } from 'src/upload/helper/multer-file-options.helper';
-import { StreamingProgressService } from './straming-progress.service';
+import { StreamingProgressService } from './streaming-progress.service';
 import { CreateProgressDto } from './dto/create-progress.dto';
 
 @ApiTags('Streaming')

@@ -16,46 +16,6 @@ export class CourseController {
     private readonly courseService: ICourseService
   ) {}
 
-  @HttpCode(HttpStatus.OK)
-  @Get('find-many')
-  @ApiOperation({ summary: 'Find many courses' })
-  @ApiResponse({ status: 200, description:'Success', type: [CourseResponseDto] })
-  @ApiResponse({status: 401, description: 'Unauthorized'})
-  @ApiResponse({ status: 404, description: 'Not Found'})
-  async findManyCourse(
-    @CurrentUser() user: number
-  ): Promise<CourseResponseDto[]> {
-    return await this.courseService.findManyCourse(user);
-  }
-  
-  @HttpCode(HttpStatus.OK)
-  @Get('find-many')
-  @ApiOperation({ summary: 'Find many courses with pagination' })
-  @ApiResponse({ status: 200, description:'Success', type: CoursePaginationResponseDto })
-  @ApiResponse({status: 401, description: 'Unauthorized'})
-  @ApiResponse({ status: 404, description: 'Not Found'})
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    description: 'Page number for pagination',
-    example: 1,
-    type: Number,
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    description: 'Number of items per page',
-    example: 10,
-    type: Number,
-  })
-  async findManyCoursePagination(
-    @CurrentUser() user: number,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10
-  ): Promise<CoursePaginationResponseDto> {
-    return await this.courseService.findManyCoursePagination(user, limit, page);
-  }
-
   @HttpCode(HttpStatus.OK) 
   @Get('preview/:idCourse')
   @ApiOperation({summary: 'Find one course'})

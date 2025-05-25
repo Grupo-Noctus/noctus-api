@@ -93,44 +93,12 @@ export class CourseService implements ICourseService{
     }
   }
   
-  async findManyCourse(user: number): Promise<CourseResponseDto[]> {
+  async findManyCoursePagination(limit: number, page: number, user: number, role: Role): Promise<CoursePaginationResponseDto> {
     try {
-      const enrolledCourses = await this.enrolledCourseService.findCoursesPerEnrollment(user);
-      const enrolledCourseIds = enrolledCourses.map(course => course.courseId);
-
-      return await this.prisma.course.findMany({
-        where: { 
-          id: { notIn: enrolledCourseIds },
-          isHidden: false, 
-        },
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          image: true,
-          duration: true,
-        },
-      });
-    } catch (error) {
-      this.logger.error('Error fetching courses for user', error);
-      throw handleAppError(error);
-    }
-  }  
-  
-  async findManyCoursePagination(user: number, limit: number, pageNumber: number): Promise<CoursePaginationResponseDto> {
-    try {
-      const enrolledCourses = await this.enrolledCourseService.findCoursesPerEnrollment(user);
-      const enrolledCourseIds = enrolledCourses.map(course => course.courseId);
-
-      if (limit <= 0 || pageNumber <= 0) {
-        throw new BadRequestException('Limit and page number must be greater than zero.');
-      }
-
-      const offset = limit * (pageNumber - 1);
+      const offset = limit * (page);
       const totalCount = await this.prisma.course.count({
         where: {
           isHidden: false,
-          id: { notIn: enrolledCourseIds },
         },
       });
       const totalPages = Math.ceil(totalCount / limit);
@@ -140,16 +108,24 @@ export class CourseService implements ICourseService{
         SELECT c.id, c.name, c.description, c.image, c.duration
         FROM Course c
         WHERE c.isHidden = 0
-        ${
-          enrolledCourseIds.length > 0 ? 
-          Prisma.sql`AND c.id NOT IN (${Prisma.join(enrolledCourseIds)})` :
-          Prisma.empty
-        }
         ORDER BY c.name ASC
         LIMIT ${limit} OFFSET ${offset}
       `);
 
-      return { courses, totalPages };
+      const coursesWithModules = await Promise.all(
+        courses.map(async course => {
+          const modules = await this.moduleService.findModulesWithVideos(course.id, user, role);
+          return {
+          ...course,
+          modules,
+          };
+      })
+      );
+
+      return {
+        courses: coursesWithModules,
+        totalPages,
+      };
     } catch (error) {
       this.logger.error('Error fetching courses with pagination', error);
       throw handleAppError(error);

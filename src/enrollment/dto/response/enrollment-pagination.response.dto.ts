@@ -13,5 +13,4 @@ export class EnrollmentPaginationResponseDto{
         example: 5,
     })
     totalPages: number;
-
 }

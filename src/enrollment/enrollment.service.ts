@@ -90,22 +90,41 @@ export class EnrollmentService implements IEnrollmentService{
     }
   }
 
-  async getEnrollmentById(id: number): Promise<EnrollmentResponseDto> {
+  async getEnrollmentById(idEnrrolment: number): Promise<EnrollmentResponseDto> {
     try{
       const enrollment = await this.prisma.$queryRaw<EnrollmentResponseDto>(
       Prisma.sql`
-        SELECT u.name, e.active, e.completed, e.expiredAt, c.name,
-          FROM Enrollment e
-          INNER JOIN Student s ON s.id = e.idStudent
-          INNER JOIN User u ON u.id = s.idUser
-          WHERE e.id = ${id}
+        SELECT 
+          u.id AS idUser,
+          u.username,
+          u.name,
+          u.email,
+          u.phoneNumber, 
+          s.dateBirth, 
+          s.state, 
+          s.ethnicity, 
+          s.gender, 
+          s.hasDisability, 
+          s.disabilityType, 
+          s.needsSupportResources, 
+          s.supportResourcesDescription, 
+          c.id AS idCourse,
+          c.name AS nameCourse,
+          e.id AS idEnrollment,
+          e.completed,
+          e.expiresAt
+        FROM Course c 
+        INNER JOIN Enrollment e ON c.id = e.idCourse
+        INNER JOIN Student s ON e.idStudent = s.id
+        INNER JOIN User u ON s.idUser = u.id
+        WHERE e.id = ${idEnrrolment};
       `);  
       if (!enrollment) {
         throw new NotFoundException('Enrollment not found');
       }
       return enrollment;
     }catch (error){ 
-      this.logger.error(`Error fetching enrrollment by id ${id}: `, error);
+      this.logger.error(`Error fetching enrrollment by id ${idEnrrolment}: `, error);
       throw handleAppError(error); 
     }   
   }
@@ -115,12 +134,53 @@ export class EnrollmentService implements IEnrollmentService{
       await this.prisma.enrollment.update({
         where: { id: idEnrollment },
         data: {
-        ...updateEnrollment,
-      },
-    });
-    return true;
+          ...updateEnrollment,
+        },
+      });
+      return true;
     } catch (error) {
       this.logger.error(`Error in update enrrollment by id ${idEnrollment}: `, error);
+      throw handleAppError(error);
+    }
+  }
+
+  async findManyEnrollment(idCourse:number, limit: number, page: number): Promise<EnrollmentPaginationResponseDto>{
+    try{
+      const totalCount = await this.prisma.enrollment.count();
+      const totalPages = Math.ceil(totalCount / limit);
+
+      const enrollments = await this.prisma.$queryRaw<
+        EnrollmentResponseDto[]
+      >(Prisma.sql`
+        SELECT 
+          u.id AS idUser,
+          u.username,
+          u.name,
+          u.email,
+          u.phoneNumber, 
+          s.dateBirth, 
+          s.state, 
+          s.ethnicity, 
+          s.gender, 
+          s.hasDisability, 
+          s.disabilityType, 
+          s.needsSupportResources, 
+          s.supportResourcesDescription, 
+          c.id AS idCourse,
+          c.name AS nameCourse,
+          e.id AS idEnrollment,
+          e.completed,
+          e.expiresAt
+        FROM Course c 
+        INNER JOIN Enrollment e ON c.id = e.idCourse
+        INNER JOIN Student s ON e.idStudent = s.id
+        INNER JOIN User u ON s.idUser = u.id
+        WHERE c.id = ${idCourse}
+        LIMIT ${limit} OFFSET ${page};
+      `); 
+      return { enrollments, totalPages };
+    } catch (error){
+      this.logger.error(`Error while retrieving paginated enrollments: `, error);
       throw handleAppError(error);
     }
   }
@@ -143,35 +203,6 @@ export class EnrollmentService implements IEnrollmentService{
       });
     } catch (error){
       this.logger.error(`Error deleting pre-enrollment by id ${idEnrollment}: `, error);
-      throw handleAppError(error);
-    }
-  }
-
-  async findManyEnrollment(pageNumber: number): Promise<EnrollmentPaginationResponseDto>{
-    try{
-      const PAGE_SIZE = 10;
-      const page = (PAGE_SIZE * (pageNumber - 1));
-
-      const totalCount = await this.prisma.enrollment.count();
-      const totalPages = Math.ceil(totalCount / PAGE_SIZE);
-
-      const enrollments = await this.prisma.$queryRaw<
-        EnrollmentResponseDto[]
-      >(Prisma.sql`
-      SELECT u.name as student_name, e.active, e.completed, e.expiredAt, c.name as course_name
-        FROM Enrollment e
-        INNER JOIN Student s ON s.id = e.idStudent
-        INNER JOIN User u ON u.id = s.idUser
-        INNER JOIN Course c ON c.id = e.idCourse
-        ORDER BY u.name ASC
-        LIMIT ${PAGE_SIZE} OFFSET ${page}
-      `);  
-      if (!enrollments || enrollments.length == 0) {
-        throw new NotFoundException('Enrollments not found');
-      }
-      return { enrollments, totalPages };
-    } catch (error){
-      this.logger.error(`Error while retrieving paginated enrollments (page ${pageNumber}): `, error);
       throw handleAppError(error);
     }
   }

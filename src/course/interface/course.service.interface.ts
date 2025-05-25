@@ -10,6 +10,5 @@ export interface ICourseService {
   updateCourse(idCourse: number, updateCourse: CourseUpdateDto, user: number, image?: string): Promise<boolean>;
   toggleCourseVisibility(idCourse: number): Promise<void>;
   findOneCoursePreview(idCourse: number, user: number, role: Role): Promise<coursePreviewDto>;
-  findManyCoursePagination(user: number, limit: number, pageNumber: number): Promise<CoursePaginationResponseDto>;
-  findManyCourse(user: number): Promise<CourseResponseDto[]>;
+  findManyCoursePagination(limit: number, page: number, user: number, role: Role): Promise<CoursePaginationResponseDto>;
 }

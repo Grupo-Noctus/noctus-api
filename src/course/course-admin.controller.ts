@@ -1,5 +1,5 @@
-import { Body, Controller, HttpCode, HttpStatus, Inject, Logger, Param, Post, Put, UploadedFile, UseInterceptors } from "@nestjs/common";
-import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Logger, Param, Post, Put, Query, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Role } from "@prisma/client";
 import { Roles } from "src/auth/decorator/role.decorator";
 import { UploadService } from "src/upload/upload.service";
@@ -12,6 +12,7 @@ import { plainToInstance } from "class-transformer";
 import { validateOrReject } from "class-validator";
 import { handleAppError } from "src/utils/handle-app-error.error";
 import { CourseUpdateDto } from "./dto/update/course.update.dto";
+import { CoursePaginationResponseDto } from "./dto/response/course-pagination.response.dto";
 
 @ApiTags('CourseAdmin')
 @Controller('course/admin')
@@ -114,5 +115,35 @@ export class CourseAdminController {
   @ApiParam({  name: 'idCourse', type: String, description: 'ID of course' })
   async toggleCourseVisibility(@Param('idCourse') idCourse: string): Promise<void> {
     await this.courseService.toggleCourseVisibility(+idCourse);
+  }
+
+    
+  @HttpCode(HttpStatus.OK)
+  @Get('find-many')
+  @ApiOperation({ summary: 'Find many courses with pagination' })
+  @ApiResponse({ status: 200, description:'Success', type: CoursePaginationResponseDto })
+  @ApiResponse({status: 401, description: 'Unauthorized'})
+  @ApiResponse({ status: 404, description: 'Not Found'})
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number for pagination',
+    example: 1,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Number of items per page',
+    example: 10,
+    type: Number,
+  })
+  async findManyCoursePagination(
+    @Query('page') page: number = 0,
+    @Query('limit') limit: number = 10,
+    @CurrentUser() user: number,
+    @CurrentUser('role') role: Role
+  ): Promise<CoursePaginationResponseDto> {
+    return await this.courseService.findManyCoursePagination(limit, page, user, role);
   }
 }

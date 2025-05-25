@@ -10,6 +10,7 @@ import { UploadService } from 'src/upload/upload.service';
 import { Role } from '@prisma/client';
 import { EnrolledCourseService } from 'src/enrollment/enrolled-course.service';
 import { ProgressVideoDto } from './dto/progress-video.dto';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class StreamingService {
@@ -17,8 +18,7 @@ export class StreamingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly uploadService: UploadService,
-    @Inject('IEnrolledCourseService') 
-    private readonly getEnrolledCourseInfoService: EnrolledCourseService
+    private readonly userService: UserService
   ){}
 
   async createVideoLecture( idModule: number, videoMetadata: VideoMetadata, thumbnail: string, streamingRequest: StreamingRequest, user: number): Promise<boolean> {
@@ -64,7 +64,7 @@ export class StreamingService {
         }
       });
       if(role === Role.STUDENT){
-        const idEnrrolment = await this.getEnrolledCourseInfoService.getEnrrolmentByIdCourseAndIdStudent(idCourse, user);
+        const idEnrrolment = await this.getEnrrolmentByIdCourseAndIdStudent(idCourse, user);
         for (const item of data){
           const progressVideo = await this.getVideoProgress(idEnrrolment, item.id);
           if(progressVideo != null){
@@ -164,6 +164,31 @@ export class StreamingService {
     } catch(error){
       this.logger.error(`Failed to find video progress`, error);
       handleAppError(error);
+    }
+  }
+
+  async getEnrrolmentByIdCourseAndIdStudent (idCourse: number, idUser: number): Promise<number>{
+    try {
+      const idStudent = await this.userService.findStudentByIdUser(idUser);
+      const data = await this.prisma.enrollment.findUnique({
+          where: {
+              idStudent_idCourse: {
+                  idStudent,
+                  idCourse,
+              },
+          },
+          select: {
+              id: true,
+          }
+      });
+      if (!data) {
+          this.logger.error('Enrollment not found');
+          throw new NotFoundException('Enrollment not found');
+      }
+      return data.id;
+    } catch (error) {
+      this.logger.error('Error fetching enrrolement: ', error);
+      throw handleAppError(error);
     }
   }
 }

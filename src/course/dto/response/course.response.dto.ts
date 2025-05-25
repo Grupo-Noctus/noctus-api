@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsUrl, IsDateString, IsOptional } from 'class-validator';
+import { ModuleWithVideosResponseDto } from 'src/module/dto/module-and-video-response.dto';
 
 export class CourseResponseDto {
   @ApiProperty({
@@ -37,4 +38,10 @@ export class CourseResponseDto {
     description: 'Duration of course in days',
   })
   duration: number;
+
+  @ApiProperty({
+    type: [ModuleWithVideosResponseDto],
+    description: 'List of course modules including their videos'
+  })
+  modules: ModuleWithVideosResponseDto[];
 }

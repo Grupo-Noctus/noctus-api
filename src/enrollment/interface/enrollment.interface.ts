@@ -8,8 +8,8 @@ export interface IEnrollmentService{
     createEnrollment(enrrolement: EnrollmentRequestDto, user: number): Promise<boolean>
     createPreEnrollment(idCourse: number,enrrolements: PreEnrollmentDto, user: number): Promise<boolean>
     createEnrollmentByPreEnrrolment(student: number, userEmail: string): Promise<void>
+    findManyEnrollment(idCourse:number, limit: number, page: number): Promise<EnrollmentPaginationResponseDto>
     getEnrollmentById(id: number): Promise<EnrollmentResponseDto>
     updateEnrollment(idEnrollment: number, updateEnrollment: EnrollmentUpdateDto, user: number): Promise<boolean>
     deleteEnrollment(idEnrollment: number): Promise<void>
-    findManyEnrollment(pageNumber: number): Promise<EnrollmentPaginationResponseDto>
 }

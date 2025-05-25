@@ -21,7 +21,10 @@ export class EnrroledCourseController {
     @ApiResponse({ status: 200, description:'Success', type: [EnrolledCourseDto] })
     @ApiResponse({status: 401, description: 'Unauthorized'})
     @ApiResponse({ status: 404, description: 'Not Found'})
-    async findCoursesPerEnrollment(@CurrentUser() user: number): Promise<EnrolledCourseDto[] | []> {
-        return await this.enrolledCourseService.findCoursesPerEnrollment(user);
+    async findCoursesPerEnrollment(
+        @CurrentUser() user: number,
+        @CurrentUser('role') role: Role
+    ): Promise<EnrolledCourseDto[] | []> {
+        return await this.enrolledCourseService.findCoursesPerEnrollment(user, role);
     }
 }

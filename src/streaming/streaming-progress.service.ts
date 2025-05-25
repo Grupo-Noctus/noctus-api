@@ -2,19 +2,19 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import { EnrolledCourseService } from "src/enrollment/enrolled-course.service";
 import { PrismaService } from 'src/prisma/prisma.service';
 import { handleAppError } from "src/utils/handle-app-error.error";
+import { StreamingService } from "./streaming.service";
 
 @Injectable()
 export class StreamingProgressService {
     private readonly logger = new Logger(StreamingProgressService.name);
     constructor (
         private readonly prisma: PrismaService,
-        @Inject('IEnrolledCourseService') 
-        private readonly getEnrolledCourseInfoService: EnrolledCourseService
+        private readonly streamingService:StreamingService
     ) {}
 //usar upsert
     async createProgressVideo (idCourse: number, idVideo: number, idUser: number, progressVideo: number): Promise<boolean>{
         try {
-            const idEnrrolment = await this.getEnrolledCourseInfoService.getEnrrolmentByIdCourseAndIdStudent(idCourse, idUser)
+            const idEnrrolment = await this.streamingService.getEnrrolmentByIdCourseAndIdStudent(idCourse, idUser)
             const data = await this.prisma.progressVideo.create({
                 data: {
                     idVideo,
