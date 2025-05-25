@@ -1,8 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { StreamingService } from './streaming.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { BadRequestException } from '@nestjs/common';
 import getVideoDurationInSeconds from 'get-video-duration';
 
 // Mocking the PrismaService
@@ -15,7 +14,7 @@ const mockPrismaService = {
 // Mocking the external dependencies
 jest.mock('get-video-duration', () => ({
   __esModule: true,
-  default: jest.fn(),  // Mocka a função default do módulo
+  default: jest.fn(), // Mocka a função default do módulo
 }));
 
 jest.mock('uuid', () => ({
@@ -28,10 +27,7 @@ describe('StreamingService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        StreamingService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
+      providers: [StreamingService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
     service = module.get<StreamingService>(StreamingService);
@@ -41,7 +37,7 @@ describe('StreamingService', () => {
   describe('createVideoLecture', () => {
     it('should successfully create a video lecture', async () => {
       // Mockando a função default do get-video-duration
-      const mockDuration = 120;  // Mockando a duração do vídeo
+      const mockDuration = 120; // Mockando a duração do vídeo
       (getVideoDurationInSeconds as jest.Mock).mockResolvedValue(mockDuration);
 
       // Mock do arquivo com o tipo correto
@@ -112,7 +108,9 @@ describe('StreamingService', () => {
 
       mockPrismaService.videoLecture.create.mockRejectedValue(new Error('Something went wrong'));
 
-      await expect(service.createVideoLecture(mockFile, streamingRequest, user)).rejects.toThrow(BadRequestException);
+      await expect(service.createVideoLecture(mockFile, streamingRequest, user)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

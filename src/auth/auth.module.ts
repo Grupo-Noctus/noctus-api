@@ -11,8 +11,8 @@ import { EnrollmentModule } from 'src/enrollment/enrollment.module';
   providers: [
     {
       provide: 'IAuthService',
-      useClass: AuthService
-    }
+      useClass: AuthService,
+    },
   ],
   imports: [
     UserModule,
@@ -21,8 +21,8 @@ import { EnrollmentModule } from 'src/enrollment/enrollment.module';
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
-      signOptions: {expiresIn: '7d'}
+      signOptions: { expiresIn: '7d' },
     }),
-  ]
+  ],
 })
 export class AuthModule {}

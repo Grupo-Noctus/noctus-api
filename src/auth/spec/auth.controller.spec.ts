@@ -110,7 +110,10 @@ describe('AuthController', () => {
     });
 
     it('should register student user successfully with student data', async () => {
-      const imageFile = { originalname: 'student.png', mimetype: 'image/png' } as Express.Multer.File;
+      const imageFile = {
+        originalname: 'student.png',
+        mimetype: 'image/png',
+      } as Express.Multer.File;
       (uploadService.uploadFileMetadata as jest.Mock).mockResolvedValue('image-key-student.png');
       (authService.registerStudent as jest.Mock).mockResolvedValue(true);
 
@@ -135,7 +138,10 @@ describe('AuthController', () => {
     });
 
     it('should delete uploaded file and rethrow on error', async () => {
-      const imageFile = { originalname: 'student.png', mimetype: 'image/png' } as Express.Multer.File;
+      const imageFile = {
+        originalname: 'student.png',
+        mimetype: 'image/png',
+      } as Express.Multer.File;
       (uploadService.uploadFileMetadata as jest.Mock).mockResolvedValue('temp-image-key.png');
       (authService.registerAdmin as jest.Mock).mockRejectedValue(new Error('Some error'));
       const body = {

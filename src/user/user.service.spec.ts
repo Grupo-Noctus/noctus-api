@@ -14,10 +14,7 @@ describe('UserService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UserService,
-        { provide: PrismaService, useValue: mockPrisma },
-      ],
+      providers: [UserService, { provide: PrismaService, useValue: mockPrisma }],
     }).compile();
 
     service = module.get<UserService>(UserService);
@@ -45,10 +42,7 @@ describe('UserService', () => {
       expect(result).toEqual(mockUser);
       expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
         where: {
-          OR: [
-            { username: 'john' },
-            { email: 'john' },
-          ],
+          OR: [{ username: 'john' }, { email: 'john' }],
         },
         select: {
           id: true,

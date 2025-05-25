@@ -1,56 +1,56 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { ModuleResponseDto } from "src/module/dto/module-response.dto";
+import { ApiProperty } from '@nestjs/swagger';
+import { ModuleResponseDto } from 'src/module/dto/module-response.dto';
 
 export class coursePreviewDto {
-    @ApiProperty({
+  @ApiProperty({
     example: '1',
-    description: 'Id of course.'
-    })
-    id: number;
+    description: 'Id of course.',
+  })
+  id: number;
 
-    @ApiProperty({
+  @ApiProperty({
     example: 'Full-Stack Web Development',
-    description: 'The name of the course.'
-    })
-    name: string;
+    description: 'The name of the course.',
+  })
+  name: string;
 
-    @ApiProperty({
+  @ApiProperty({
     example: 'Learn to build web applications using React, Node.js, and MongoDB.',
-    description: 'A short description summarizing the course content and goals.'
-    })
-    description: string;
+    description: 'A short description summarizing the course content and goals.',
+  })
+  description: string;
 
-    @ApiProperty({
+  @ApiProperty({
     example: 'https://example.com/images/fullstack-course.png',
-    description: 'Optional URL of the course cover image.'
-    })
-    image: string;
+    description: 'Optional URL of the course cover image.',
+  })
+  image: string;
 
-    @ApiProperty({
+  @ApiProperty({
     example: 21,
     description: 'Duration of course in days',
-    })
-    @ApiProperty({
-        type: [ModuleResponseDto],
-        description: 'List of modules in the course.',
-    })
-    modules: ModuleResponseDto[];
+  })
+  @ApiProperty({
+    type: [ModuleResponseDto],
+    description: 'List of modules in the course.',
+  })
+  modules: ModuleResponseDto[];
 
-    @ApiProperty({
-        example: 5,
-        description: 'Total number of modules in the course.',
-    })
-    countModules: number;
+  @ApiProperty({
+    example: 5,
+    description: 'Total number of modules in the course.',
+  })
+  countModules: number;
 
-    @ApiProperty({
-        example: 240,
-        description: 'Total duration of all videos in the course.',
-    })
-    durationVideos: number;
+  @ApiProperty({
+    example: 240,
+    description: 'Total duration of all videos in the course.',
+  })
+  durationVideos: number;
 
-    @ApiProperty({
-        example: 15,
-        description: 'Total number of videos in the course.',
-    })
-    countVideos: number;
+  @ApiProperty({
+    example: 15,
+    description: 'Total number of videos in the course.',
+  })
+  countVideos: number;
 }

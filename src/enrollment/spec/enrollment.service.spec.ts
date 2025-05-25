@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EnrollmentService } from './enrollment.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 
 describe('EnrollmentService', () => {
   let service: EnrollmentService;
@@ -25,7 +25,17 @@ describe('EnrollmentService', () => {
       jest.spyOn(prisma.enrollment, 'create').mockResolvedValueOnce(true as any);
 
       await expect(
-        service.createEnrollment({ idStudent: 1, idCourse: 1, active: true, completed: false, startDate: new Date(), endDate: new Date() }, 1)
+        service.createEnrollment(
+          {
+            idStudent: 1,
+            idCourse: 1,
+            active: true,
+            completed: false,
+            startDate: new Date(),
+            endDate: new Date(),
+          },
+          1,
+        ),
       ).resolves.toBe(true);
     });
 
@@ -33,14 +43,33 @@ describe('EnrollmentService', () => {
       jest.spyOn(prisma.enrollment, 'create').mockRejectedValueOnce(new Error());
 
       await expect(
-        service.createEnrollment({ idStudent: 1, idCourse: 1, active: true, completed: false, startDate: new Date(), endDate: new Date() }, 1)
+        service.createEnrollment(
+          {
+            idStudent: 1,
+            idCourse: 1,
+            active: true,
+            completed: false,
+            startDate: new Date(),
+            endDate: new Date(),
+          },
+          1,
+        ),
       ).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('getEnrollmentById', () => {
     it('should return enrollment details', async () => {
-      const mockEnrollment = [{ name: 'John Doe', active: true, completed: false, startDate: new Date(), endDate: new Date(), nameCourse: 'Math' }];
+      const mockEnrollment = [
+        {
+          name: 'John Doe',
+          active: true,
+          completed: false,
+          startDate: new Date(),
+          endDate: new Date(),
+          nameCourse: 'Math',
+        },
+      ];
       jest.spyOn(prisma, '$queryRaw').mockResolvedValueOnce(mockEnrollment);
 
       await expect(service.getEnrollmentById(1)).resolves.toEqual({
@@ -56,19 +85,23 @@ describe('EnrollmentService', () => {
     it('should throw BadRequestException if no enrollments are found', async () => {
       jest.spyOn(prisma, '$queryRaw').mockResolvedValueOnce([]);
       await expect(service.findManyEnrollment(1)).rejects.toThrow(BadRequestException);
-    });    
+    });
   });
 
   describe('updateEnrollment', () => {
     it('should update an enrollment and return true', async () => {
       jest.spyOn(prisma.enrollment, 'update').mockResolvedValueOnce(true as any);
 
-      await expect(service.updateEnrollment(1, { active: false, completed: true }, 1)).resolves.toBe(true);
+      await expect(
+        service.updateEnrollment(1, { active: false, completed: true }, 1),
+      ).resolves.toBe(true);
     });
 
     it('should throw BadRequestException on error', async () => {
       jest.spyOn(prisma.enrollment, 'update').mockRejectedValueOnce(new Error());
-      await expect(service.updateEnrollment(1, { active: false, completed: true }, 1)).rejects.toThrow(BadRequestException);
+      await expect(
+        service.updateEnrollment(1, { active: false, completed: true }, 1),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -86,16 +119,28 @@ describe('EnrollmentService', () => {
 
   describe('findManyEnrollment', () => {
     it('should return paginated enrollments', async () => {
-      const mockEnrollments = [{ student_name: 'John Doe', active: true, completed: false, startDate: new Date(), endDate: new Date(), course_name: 'Math' }];
+      const mockEnrollments = [
+        {
+          student_name: 'John Doe',
+          active: true,
+          completed: false,
+          startDate: new Date(),
+          endDate: new Date(),
+          course_name: 'Math',
+        },
+      ];
       jest.spyOn(prisma, '$queryRaw').mockResolvedValueOnce(mockEnrollments);
       jest.spyOn(prisma.enrollment, 'count').mockResolvedValueOnce(1);
 
-      await expect(service.findManyEnrollment(1)).resolves.toEqual({ enrollments: mockEnrollments, totalPages: 1 });
+      await expect(service.findManyEnrollment(1)).resolves.toEqual({
+        enrollments: mockEnrollments,
+        totalPages: 1,
+      });
     });
 
     it('should throw BadRequestException if no enrollments are found', async () => {
       jest.spyOn(prisma, '$queryRaw').mockResolvedValueOnce([]);
       await expect(service.findManyEnrollment(1)).rejects.toThrow(BadRequestException);
-    });    
+    });
   });
 });

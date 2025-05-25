@@ -26,7 +26,11 @@ export class EnrollmentResponseDto {
   @ApiProperty({ enum: State, example: State.SP, description: 'State of origin' })
   state: State;
 
-  @ApiProperty({ enum: Ethnicity, example: Ethnicity.WHITE, description: 'Ethnicity of the student' })
+  @ApiProperty({
+    enum: Ethnicity,
+    example: Ethnicity.WHITE,
+    description: 'Ethnicity of the student',
+  })
   ethnicity: Ethnicity;
 
   @ApiProperty({ enum: Gender, example: Gender.FEMALE, description: 'Gender of the student' })
@@ -35,13 +39,28 @@ export class EnrollmentResponseDto {
   @ApiProperty({ example: true, description: 'Indicates if the student has a disability' })
   hasDisability: boolean;
 
-  @ApiProperty({ example: 'Visual impairment', required: false, nullable: true, description: 'Type of disability, if any' })
+  @ApiProperty({
+    example: 'Visual impairment',
+    required: false,
+    nullable: true,
+    description: 'Type of disability, if any',
+  })
   disabilityType: string;
 
-  @ApiProperty({ example: true, required: false, nullable: true, description: 'Whether the student needs support resources' })
+  @ApiProperty({
+    example: true,
+    required: false,
+    nullable: true,
+    description: 'Whether the student needs support resources',
+  })
   needsSupportResources: boolean;
 
-  @ApiProperty({ example: 'Needs screen reader', required: false, nullable: true, description: 'Description of support resources required' })
+  @ApiProperty({
+    example: 'Needs screen reader',
+    required: false,
+    nullable: true,
+    description: 'Description of support resources required',
+  })
   supportResourcesDescription: string;
 
   @ApiProperty({ example: 3, description: 'ID of the enrolled course' })
@@ -56,6 +75,9 @@ export class EnrollmentResponseDto {
   @ApiProperty({ example: false, description: 'Whether the course has been completed' })
   completed: boolean;
 
-  @ApiProperty({ example: '2025-12-31T23:59:59.000Z', description: 'Expiration date of the enrollment' })
+  @ApiProperty({
+    example: '2025-12-31T23:59:59.000Z',
+    description: 'Expiration date of the enrollment',
+  })
   expiresAt: Date;
 }

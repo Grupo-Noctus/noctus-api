@@ -5,7 +5,7 @@ import { ModuleUpdateDto } from './dto/module-update.dto';
 import { ModuleResponseDto } from './dto/module-response.dto';
 import { handleAppError } from 'src/utils/handle-app-error.error';
 import { ModuleWithVideosResponseDto } from './dto/module-and-video-response.dto';
-import { Prisma, Role } from '@prisma/client';
+import { Role } from '@prisma/client';
 import { StreamingService } from 'src/streaming/streaming.service';
 
 @Injectable()
@@ -17,7 +17,11 @@ export class ModuleService {
     private readonly streamingService: StreamingService,
   ) {}
 
-  async createModule(idCourse: number, moduleRequest: ModuleRequstDto, user: number): Promise<boolean> {
+  async createModule(
+    idCourse: number,
+    moduleRequest: ModuleRequstDto,
+    user: number,
+  ): Promise<boolean> {
     try {
       const lastModule = await this.prisma.module.findFirst({
         where: { idCourse },
@@ -42,7 +46,11 @@ export class ModuleService {
     }
   }
 
-  async updateModule(idModule: number, moduleUpdate: ModuleUpdateDto, user: number): Promise<boolean> {
+  async updateModule(
+    idModule: number,
+    moduleUpdate: ModuleUpdateDto,
+    user: number,
+  ): Promise<boolean> {
     try {
       await this.prisma.module.update({
         where: { id: idModule },
@@ -95,7 +103,7 @@ export class ModuleService {
   async findModulesWithVideos(
     idCourse: number,
     user: number,
-    role: Role
+    role: Role,
   ): Promise<ModuleWithVideosResponseDto[]> {
     try {
       const modules = await this.prisma.module.findMany({
@@ -119,7 +127,7 @@ export class ModuleService {
             description: video.description,
             duration: video.duration,
             idProgressVideo: (video as any).idProgressVideo ?? null,
-            viewed : (video as any).viewed  ?? null,
+            viewed: (video as any).viewed ?? null,
           })),
         });
       }
@@ -138,7 +146,7 @@ export class ModuleService {
         select: { id: true },
       });
 
-      return modules.map((module) => module.id);
+      return modules.map(module => module.id);
     } catch (error) {
       this.logger.error('Error while fetching modules for course', error);
       handleAppError(error);

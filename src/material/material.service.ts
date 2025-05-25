@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { MaterialRequestDto } from './dto/material-resquest.dto';
 import { FindMaterialDto } from './dto/find-material-dto';
@@ -20,10 +17,9 @@ export class MaterialService {
   async createMaterial(
     materialResponse: MaterialRequestDto,
     user: number,
-    file: Express.Multer.File
+    file: Express.Multer.File,
   ): Promise<number> {
-
-    const {idCourse, ...material} = materialResponse
+    const { idCourse, ...material } = materialResponse;
     const createdMaterial = await this.prisma.material.create({
       data: {
         course: { connect: { id: Number(idCourse) } },
@@ -33,23 +29,26 @@ export class MaterialService {
         updatedBy: user,
       },
     });
-      return createdMaterial.id;
+    return createdMaterial.id;
   }
 
   async findManyMaterial(param: FindMaterialDto): Promise<MaterialResponseDto[]> {
-  const { idCourse } = param;
+    const { idCourse } = param;
 
-  const materials = await this.prisma.material.findMany({
-    where: {
-      ...(idCourse ? { idCourse } : {}),
-    },
-  });
+    const materials = await this.prisma.material.findMany({
+      where: {
+        ...(idCourse ? { idCourse } : {}),
+      },
+    });
 
-  return materials;
-}
+    return materials;
+  }
 
   async findOneMaterial(id: number): Promise<Material>;
-  async findOneMaterial(id: number, withMetadata: true): Promise<{ material: Material; fileMetadata: string }>;
+  async findOneMaterial(
+    id: number,
+    withMetadata: true,
+  ): Promise<{ material: Material; fileMetadata: string }>;
   async findOneMaterial(id: number, withMetadata?: boolean) {
     const material = await this.prisma.material.findUnique({ where: { id } });
 
@@ -61,7 +60,7 @@ export class MaterialService {
       const mockFile = { filename: material.filename } as Express.Multer.File;
       const fileMetadata = await this.uploadService.uploadFileMetadata(
         mockFile,
-        'uploads/materials'
+        'uploads/materials',
       );
       return { material, fileMetadata };
     }
@@ -70,18 +69,14 @@ export class MaterialService {
   }
 
   async deleteMaterial(id: number): Promise<void> {
+    const material = await this.prisma.material.findUnique({ where: { id } });
+    if (!material) {
+      throw new NotFoundException(`Material with ID ${id} not found`);
+    }
 
+    const filePath = path.join(__dirname, '..', '..', 'uploads', 'materials', material.filename);
 
-    
-      const material = await this.prisma.material.findUnique({ where: { id } });
-      if (!material) {
-        throw new NotFoundException(`Material with ID ${id} not found`);
-      }
-
-      const filePath = path.join(__dirname, '..', '..', 'uploads', 'materials', material.filename);
-      
-      await this.uploadService.deleteFile(filePath);
-      await this.prisma.material.delete({ where: { id } });
-      
+    await this.uploadService.deleteFile(filePath);
+    await this.prisma.material.delete({ where: { id } });
   }
 }

@@ -78,7 +78,9 @@ describe('CourseAdminController', () => {
 
       (validateOrReject as jest.Mock).mockRejectedValue(new BadRequestException());
 
-      await expect(controller.createCourse(undefined, dto, user)).rejects.toThrow(BadRequestException);
+      await expect(controller.createCourse(undefined, dto, user)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -118,7 +120,9 @@ describe('CourseAdminController', () => {
 
       (validateOrReject as jest.Mock).mockRejectedValue(new BadRequestException());
 
-      await expect(controller.updateCourse('1', dto, user, undefined)).rejects.toThrow(BadRequestException);
+      await expect(controller.updateCourse('1', dto, user, undefined)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 

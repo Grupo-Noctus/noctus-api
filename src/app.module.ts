@@ -27,7 +27,7 @@ import { UploadModule } from './upload/upload.module';
         ttl: 60000,
         limit: 30,
         blockDuration: 5000,
-      }
+      },
     ]),
     UploadModule,
     ModuleModule,
@@ -40,15 +40,15 @@ import { UploadModule } from './upload/upload.module';
     AppService,
     {
       provide: APP_GUARD,
-      useClass:ThrottlerGuard
+      useClass: ThrottlerGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: AuthGuard
+      useClass: AuthGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard
+      useClass: RolesGuard,
     },
   ],
 })

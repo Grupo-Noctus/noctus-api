@@ -107,7 +107,11 @@ describe('ModuleService', () => {
 
   describe('findOneModule', () => {
     it('should return module', async () => {
-      mockPrisma.module.findUnique.mockResolvedValue({ name: 'Test', description: 'Desc', order: 1 });
+      mockPrisma.module.findUnique.mockResolvedValue({
+        name: 'Test',
+        description: 'Desc',
+        order: 1,
+      });
       const result = await service.findOneModule(1);
       expect(result).toEqual({ name: 'Test', description: 'Desc', order: 1 });
     });

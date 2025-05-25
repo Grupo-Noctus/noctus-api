@@ -87,7 +87,11 @@ describe('CourseController', () => {
       courseService.findManyCoursePagination.mockResolvedValue(paginatedResult);
 
       const result = await controller.findManyCoursePagination(userId);
-      expect(courseService.findManyCoursePagination).toHaveBeenCalledWith(userId, defaultLimit, defaultPage);
+      expect(courseService.findManyCoursePagination).toHaveBeenCalledWith(
+        userId,
+        defaultLimit,
+        defaultPage,
+      );
       expect(result).toEqual(paginatedResult);
     });
   });

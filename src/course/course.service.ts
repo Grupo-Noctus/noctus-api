@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CourseRequestDto } from './dto/request/course.request.dto';
 import { CourseUpdateDto } from './dto/update/course.update.dto';
@@ -6,24 +11,25 @@ import { CourseResponseDto } from './dto/response/course.response.dto';
 import { CoursePaginationResponseDto } from './dto/response/course-pagination.response.dto';
 import { UploadService } from 'src/upload/upload.service';
 import { handleAppError } from 'src/utils/handle-app-error.error';
-import { EnrolledCourseService } from 'src/enrollment/enrolled-course.service';
 import { Prisma, Role } from '@prisma/client';
 import { ICourseService } from './interface/course.service.interface';
 import { coursePreviewDto } from './dto/response/course-preview.response';
 import { ModuleService } from 'src/module/module.service';
-@Injectable()
-export class CourseService implements ICourseService{
-  private readonly logger = new Logger(CourseService.name);
 
+@Injectable()
+export class CourseService implements ICourseService {
+  private readonly logger = new Logger(CourseService.name);
   constructor(
     private prisma: PrismaService,
-    @Inject('IEnrolledCourseService')
-    private enrolledCourseService: EnrolledCourseService,
     private readonly moduleService: ModuleService,
     private readonly uploadService: UploadService,
   ) {}
 
-  async createCourse(courseRequest: CourseRequestDto, user: number, image: string): Promise<boolean> {
+  async createCourse(
+    courseRequest: CourseRequestDto,
+    user: number,
+    image: string,
+  ): Promise<boolean> {
     try {
       const { duration } = courseRequest;
       await this.prisma.course.create({
@@ -43,19 +49,24 @@ export class CourseService implements ICourseService{
       throw handleAppError(error);
     }
   }
-  
-  async updateCourse(idCourse: number, updateCourse: CourseUpdateDto, user: number, image?: string): Promise<boolean> {
+
+  async updateCourse(
+    idCourse: number,
+    updateCourse: CourseUpdateDto,
+    user: number,
+    image?: string,
+  ): Promise<boolean> {
     try {
       const existingCourse = await this.prisma.course.findUnique({ where: { id: idCourse } });
       if (!existingCourse) {
         throw new NotFoundException('Course not found');
       }
       const finalImage = image ?? existingCourse.image;
-  
+
       if (updateCourse.duration != null) {
         updateCourse.duration = Number(updateCourse.duration);
       }
-  
+
       await this.prisma.course.update({
         where: { id: idCourse },
         data: {
@@ -72,7 +83,7 @@ export class CourseService implements ICourseService{
     }
   }
 
-    async toggleCourseVisibility(idCourse: number): Promise<void> {
+  async toggleCourseVisibility(idCourse: number): Promise<void> {
     try {
       const course = await this.prisma.course.findUnique({
         where: { id: idCourse },
@@ -92,10 +103,15 @@ export class CourseService implements ICourseService{
       throw handleAppError(error);
     }
   }
-  
-  async findManyCoursePagination(limit: number, page: number, user: number, role: Role): Promise<CoursePaginationResponseDto> {
+
+  async findManyCoursePagination(
+    limit: number,
+    page: number,
+    user: number,
+    role: Role,
+  ): Promise<CoursePaginationResponseDto> {
     try {
-      const offset = limit * (page);
+      const offset = limit * page;
       const totalCount = await this.prisma.course.count({
         where: {
           isHidden: false,
@@ -103,8 +119,7 @@ export class CourseService implements ICourseService{
       });
       const totalPages = Math.ceil(totalCount / limit);
 
-      const courses = await this.prisma.$queryRaw<CourseResponseDto[]>
-      (Prisma.sql`
+      const courses = await this.prisma.$queryRaw<CourseResponseDto[]>(Prisma.sql`
         SELECT c.id, c.name, c.description, c.image, c.duration
         FROM Course c
         WHERE c.isHidden = 0
@@ -116,10 +131,10 @@ export class CourseService implements ICourseService{
         courses.map(async course => {
           const modules = await this.moduleService.findModulesWithVideos(course.id, user, role);
           return {
-          ...course,
-          modules,
+            ...course,
+            modules,
           };
-      })
+        }),
       );
 
       return {
@@ -132,7 +147,11 @@ export class CourseService implements ICourseService{
     }
   }
 
-  async findOneCoursePreview(idCourse: number, user: number, role: Role): Promise<coursePreviewDto> {
+  async findOneCoursePreview(
+    idCourse: number,
+    user: number,
+    role: Role,
+  ): Promise<coursePreviewDto> {
     try {
       const course = await this.prisma.course.findUnique({
         where: { id: idCourse },
@@ -160,10 +179,10 @@ export class CourseService implements ICourseService{
       const countVideos = modulesAndVideos.reduce((acc, module) => acc + module.videos.length, 0);
       const durationVideos = modulesAndVideos.reduce(
         (acc, module) => acc + module.videos.reduce((sum, video) => sum + video.duration, 0),
-        0
+        0,
       );
       const modules = modulesAndVideos.map(({ videos, ...module }) => module);
-      
+
       return {
         ...courseData,
         modules,

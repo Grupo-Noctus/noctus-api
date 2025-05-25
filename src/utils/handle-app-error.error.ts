@@ -4,7 +4,6 @@ import {
   ForbiddenException,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException,
   HttpException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -25,7 +24,7 @@ export function handleAppError(error: any): HttpException {
       case 'P2002': {
         const fields = Array.isArray(error.meta?.target)
           ? error.meta.target.join(', ')
-          : error.meta?.target ?? 'unique field';
+          : (error.meta?.target ?? 'unique field');
         return new ConflictException(`Duplicate value for: ${fields}`);
       }
       case 'P2003':

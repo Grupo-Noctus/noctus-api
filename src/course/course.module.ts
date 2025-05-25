@@ -7,20 +7,13 @@ import { CourseAdminController } from './course-admin.controller';
 import { ModuleModule } from 'src/module/module.module';
 
 @Module({
-  controllers: [
-    CourseController,
-    CourseAdminController
-  ],
-    providers: [
-      {
+  controllers: [CourseController, CourseAdminController],
+  providers: [
+    {
       provide: 'ICourseService',
-      useClass: CourseService
+      useClass: CourseService,
     },
   ],
-  imports:[
-    EnrollmentModule,
-    ModuleModule,
-    UploadModule,  
-  ]
+  imports: [EnrollmentModule, ModuleModule, UploadModule],
 })
 export class CourseModule {}

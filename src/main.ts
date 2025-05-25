@@ -1,4 +1,3 @@
-
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -26,11 +25,12 @@ async function bootstrap() {
     .addTag('Material')
     .addTag('Streaming')
     .addBearerAuth()
-    .addServer('http://localhost:3000') 
+    .addServer('http://localhost:3000')
     .build();
-  const documentFactory = () => SwaggerModule.createDocument(app, config, {
-    extraModels: [UserRegisterDto, StudentRegisterDto],
-  });
+  const documentFactory = () =>
+    SwaggerModule.createDocument(app, config, {
+      extraModels: [UserRegisterDto, StudentRegisterDto],
+    });
   SwaggerModule.setup('api', app, documentFactory);
 
   app.useGlobalPipes(
@@ -40,14 +40,14 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true,
       },
-      exceptionFactory: (errors) => {
+      exceptionFactory: errors => {
         return new BadRequestException(errors);
       },
     }),
   );
 
   app.enableCors({
-    origin: '*' //no ambiente de produção colocar o dominio
+    origin: '*', //no ambiente de produção colocar o dominio
   });
 
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));

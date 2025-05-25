@@ -1,4 +1,20 @@
-import { Controller, Get, Post, Body, Param, Delete, UseInterceptors, HttpCode, HttpStatus, UseGuards, Query, UploadedFile, Logger, Res, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseInterceptors,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  UploadedFile,
+  Logger,
+  Res,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { MaterialService } from './material.service';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
@@ -10,7 +26,6 @@ import { Roles } from 'src/auth/decorator/role.decorator';
 import { Role } from '@prisma/client';
 import { handleAppError } from 'src/utils/handle-app-error.error';
 import { multerFileOptions } from 'src/upload/helper/multer-file-options.helper';
-import { FindMaterialDto } from './dto/find-material-dto';
 import { join } from 'path';
 import { Response } from 'express';
 
@@ -28,8 +43,15 @@ export class MaterialController {
   @ApiResponse({ status: 201, description: 'Success' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseInterceptors(FileInterceptor('file', multerFileOptions('./uploads/materials', /^image\/(jpeg|png|jpg|webp)$|^application\/pdf$|^application\/msword$|^application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document$/
-)))
+  @UseInterceptors(
+    FileInterceptor(
+      'file',
+      multerFileOptions(
+        './uploads/materials',
+        /^image\/(jpeg|png|jpg|webp)$|^application\/pdf$|^application\/msword$|^application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document$/,
+      ),
+    ),
+  )
   async createMaterial(
     @Body() materialResponse: MaterialRequestDto,
     @CurrentUser() user: number,
@@ -42,8 +64,7 @@ export class MaterialController {
         throw new BadRequestException('File type not allowed');
       }
       return await this.materialService.createMaterial(materialResponse, user, file);
-    } catch( error ) {
-
+    } catch (error) {
       this.logger.error(`Error to create a Material `, error);
       handleAppError(error);
     }
@@ -56,12 +77,11 @@ export class MaterialController {
   @ApiResponse({ status: 200, description: 'Success', type: [MaterialResponseDto] })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findManyMaterial(@Param('idCourse') idCourse: string
-    ): Promise<MaterialResponseDto[]> {
+  async findManyMaterial(@Param('idCourse') idCourse: string): Promise<MaterialResponseDto[]> {
     try {
-      return await this.materialService.findManyMaterial({idCourse: +idCourse});
-    } catch(error) {
-      this.logger.error('Error in find the Materials', error)
+      return await this.materialService.findManyMaterial({ idCourse: +idCourse });
+    } catch (error) {
+      this.logger.error('Error in find the Materials', error);
       handleAppError(error);
     }
   }
@@ -73,26 +93,21 @@ export class MaterialController {
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiParam({ name: 'idMaterial', type: String, description: 'ID Material'})
-  async findOneMaterial(
-    @Param('idMaterial') id: string,
-    @Res() res: Response,
-  ) {
+  @ApiParam({ name: 'idMaterial', type: String, description: 'ID Material' })
+  async findOneMaterial(@Param('idMaterial') id: string, @Res() res: Response) {
     try {
       const material = await this.materialService.findOneMaterial(+id);
 
-      if(!material.filename) {
+      if (!material.filename) {
         throw new NotFoundException('This material has no file available for download.');
       }
 
       const filePath = join(process.cwd(), 'uploads', 'materials', material.filename);
       return res.download(filePath, material.filename);
-    } catch(error) {
-
-      this.logger.error(`Failed to download file for material with ID ${id}`, error)
+    } catch (error) {
+      this.logger.error(`Failed to download file for material with ID ${id}`, error);
       handleAppError(error);
     }
-    
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -102,12 +117,11 @@ export class MaterialController {
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiParam({ name: 'idMaterial', type: String, description: 'ID Material'})
+  @ApiParam({ name: 'idMaterial', type: String, description: 'ID Material' })
   async deleteMaterial(@Param('idMaterial') id: string): Promise<void> {
     try {
       await this.materialService.deleteMaterial(+id);
     } catch (error) {
-
       this.logger.error('Error deleting material:', error);
       handleAppError(error);
     }

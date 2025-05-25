@@ -1,4 +1,18 @@
-import { Controller, Post, Body, Get, Param, UseInterceptors, HttpStatus, HttpCode, Res, Req, Delete, UploadedFiles, Put } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  UseInterceptors,
+  HttpStatus,
+  HttpCode,
+  Res,
+  Req,
+  Delete,
+  UploadedFiles,
+  Put,
+} from '@nestjs/common';
 import { ApiBody, ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { Response, Request } from 'express';
@@ -23,35 +37,40 @@ export class StreamingController {
   constructor(
     private readonly streamingService: StreamingService,
     private readonly streamingProgressService: StreamingProgressService,
-    private readonly uploadService: UploadService
-  ) { }
+    private readonly uploadService: UploadService,
+  ) {}
 
   @HttpCode(HttpStatus.CREATED)
   @Post('upload/:idModule')
   @Roles(Role.ADMIN)
-  @UseInterceptors(FileFieldsInterceptor([
-    { name: 'video', maxCount: 1 },
-    { name: 'thumbnail', maxCount: 1 },
-  ], multerFieldsOptions({
-    video: {
-      destination: './uploads/videos-lectures',
-      allowedMimeTypes: /^video\/(mp4|webm|ogg|quicktime)$/,
-    },
-    thumbnail: {
-      destination: './uploads/thumbnails',
-      allowedMimeTypes: /^image\/(jpeg|jpg|png|webp)$/,
-    },
-  })))
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'video', maxCount: 1 },
+        { name: 'thumbnail', maxCount: 1 },
+      ],
+      multerFieldsOptions({
+        video: {
+          destination: './uploads/videos-lectures',
+          allowedMimeTypes: /^video\/(mp4|webm|ogg|quicktime)$/,
+        },
+        thumbnail: {
+          destination: './uploads/thumbnails',
+          allowedMimeTypes: /^image\/(jpeg|jpg|png|webp)$/,
+        },
+      }),
+    ),
+  )
   @ApiOperation({ summary: 'Upload a video file' })
-  @ApiResponse({ status: 200, description: 'Video file uploaded successfully.', type: Boolean})
-  @ApiResponse({ status: 400, description: 'Bad request or missing file.'})
+  @ApiResponse({ status: 200, description: 'Video file uploaded successfully.', type: Boolean })
+  @ApiResponse({ status: 400, description: 'Bad request or missing file.' })
   @ApiParam({ name: 'idModule', description: 'ID of the module where the video is', type: Number })
   @ApiBody({ description: 'Data to create the video information.', type: StreamingRequest })
   async uploadFile(
     @Param('idModule') idModule: string,
     @UploadedFiles() files: { video?: Express.Multer.File[]; thumbnail?: Express.Multer.File[] },
     @Body() streamingRequest: StreamingRequest,
-    @CurrentUser() user: number
+    @CurrentUser() user: number,
   ) {
     const videoFile = files.video?.[0];
     const thumbnailFile = files.thumbnail?.[0];
@@ -62,7 +81,7 @@ export class StreamingController {
     if (videoFile) {
       videoVideoMetadata = await this.uploadService.uploadVideoMetadata(
         videoFile,
-        './uploads/videos-lectures'
+        './uploads/videos-lectures',
       );
     }
 
@@ -76,7 +95,13 @@ export class StreamingController {
     if (thumbnailPath) {
       streamingRequest.thumbnail = thumbnailPath;
     }
-    return await this.streamingService.createVideoLecture( +idModule, videoVideoMetadata, thumbnailPath, streamingRequest, user);
+    return await this.streamingService.createVideoLecture(
+      +idModule,
+      videoVideoMetadata,
+      thumbnailPath,
+      streamingRequest,
+      user,
+    );
   }
 
   @HttpCode(HttpStatus.OK)
@@ -87,10 +112,10 @@ export class StreamingController {
   @ApiResponse({ status: 400, description: 'Bad request. Could not update video data.' })
   @ApiParam({ name: 'idVideo', description: 'ID of the video to be updated', type: Number })
   @ApiBody({ description: 'Data to update the video information.', type: StreamingUpdate })
-  async updateVideoData (
+  async updateVideoData(
     @Param('idVideo') idVideo: number,
     @Body() streamingUpdate: StreamingUpdate,
-    @CurrentUser() user: number
+    @CurrentUser() user: number,
   ): Promise<boolean> {
     return await this.streamingService.updateVideoData(+idVideo, streamingUpdate, user);
   }
@@ -99,10 +124,14 @@ export class StreamingController {
   @Get(':idVideo')
   @Roles(Role.ADMIN, Role.STUDENT)
   @ApiOperation({ summary: 'Stream a video file' })
-  @ApiResponse({ status: 206, description: 'Partial content (video stream)'})
-  @ApiResponse({ status: 400, description: 'Invalid range header.'})
-  @ApiResponse({ status: 416, description: 'Requested range is not satisfiable.'})
-  @ApiParam({ name: 'idVideo', description: 'ID of the video lecture to be streamed', type: Number })
+  @ApiResponse({ status: 206, description: 'Partial content (video stream)' })
+  @ApiResponse({ status: 400, description: 'Invalid range header.' })
+  @ApiResponse({ status: 416, description: 'Requested range is not satisfiable.' })
+  @ApiParam({
+    name: 'idVideo',
+    description: 'ID of the video lecture to be streamed',
+    type: Number,
+  })
   @ApiHeader({
     name: 'Range',
     description: 'The byte range for video streaming',
@@ -112,9 +141,9 @@ export class StreamingController {
   async streamingVideo(
     @Param('idVideo') idVideo: string,
     @Res() res: Response,
-    @Req() req: Request
-  ): Promise <void> {
-    const {url, mimetype, size} = await this.streamingService.findVideo(+idVideo);
+    @Req() req: Request,
+  ): Promise<void> {
+    const { url, mimetype, size } = await this.streamingService.findVideo(+idVideo);
     const videoPath = path.resolve(url);
 
     const stat = fs.statSync(videoPath);
@@ -134,7 +163,7 @@ export class StreamingController {
       return;
     }
 
-    const chunkSize = (end - start) + 1;
+    const chunkSize = end - start + 1;
     const fileStreaming = fs.createReadStream(videoPath, { start, end });
 
     res.writeHead(206, {
@@ -151,55 +180,76 @@ export class StreamingController {
   @Get('findMany/:idCourse/:idModule')
   @Roles(Role.ADMIN, Role.STUDENT)
   @ApiOperation({ summary: 'Get multiple video lectures by module ID' })
-  @ApiResponse({ status: 200, description: 'List of video lectures for the given module ID', type: [StreamingResponseDto] })
-  @ApiParam({ name: 'id', description: 'The ID of the module to get the videos from', type: Number })
-  async findManyVideos (
+  @ApiResponse({
+    status: 200,
+    description: 'List of video lectures for the given module ID',
+    type: [StreamingResponseDto],
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the module to get the videos from',
+    type: Number,
+  })
+  async findManyVideos(
     @Param('idCourse') idCourse: number,
     @Param('idModule') idModule: number,
     @CurrentUser() user: number,
-    @CurrentUser('role') roleUser: Role
+    @CurrentUser('role') roleUser: Role,
   ): Promise<StreamingResponseDto[]> {
     return await this.streamingService.findManyVideos(+idCourse, +idModule, user, roleUser);
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT) 
-  @Delete('delete/:idVideo') 
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('delete/:idVideo')
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Delete a video lecture by ID' }) 
-  @ApiResponse({ status: 204, description: 'Video lecture deleted successfully.' }) 
-  @ApiResponse({ status: 400, description: 'Bad request. Could not delete the video lecture.' }) 
-  @ApiResponse({ status: 404, description: 'Video lecture not found.' }) 
-  @ApiParam({ name: 'idVideo', description: 'ID of the video lecture to be deleted', type: Number }) 
-  async deleteVideoLecture (@Param('idVideo') idVideo: number): Promise<void> {
+  @ApiOperation({ summary: 'Delete a video lecture by ID' })
+  @ApiResponse({ status: 204, description: 'Video lecture deleted successfully.' })
+  @ApiResponse({ status: 400, description: 'Bad request. Could not delete the video lecture.' })
+  @ApiResponse({ status: 404, description: 'Video lecture not found.' })
+  @ApiParam({ name: 'idVideo', description: 'ID of the video lecture to be deleted', type: Number })
+  async deleteVideoLecture(@Param('idVideo') idVideo: number): Promise<void> {
     await this.streamingService.deleteVideo(+idVideo);
   }
 
-  @HttpCode(HttpStatus.OK) 
-  @Post('create-progress/:idCourse/:idVideo') 
+  @HttpCode(HttpStatus.OK)
+  @Post('create-progress/:idCourse/:idVideo')
   @Roles(Role.STUDENT)
   @ApiOperation({ summary: 'Update progress of a video lecture by ID' })
-  @ApiResponse({ status: 200, description: 'Video progress updated successfully.' }) 
-  @ApiResponse({ status: 400, description: 'Bad request. Could not update video progress.' }) 
-  @ApiResponse({ status: 404, description: 'Progress record not found.' }) 
-  @ApiParam({name: 'idProgressVideo', description: 'ID of the progress record to be updated', type: Number}) 
-  async createProgressVideo (
+  @ApiResponse({ status: 200, description: 'Video progress updated successfully.' })
+  @ApiResponse({ status: 400, description: 'Bad request. Could not update video progress.' })
+  @ApiResponse({ status: 404, description: 'Progress record not found.' })
+  @ApiParam({
+    name: 'idProgressVideo',
+    description: 'ID of the progress record to be updated',
+    type: Number,
+  })
+  async createProgressVideo(
     @Param('idCourse') idCourse: number,
     @Param('idVideo') idVideo: number,
     @CurrentUser() user: number,
     @Body() body: CreateProgressDto,
   ): Promise<void> {
-    await this.streamingProgressService.createProgressVideo(+idCourse, +idVideo, user, body.progressVideo);
+    await this.streamingProgressService.createProgressVideo(
+      +idCourse,
+      +idVideo,
+      user,
+      body.progressVideo,
+    );
   }
 
-  @HttpCode(HttpStatus.OK) 
-  @Put('update-progress/:idProgressVideo') 
+  @HttpCode(HttpStatus.OK)
+  @Put('update-progress/:idProgressVideo')
   @Roles(Role.STUDENT)
   @ApiOperation({ summary: 'Update progress of a video lecture by ID' })
-  @ApiResponse({ status: 200, description: 'Video progress updated successfully.' }) 
-  @ApiResponse({ status: 400, description: 'Bad request. Could not update video progress.' }) 
-  @ApiResponse({ status: 404, description: 'Progress record not found.' }) 
-  @ApiParam({name: 'idProgressVideo', description: 'ID of the progress record to be updated', type: Number}) 
-  async updateProgressVideo (
+  @ApiResponse({ status: 200, description: 'Video progress updated successfully.' })
+  @ApiResponse({ status: 400, description: 'Bad request. Could not update video progress.' })
+  @ApiResponse({ status: 404, description: 'Progress record not found.' })
+  @ApiParam({
+    name: 'idProgressVideo',
+    description: 'ID of the progress record to be updated',
+    type: Number,
+  })
+  async updateProgressVideo(
     @Param('idProgressVideo') idProgressVideo: number,
     @Body() body: CreateProgressDto,
   ): Promise<void> {

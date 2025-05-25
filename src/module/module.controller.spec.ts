@@ -47,7 +47,7 @@ describe('ModuleController', () => {
 
       mockModuleService.createModule.mockResolvedValueOnce(true);
       const result = await controller.createModule(dto, 1);
-      
+
       expect(result).toBe(true);
       expect(mockModuleService.createModule).toHaveBeenCalledWith(dto, 1);
     });
@@ -61,11 +61,16 @@ describe('ModuleController', () => {
 
   describe('updateModule', () => {
     it('should update a module and return true', async () => {
-      const dto: ModuleRequstDto = { idCourse: 1, name: 'Updated Module', description: 'Module description', order: 1 };
+      const dto: ModuleRequstDto = {
+        idCourse: 1,
+        name: 'Updated Module',
+        description: 'Module description',
+        order: 1,
+      };
 
       mockModuleService.updateModule.mockResolvedValueOnce(true);
       const result = await controller.updateModule('1', dto, 1);
-      
+
       expect(result).toBe(true);
       expect(mockModuleService.updateModule).toHaveBeenCalledWith(1, dto, 1);
     });
@@ -79,11 +84,15 @@ describe('ModuleController', () => {
 
   describe('findOneModule', () => {
     it('should return module data', async () => {
-      const moduleData: ModuleResponseDto = { name: 'Test Module', description: 'Module description', order: 1 };
+      const moduleData: ModuleResponseDto = {
+        name: 'Test Module',
+        description: 'Module description',
+        order: 1,
+      };
 
       mockModuleService.findOneModule.mockResolvedValueOnce(moduleData);
       const result = await controller.findOneModule('1');
-      
+
       expect(result).toEqual(moduleData);
       expect(mockModuleService.findOneModule).toHaveBeenCalledWith(1);
     });
@@ -119,7 +128,7 @@ describe('ModuleController', () => {
 
       mockModuleService.findManyModule.mockResolvedValueOnce(modules);
       const result = await controller.findManyCourse('1');
-      
+
       expect(result).toEqual(modules);
       expect(mockModuleService.findManyModule).toHaveBeenCalledWith(1);
     });

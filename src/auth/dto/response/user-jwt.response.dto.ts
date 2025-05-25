@@ -1,5 +1,5 @@
 export class UserJwtDto {
-  id: number
-  usernameOrEmail: string
-  password: string
+  id: number;
+  usernameOrEmail: string;
+  password: string;
 }

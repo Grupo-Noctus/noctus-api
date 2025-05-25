@@ -2,13 +2,13 @@ export abstract class IUploadService {
   abstract uploadFileMetadata(
     file: Express.Multer.File,
     subfolder: string,
-    allowedMimeTypes: RegExp
+    allowedMimeTypes: RegExp,
   ): Promise<string>;
 
   abstract uploadVideoMetadata(
     file: Express.Multer.File,
     subfolder: string,
-    allowedMimeTypes: RegExp
+    allowedMimeTypes: RegExp,
   ): Promise<{
     duration: number;
     key: string;

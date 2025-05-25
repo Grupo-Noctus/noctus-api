@@ -12,28 +12,27 @@ import { IAuthService } from './interface/auth.service.interface';
 import { EnrollmentService } from 'src/enrollment/enrollment.service';
 
 @Injectable()
-export class AuthService implements IAuthService{
-    
-  constructor( 
+export class AuthService implements IAuthService {
+  constructor(
     private jwt: JwtService,
     private userService: UserService,
     @Inject('IEnrollmentService')
     private readonly enrollmentService: EnrollmentService,
-    private readonly prisma: PrismaService
-  ){}
+    private readonly prisma: PrismaService,
+  ) {}
 
   async signIn(login: LoginRequestDto): Promise<LoginResponseDto> {
     const user = await this.userService.findByUsernameOrEmailForAuth(login.usernameOrEmail);
-  
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-  
+
     const passwordMatches = await argon2.verify(user.password, login.password);
     if (!passwordMatches) {
       throw new UnauthorizedException('Invalid credentials');
     }
-  
+
     const payload = {
       sub: user.id,
       name: user.name,
@@ -42,16 +41,13 @@ export class AuthService implements IAuthService{
       role: user.role,
       active: user.active,
     };
-  
-    const access_token = await this.jwt.signAsync(payload);
-  
-    return { access_token, payload };
-  }      
 
-  async registerAdmin(
-    userRegister: UserRegisterDto,
-    image: string
-    ): Promise<boolean> {
+    const access_token = await this.jwt.signAsync(payload);
+
+    return { access_token, payload };
+  }
+
+  async registerAdmin(userRegister: UserRegisterDto, image: string): Promise<boolean> {
     const hashedPassword = await argon2.hash(userRegister.password);
 
     await this.prisma.user.create({
@@ -60,22 +56,22 @@ export class AuthService implements IAuthService{
         role: Role.ADMIN,
         active: true,
         password: hashedPassword,
-        image: image
-      }
+        image: image,
+      },
     });
 
     return true;
   }
-    
+
   async registerStudent(
     userRegister: UserRegisterDto,
     studentRegister: StudentRegisterDto,
-    image?: string
+    image?: string,
   ): Promise<boolean> {
     const hashedPassword = await argon2.hash(userRegister.password);
 
     const createdStudent = await this.prisma.user.create({
-    data: {
+      data: {
         ...userRegister,
         role: Role.STUDENT,
         active: true,
@@ -84,18 +80,18 @@ export class AuthService implements IAuthService{
         student: {
           create: {
             ...studentRegister,
-            dateBirth: new Date(studentRegister.dateBirth)
-          }
-        }
-      }
+            dateBirth: new Date(studentRegister.dateBirth),
+          },
+        },
+      },
     });
     const { student } = await this.prisma.user.findUnique({
       where: { id: createdStudent.id },
-      include: { student: true }
+      include: { student: true },
     });
 
     await this.enrollmentService.createEnrollmentByPreEnrrolment(student.id, userRegister.email);
 
     return true;
-  }  
+  }
 }

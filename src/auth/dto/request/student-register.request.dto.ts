@@ -1,13 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EducationLevel, Ethnicity, Gender, State } from '@prisma/client';
-import {
-  IsNotEmpty,
-  IsEnum,
-  IsBoolean,
-  IsString,
-  IsDateString,
-  ValidateIf,
-} from 'class-validator';
+import { IsNotEmpty, IsEnum, IsBoolean, IsString, IsDateString, ValidateIf } from 'class-validator';
 
 export class StudentRegisterDto {
   @ApiProperty({
@@ -66,7 +59,7 @@ export class StudentRegisterDto {
     description: 'Type of disability (if applicable)',
     example: 'Visual',
   })
-  @ValidateIf((o) => o.hasDisability === true)
+  @ValidateIf(o => o.hasDisability === true)
   @IsNotEmpty({ message: 'Disability type must not be empty when hasDisability is true.' })
   @IsString({ message: 'Disability type must be a string.' })
   disabilityType?: string;
@@ -83,7 +76,7 @@ export class StudentRegisterDto {
     description: 'Description of required support resources (if applicable)',
     example: 'Screen reader',
   })
-  @ValidateIf((o) => o.needsSupportResources === true)
+  @ValidateIf(o => o.needsSupportResources === true)
   @IsNotEmpty({ message: 'Support resource description must not be empty when needed.' })
   @IsString({ message: 'Support resource description must be a string.' })
   supportResourcesDescription?: string;

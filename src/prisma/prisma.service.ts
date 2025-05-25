@@ -2,12 +2,15 @@ import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/commo
 import { PrismaClient, Prisma } from '@prisma/client';
 
 @Injectable()
-export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Prisma.LogLevel> implements OnModuleInit, OnModuleDestroy {
+export class PrismaService
+  extends PrismaClient<Prisma.PrismaClientOptions, Prisma.LogLevel>
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(PrismaService.name);
 
   constructor() {
     super({
-      log: ['query', 'warn', 'error'], 
+      log: ['query', 'warn', 'error'],
     });
   }
 
@@ -15,17 +18,17 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
     await this.$connect();
     this.logger.log('Prisma connected');
 
-    this.$on('query', (e) => {
+    this.$on('query', e => {
       this.logger.debug(`[QUERY] ${e.query}`);
       this.logger.debug(`[PARAMS] ${JSON.stringify(e.params)}`);
       this.logger.debug(`[DURATION] ${e.duration}ms`);
     });
 
-    this.$on('warn', (e) => {
+    this.$on('warn', e => {
       this.logger.warn(`[WARNING] ${e.message}`);
     });
 
-    this.$on('error', (e) => {
+    this.$on('error', e => {
       this.logger.error(`[ERROR] ${e.message}`);
     });
   }

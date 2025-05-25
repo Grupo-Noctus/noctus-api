@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ProgressVideoDto {
   @ApiProperty({
@@ -11,7 +11,7 @@ export class ProgressVideoDto {
   @ApiProperty({
     description: 'Amount of the video in percentage the student has watched',
     type: Number,
-    example: 75, 
+    example: 75,
   })
   viewed: number;
 }

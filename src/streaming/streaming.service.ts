@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { StreamingRequest } from './dto/streaming-request.dto';
 import { StreamingDto } from './dto/streaming.dto';
@@ -8,7 +8,6 @@ import { VideoMetadata } from 'src/upload/dto/video-metadata.dto';
 import { handleAppError } from 'src/utils/handle-app-error.error';
 import { UploadService } from 'src/upload/upload.service';
 import { Role } from '@prisma/client';
-import { EnrolledCourseService } from 'src/enrollment/enrolled-course.service';
 import { ProgressVideoDto } from './dto/progress-video.dto';
 import { UserService } from 'src/user/user.service';
 
@@ -18,26 +17,32 @@ export class StreamingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly uploadService: UploadService,
-    private readonly userService: UserService
-  ){}
+    private readonly userService: UserService,
+  ) {}
 
-  async createVideoLecture( idModule: number, videoMetadata: VideoMetadata, thumbnail: string, streamingRequest: StreamingRequest, user: number): Promise<boolean> {
+  async createVideoLecture(
+    idModule: number,
+    videoMetadata: VideoMetadata,
+    thumbnail: string,
+    streamingRequest: StreamingRequest,
+    user: number,
+  ): Promise<boolean> {
     try {
       const videoData = {
         data: {
           module: {
             connect: {
-              id: idModule
-            }
+              id: idModule,
+            },
           },
           ...streamingRequest,
           ...videoMetadata,
           thumbnail: thumbnail,
           createdBy: user,
-          updatedBy: user
-        }
+          updatedBy: user,
+        },
       };
-    
+
       await this.prisma.videoLecture.create(videoData);
       return true;
     } catch (error) {
@@ -47,28 +52,28 @@ export class StreamingService {
     }
   }
 
-  async findManyVideos (
+  async findManyVideos(
     idCourse: number,
-    idModule: number, 
-    user: number, 
-    role: Role
-  ): Promise<StreamingResponseDto[]>{
-    try{
+    idModule: number,
+    user: number,
+    role: Role,
+  ): Promise<StreamingResponseDto[]> {
+    try {
       const data = await this.prisma.videoLecture.findMany({
-        where: {idModule: idModule},
+        where: { idModule: idModule },
         select: {
           id: true,
           name: true,
           description: true,
           duration: true,
-        }
+        },
       });
-      if(role === Role.STUDENT){
+      if (role === Role.STUDENT) {
         const idEnrrolment = await this.getEnrrolmentByIdCourseAndIdStudent(idCourse, user);
-        for (const item of data){
+        for (const item of data) {
           const progressVideo = await this.getVideoProgress(idEnrrolment, item.id);
-          if(progressVideo != null){
-            item['idProgressVideo'] = progressVideo.id
+          if (progressVideo != null) {
+            item['idProgressVideo'] = progressVideo.id;
             item['viewed'] = progressVideo.viewed;
           }
         }
@@ -81,14 +86,18 @@ export class StreamingService {
     }
   }
 
-  async updateVideoData (idVideo: number, streamingUpdate: StreamingUpdate, user: number): Promise <boolean> {
+  async updateVideoData(
+    idVideo: number,
+    streamingUpdate: StreamingUpdate,
+    user: number,
+  ): Promise<boolean> {
     try {
       await this.prisma.videoLecture.update({
-        where: {id: idVideo},
+        where: { id: idVideo },
         data: {
           ...streamingUpdate,
           updatedBy: user,
-        }
+        },
       });
       return true;
     } catch (error) {
@@ -97,43 +106,43 @@ export class StreamingService {
     }
   }
 
-  async findVideo (id: number): Promise<StreamingDto>{
-    try{
-    const videoData = await this.prisma.videoLecture.findUnique({
-        where: {id: id},
-        select:{
+  async findVideo(id: number): Promise<StreamingDto> {
+    try {
+      const videoData = await this.prisma.videoLecture.findUnique({
+        where: { id: id },
+        select: {
           url: true,
-          mimetype:true,
+          mimetype: true,
           size: true,
-        }
+        },
       });
-       
-      if(!videoData){
+
+      if (!videoData) {
         throw new NotFoundException();
       }
 
       return videoData;
-    } catch (error){
-      this.logger.error(`Failed to retrieve video lecture with ID ${id}`, error);;
+    } catch (error) {
+      this.logger.error(`Failed to retrieve video lecture with ID ${id}`, error);
       handleAppError(error);
     }
   }
 
-  async deleteVideo (idVideo: number): Promise<void>{
+  async deleteVideo(idVideo: number): Promise<void> {
     try {
       const video = await this.prisma.videoLecture.findUnique({
-        where: {id: idVideo},
-        select: {url: true}
+        where: { id: idVideo },
+        select: { url: true },
       });
 
       if (!video) {
         throw new NotFoundException(`video with ID ${idVideo} not found.`);
       }
-  
+
       if (video.url) {
         await this.uploadService.deleteFile(video.url);
       }
-  
+
       await this.prisma.videoLecture.delete({ where: { id: idVideo } });
     } catch (error) {
       this.logger.error(`Failed to delete video lecture with ID ${idVideo}`, error);
@@ -141,8 +150,11 @@ export class StreamingService {
     }
   }
 
-  private async getVideoProgress(idEnrrolment: number, idVideo: number): Promise<ProgressVideoDto | null> {
-    try{
+  private async getVideoProgress(
+    idEnrrolment: number,
+    idVideo: number,
+  ): Promise<ProgressVideoDto | null> {
+    try {
       const data = await this.prisma.progressVideo.findUnique({
         where: {
           idEnrrolment_idVideo: {
@@ -156,34 +168,34 @@ export class StreamingService {
         },
       });
 
-      if(!data || !data.viewed){
+      if (!data || !data.viewed) {
         return null;
       }
 
       return data;
-    } catch(error){
+    } catch (error) {
       this.logger.error(`Failed to find video progress`, error);
       handleAppError(error);
     }
   }
 
-  async getEnrrolmentByIdCourseAndIdStudent (idCourse: number, idUser: number): Promise<number>{
+  async getEnrrolmentByIdCourseAndIdStudent(idCourse: number, idUser: number): Promise<number> {
     try {
       const idStudent = await this.userService.findStudentByIdUser(idUser);
       const data = await this.prisma.enrollment.findUnique({
-          where: {
-              idStudent_idCourse: {
-                  idStudent,
-                  idCourse,
-              },
+        where: {
+          idStudent_idCourse: {
+            idStudent,
+            idCourse,
           },
-          select: {
-              id: true,
-          }
+        },
+        select: {
+          id: true,
+        },
       });
       if (!data) {
-          this.logger.error('Enrollment not found');
-          throw new NotFoundException('Enrollment not found');
+        this.logger.error('Enrollment not found');
+        throw new NotFoundException('Enrollment not found');
       }
       return data.id;
     } catch (error) {

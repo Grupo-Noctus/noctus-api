@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { EnrollmentService } from './enrollment.service';
 import { EnrollmentController } from './enrollment.controller';
 import { EnrolledCourseService } from './enrolled-course.service';
@@ -7,27 +7,18 @@ import { EnrroledCourseController } from './enrolled-course.controller';
 import { ModuleModule } from 'src/module/module.module';
 
 @Module({
-  controllers: [
-    EnrollmentController,
-    EnrroledCourseController
-  ],
+  controllers: [EnrollmentController, EnrroledCourseController],
   providers: [
     {
       provide: 'IEnrollmentService',
-      useClass: EnrollmentService
+      useClass: EnrollmentService,
     },
     {
       provide: 'IEnrolledCourseService',
-      useClass: EnrolledCourseService
+      useClass: EnrolledCourseService,
     },
   ],
-  exports:[
-    'IEnrolledCourseService',
-    'IEnrollmentService'
-  ],
-  imports: [
-    UserModule,
-    forwardRef(() => ModuleModule)
-  ],
+  exports: ['IEnrolledCourseService', 'IEnrollmentService'],
+  imports: [UserModule, ModuleModule],
 })
 export class EnrollmentModule {}

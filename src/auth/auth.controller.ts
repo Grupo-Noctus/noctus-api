@@ -1,4 +1,15 @@
-import { BadRequestException, Body, Controller, HttpCode, HttpStatus, Inject, Logger, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Logger,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { LoginRequestDto } from './dto/request/login.request.dto';
 import { Public } from './decorator/public.decorator';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
@@ -17,12 +28,12 @@ import { LoginResponseDto } from './dto/response/login.response.dto';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  private readonly logger = new Logger(AuthController.name)
+  private readonly logger = new Logger(AuthController.name);
 
   constructor(
     @Inject('IAuthService')
     private readonly authService: IAuthService,
-    private readonly uploadService: UploadService
+    private readonly uploadService: UploadService,
   ) {}
 
   @HttpCode(HttpStatus.OK)
@@ -34,9 +45,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized - invalid credentials' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   @ApiBody({ type: LoginRequestDto })
-  async signIn(
-    @Body() userAuth: LoginRequestDto,
-  ): Promise<{ access_token: string }> {
+  async signIn(@Body() userAuth: LoginRequestDto): Promise<{ access_token: string }> {
     try {
       return await this.authService.signIn(userAuth);
     } catch (error) {
@@ -69,7 +78,8 @@ export class AuthController {
 
     try {
       const userPlain = typeof body.user === 'string' ? JSON.parse(body.user) : body.user;
-      const studentPlain = typeof body.student === 'string' ? JSON.parse(body.student) : body.student;
+      const studentPlain =
+        typeof body.student === 'string' ? JSON.parse(body.student) : body.student;
 
       if (!userPlain) {
         throw new BadRequestException('User data not found');
@@ -89,10 +99,7 @@ export class AuthController {
       }
 
       if (imageUser) {
-        imageKey = await this.uploadService.uploadFileMetadata(
-          imageUser, 
-          'images-users'
-        );
+        imageKey = await this.uploadService.uploadFileMetadata(imageUser, 'images-users');
       }
 
       if (isEmailFromMatera(userDto.email)) {
@@ -100,13 +107,12 @@ export class AuthController {
       } else {
         return await this.authService.registerStudent(userDto, studentDto!, imageKey);
       }
-
     } catch (error) {
       this.logger.error('Error occurred during user registration', error);
       if (imageKey) {
         await this.uploadService.deleteFile(imageKey);
       }
-      
+
       throw handleAppError(error);
     }
   }

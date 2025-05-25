@@ -75,10 +75,11 @@ describe('AuthService', () => {
 
       const result = await authService.signIn(loginDto);
 
-      expect(userService.findByUsernameOrEmailForAuth).toHaveBeenCalledWith(loginDto.usernameOrEmail);
+      expect(userService.findByUsernameOrEmailForAuth).toHaveBeenCalledWith(
+        loginDto.usernameOrEmail,
+      );
       expect(argon2.verify).toHaveBeenCalledWith(user.password, loginDto.password);
-      
-     
+
       expect(result).toHaveProperty('access_token', 'mock_token');
     });
 
