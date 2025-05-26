@@ -16,7 +16,7 @@ export class UserRegisterDto {
   })
   @IsNotEmpty({ message: "The 'username' field must not be empty." })
   @IsString({ message: "The 'username' field must be a string." })
-  @Matches(/^[a-zA-Z0-9._]{3,}$/, {
+  @Matches(/^[a-z0-9._]{3,}$/, {
     message:
       "The 'username' must have at least 3 characters and contain only letters, numbers, dots, or underscores.",
   })

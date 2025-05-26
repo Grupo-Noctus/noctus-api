@@ -1,6 +1,5 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/user.service';
 import { UserRegisterDto } from './dto/request/user-register.request.dto';
 import { LoginRequestDto } from './dto/request/login.request.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -10,15 +9,17 @@ import * as argon2 from 'argon2';
 import { LoginResponseDto } from './dto/response/login.response.dto';
 import { IAuthService } from './interface/auth.service.interface';
 import { EnrollmentService } from 'src/enrollment/enrollment.service';
+import { IUserService } from 'src/user/interface/user.service.interface';
 
 @Injectable()
 export class AuthService implements IAuthService {
   constructor(
-    private jwt: JwtService,
-    private userService: UserService,
+    private readonly jwt: JwtService,
+    private readonly prisma: PrismaService,
+    @Inject('IUserService')
+    private readonly userService: IUserService,
     @Inject('IEnrollmentService')
     private readonly enrollmentService: EnrollmentService,
-    private readonly prisma: PrismaService,
   ) {}
 
   async signIn(login: LoginRequestDto): Promise<LoginResponseDto> {

@@ -25,6 +25,7 @@ import { plainToInstance } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
 import { StudentRegisterDto } from './dto/request/student-register.request.dto';
 import { LoginResponseDto } from './dto/response/login.response.dto';
+import { IUploadService } from 'src/upload/interface/upload.service.interface';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
@@ -33,7 +34,8 @@ export class AuthController {
   constructor(
     @Inject('IAuthService')
     private readonly authService: IAuthService,
-    private readonly uploadService: UploadService,
+    @Inject('IUploadService')
+    private readonly uploadService: IUploadService,
   ) {}
 
   @HttpCode(HttpStatus.OK)

@@ -33,4 +33,6 @@ export class CourseController {
   ): Promise<coursePreviewDto> {
     return await this.courseService.findOneCoursePreview(+idCourse, user, role);
   }
+
+  //Criar pegar todos os cursos preview
 }

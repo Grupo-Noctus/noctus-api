@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { StreamingRequest } from './dto/request/streaming.request.dto';
 import { StreamingDto } from './dto/streaming.dto';
@@ -10,13 +10,15 @@ import { UploadService } from 'src/upload/upload.service';
 import { Role } from '@prisma/client';
 import { ProgressVideoDto } from './dto/response/progress.response.dto';
 import { IStreamingService } from './interface/streaming.intercafe';
+import { IUploadService } from 'src/upload/interface/upload.service.interface';
 
 @Injectable()
 export class StreamingService implements IStreamingService {
   private readonly logger = new Logger(StreamingService.name);
   constructor(
     private readonly prisma: PrismaService,
-    private readonly uploadService: UploadService,
+    @Inject('IUploadService')
+    private readonly uploadService: IUploadService,
   ) {}
 
   async createVideoLecture(

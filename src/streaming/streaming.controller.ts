@@ -15,6 +15,7 @@ import {
   Query,
   Inject,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
@@ -27,19 +28,22 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { Roles } from 'src/auth/decorator/role.decorator';
 import { Role } from '@prisma/client';
-import { UploadService } from 'src/upload/upload.service';
 import { VideoMetadata } from 'src/upload/dto/video-metadata.dto';
 import { multerFieldsOptions } from 'src/upload/helper/multer-file-options.helper';
 import { SaveProgressDto } from './dto/request/progress.request.dto';
 import { IStreamingService } from './interface/streaming.intercafe';
+import { IUploadService } from 'src/upload/interface/upload.service.interface';
+import { EnrollmentGuard } from 'src/auth/guard/enrrolment.guard';
 
 @ApiTags('Streaming')
 @Controller('streaming')
+@UseGuards(EnrollmentGuard)
 export class StreamingController {
   constructor(
     @Inject('IStreamingService')
     private readonly streamingService: IStreamingService,
-    private readonly uploadService: UploadService,
+    @Inject('IUploadService')
+    private readonly uploadService: IUploadService,
   ) {}
 
   @HttpCode(HttpStatus.CREATED)
@@ -201,7 +205,7 @@ export class StreamingController {
     type: Number,
   })
   async findManyVideos(
-    @Query('idEnrollment') idEnrollment: number | null,
+    @Query('idEnrollment') idEnrollment: number,
     @Param('idModule') idModule: number,
     @CurrentUser() user: number,
     @CurrentUser('role') roleUser: Role,
@@ -209,7 +213,7 @@ export class StreamingController {
     if (roleUser === Role.STUDENT && !idEnrollment) {
       throw new BadRequestException('idEnrollment is required for students');
     }
-    return await this.streamingService.findManyVideos(idEnrollment, idModule, user, roleUser);
+    return await this.streamingService.findManyVideos(+idEnrollment, idModule, user, roleUser);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)

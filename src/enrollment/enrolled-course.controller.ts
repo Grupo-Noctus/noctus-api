@@ -1,14 +1,16 @@
-import { Controller, Get, HttpCode, HttpStatus, Inject } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Inject, UseGuards } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { Roles } from 'src/auth/decorator/role.decorator';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EnrolledCourseDto } from './dto/response/enrolled-course.response.dto';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { IEnrolledCourseService } from './interface/enrolled-course.interface';
+import { EnrollmentGuard } from 'src/auth/guard/enrrolment.guard';
 
 @ApiTags('EnrollmentCourse')
 @Controller('enrollment-course')
 @Roles(Role.STUDENT)
+@UseGuards(EnrollmentGuard)
 export class EnrroledCourseController {
   constructor(
     @Inject('IEnrolledCourseService')

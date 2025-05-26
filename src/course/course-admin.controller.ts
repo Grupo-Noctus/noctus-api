@@ -36,6 +36,7 @@ import { validateOrReject } from 'class-validator';
 import { handleAppError } from 'src/utils/handle-app-error.error';
 import { CourseUpdateDto } from './dto/update/course.update.dto';
 import { CoursePaginationResponseDto } from './dto/response/course-pagination.response.dto';
+import { IUploadService } from 'src/upload/interface/upload.service.interface';
 
 @ApiTags('CourseAdmin')
 @Controller('course/admin')
@@ -45,7 +46,8 @@ export class CourseAdminController {
   constructor(
     @Inject('ICourseService')
     private readonly courseService: ICourseService,
-    private readonly uploadService: UploadService,
+    @Inject('IUploadService')
+    private readonly uploadService: IUploadService,
   ) {}
 
   @HttpCode(HttpStatus.CREATED)

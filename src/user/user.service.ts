@@ -1,12 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UserAutResDto } from './dto/user-auth-response.dto';
+import { UserAutResDto } from './dto/response/user-auth.response.dto';
 import { handleAppError } from 'src/utils/handle-app-error.error';
+import { IUploadService } from 'src/upload/interface/upload.service.interface';
+import { IUserService } from './interface/user.service.interface';
 
 @Injectable()
-export class UserService {
+export class UserService implements IUserService {
   private readonly logger = new Logger(UserService.name);
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findByUsernameOrEmailForAuth(usernameOrEmail: string): Promise<UserAutResDto> {
     try {

@@ -1,7 +1,10 @@
-import { Controller } from '@nestjs/common';
-import { UserService } from './user.service';
+import { Controller, Inject } from '@nestjs/common';
+import { IUserService } from './interface/user.service.interface';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    @Inject('IUserService')
+    private readonly userService: IUserService,
+  ) {}
 }

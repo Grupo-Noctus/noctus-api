@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as fs from 'fs/promises';
-import { IUploadService } from './interface/upload.interface';
+import { IUploadService } from './interface/upload.service.interface';
 import getVideoDuration from 'get-video-duration';
 import { VideoMetadata } from './dto/video-metadata.dto';
 

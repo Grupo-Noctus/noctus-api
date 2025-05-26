@@ -10,15 +10,17 @@ import { Prisma, Role } from '@prisma/client';
 import { ICourseService } from './interface/course.service.interface';
 import { coursePreviewDto } from './dto/response/course-preview.response';
 import { IModuleService } from 'src/module/interface/module.interface';
+import { IUploadService } from 'src/upload/interface/upload.service.interface';
 
 @Injectable()
 export class CourseService implements ICourseService {
   private readonly logger = new Logger(CourseService.name);
   constructor(
-    private prisma: PrismaService,
+    private readonly prisma: PrismaService,
     @Inject('IModuleService')
     private readonly moduleService: IModuleService,
-    private readonly uploadService: UploadService,
+    @Inject('IUploadService')
+    private readonly uploadService: IUploadService,
   ) {}
 
   async createCourse(

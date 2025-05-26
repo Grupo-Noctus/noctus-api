@@ -66,7 +66,7 @@ export class MaterialController {
       return await this.materialService.createMaterial(materialResponse, user, file);
     } catch (error) {
       this.logger.error(`Error to create a Material `, error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
@@ -82,7 +82,7 @@ export class MaterialController {
       return await this.materialService.findManyMaterial({ idCourse: +idCourse });
     } catch (error) {
       this.logger.error('Error in find the Materials', error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
@@ -106,7 +106,7 @@ export class MaterialController {
       return res.download(filePath, material.filename);
     } catch (error) {
       this.logger.error(`Failed to download file for material with ID ${id}`, error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
@@ -123,7 +123,7 @@ export class MaterialController {
       await this.materialService.deleteMaterial(+id);
     } catch (error) {
       this.logger.error('Error deleting material:', error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 }

@@ -12,6 +12,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
@@ -20,10 +21,13 @@ import { ModuleRequstDto } from './dto/request/module-request.dto';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { ModuleResponseDto } from './dto/response/module-response.dto';
 import { IModuleService } from './interface/module.interface';
+import { ModuleUpdateDto } from './dto/update/module-update.dto';
+import { EnrollmentGuard } from 'src/auth/guard/enrrolment.guard';
 
 @ApiTags('Module')
 @Controller('module')
 @Roles(Role.ADMIN)
+@UseGuards(EnrollmentGuard)
 export class ModuleController {
   constructor(
     @Inject('IModuleService')
@@ -59,7 +63,7 @@ export class ModuleController {
   @Put('update/:idModule')
   async updateModule(
     @Param('idModule', ParseIntPipe) idModule: number,
-    @Body() updateModule: ModuleRequstDto,
+    @Body() updateModule: ModuleUpdateDto,
     @CurrentUser() user: number,
   ): Promise<boolean> {
     return await this.moduleService.updateModule(idModule, updateModule, user);
@@ -76,7 +80,7 @@ export class ModuleController {
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async findManyModule(
     @Param('idCourse', ParseIntPipe) idCourse: number,
-    @Query('idEnrollment') idEnrollment: number | null,
+    @Query('idEnrollment') idEnrollment: number,
     @CurrentUser() user: number,
     @CurrentUser('role') role: Role,
   ): Promise<ModuleResponseDto[] | []> {

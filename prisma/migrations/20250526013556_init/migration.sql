@@ -40,9 +40,10 @@ CREATE TABLE `Course` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NOT NULL,
-    `image` VARCHAR(191) NOT NULL,
-    `durationInDays` INTEGER NOT NULL,
+    `image` VARCHAR(191) NULL,
+    `duration` INTEGER NOT NULL,
     `certificateModel` VARCHAR(191) NULL,
+    `isHidden` BOOLEAN NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `createdBy` INTEGER NOT NULL,
     `updatedAt` DATETIME(3) NOT NULL,
@@ -59,11 +60,23 @@ CREATE TABLE `Enrollment` (
     `idCourse` INTEGER NOT NULL,
     `active` BOOLEAN NOT NULL DEFAULT true,
     `completed` BOOLEAN NOT NULL,
-    `startDate` DATETIME(3) NOT NULL,
-    `endDate` DATETIME(3) NOT NULL,
+    `expiresAt` DATETIME(3) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `Enrollment_idStudent_idCourse_key`(`idStudent`, `idCourse`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `PreEnrollment` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `email` VARCHAR(191) NOT NULL,
+    `idCourse` INTEGER NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `createdBy` INTEGER NOT NULL,
+
+    UNIQUE INDEX `PreEnrollment_email_idCourse_key`(`email`, `idCourse`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -137,7 +150,6 @@ CREATE TABLE `VideoLecture` (
     `url` VARCHAR(191) NOT NULL,
     `mimetype` VARCHAR(191) NOT NULL,
     `size` INTEGER NOT NULL,
-    `order` INTEGER NOT NULL,
     `thumbnail` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `createdBy` INTEGER NOT NULL,
@@ -185,6 +197,19 @@ CREATE TABLE `Messages` (
     `fixed` BOOLEAN NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ProgressVideo` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `idVideo` INTEGER NOT NULL,
+    `idEnrollment` INTEGER NOT NULL,
+    `viewed` INTEGER NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `ProgressVideo_idEnrollment_idVideo_key`(`idEnrollment`, `idVideo`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
