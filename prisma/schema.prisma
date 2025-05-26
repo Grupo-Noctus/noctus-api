@@ -210,12 +210,12 @@ model Messages {
 model ProgressVideo {
   id           Int      @id @default(autoincrement())
   idVideo      Int
-  idEnrrolment Int
+  idEnrollment Int
   viewed       Int
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  @@unique([idEnrrolment, idVideo])
+  @@unique([idEnrollment, idVideo])
 }
 
 enum Role {

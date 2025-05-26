@@ -1,14 +1,23 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EducationLevel, Ethnicity, Gender, State } from '@prisma/client';
-import { IsNotEmpty, IsEnum, IsBoolean, IsString, IsDateString, ValidateIf } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsEnum,
+  IsBoolean,
+  IsString,
+  IsDateString,
+  ValidateIf,
+  IsDefined,
+  MaxLength,
+} from 'class-validator';
 
 export class StudentRegisterDto {
   @ApiProperty({
     example: '2005-03-23T15:00:00.000Z',
     description: "Student's date of birth in ISO format (YYYY-MM-DD)",
   })
-  @IsNotEmpty({ message: 'Date of birth must not be empty.' })
-  @IsDateString({}, { message: 'Date of birth must be a valid ISO date string.' })
+  @IsNotEmpty({ message: "Field 'dateBirth' is required." })
+  @IsDateString({}, { message: "Field 'dateBirth' must be a valid ISO date string." })
   dateBirth: string;
 
   @ApiProperty({
@@ -16,8 +25,8 @@ export class StudentRegisterDto {
     enumName: 'EducationLevel',
     description: "Student's education level",
   })
-  @IsNotEmpty({ message: 'Education level must not be empty.' })
-  @IsEnum(EducationLevel, { message: 'Education level must be a valid enum value.' })
+  @IsNotEmpty({ message: "Field 'educationLevel' is required." })
+  @IsEnum(EducationLevel, { message: "Field 'educationLevel' must be a valid enum value." })
   educationLevel: EducationLevel;
 
   @ApiProperty({
@@ -25,8 +34,8 @@ export class StudentRegisterDto {
     enumName: 'State',
     description: "Student's state of residence",
   })
-  @IsNotEmpty({ message: 'State must not be empty.' })
-  @IsEnum(State, { message: 'State must be a valid enum value.' })
+  @IsNotEmpty({ message: "Field 'state' is required." })
+  @IsEnum(State, { message: "Field 'state' must be a valid enum value." })
   state: State;
 
   @ApiProperty({
@@ -34,8 +43,8 @@ export class StudentRegisterDto {
     enumName: 'Ethnicity',
     description: "Student's ethnicity",
   })
-  @IsNotEmpty({ message: 'Ethnicity must not be empty.' })
-  @IsEnum(Ethnicity, { message: 'Ethnicity must be a valid enum value.' })
+  @IsNotEmpty({ message: "Field 'ethnicity' is required." })
+  @IsEnum(Ethnicity, { message: "Field 'ethnicity' must be a valid enum value." })
   ethnicity: Ethnicity;
 
   @ApiProperty({
@@ -43,16 +52,16 @@ export class StudentRegisterDto {
     enumName: 'Gender',
     description: "Student's gender",
   })
-  @IsNotEmpty({ message: 'Gender must not be empty.' })
-  @IsEnum(Gender, { message: 'Gender must be a valid enum value.' })
+  @IsNotEmpty({ message: "Field 'gender' is required." })
+  @IsEnum(Gender, { message: "Field 'gender' must be a valid enum value." })
   gender: Gender;
 
   @ApiProperty({
     description: 'Indicates whether the student has a disability',
     example: true,
   })
-  @IsNotEmpty({ message: 'Disability status must not be empty.' })
-  @IsBoolean({ message: 'Disability status must be a boolean.' })
+  @IsDefined({ message: "Field 'hasDisability' must be defined." })
+  @IsBoolean({ message: "Field 'hasDisability' must be a boolean." })
   hasDisability: boolean;
 
   @ApiPropertyOptional({
@@ -60,16 +69,17 @@ export class StudentRegisterDto {
     example: 'Visual',
   })
   @ValidateIf(o => o.hasDisability === true)
-  @IsNotEmpty({ message: 'Disability type must not be empty when hasDisability is true.' })
-  @IsString({ message: 'Disability type must be a string.' })
+  @IsNotEmpty({ message: "Field 'disabilityType' is required when 'hasDisability' is true." })
+  @IsString({ message: "Field 'disabilityType' must be a string." })
+  @MaxLength(100, { message: "Field 'disabilityType' must be at most 100 characters." })
   disabilityType?: string;
 
   @ApiProperty({
     description: 'Indicates whether the student requires support resources',
     example: false,
   })
-  @IsNotEmpty({ message: 'Support resource status must not be empty.' })
-  @IsBoolean({ message: 'Support resource status must be a boolean.' })
+  @IsDefined({ message: "Field 'needsSupportResources' must be defined." })
+  @IsBoolean({ message: "Field 'needsSupportResources' must be a boolean." })
   needsSupportResources: boolean;
 
   @ApiPropertyOptional({
@@ -77,7 +87,13 @@ export class StudentRegisterDto {
     example: 'Screen reader',
   })
   @ValidateIf(o => o.needsSupportResources === true)
-  @IsNotEmpty({ message: 'Support resource description must not be empty when needed.' })
-  @IsString({ message: 'Support resource description must be a string.' })
+  @IsNotEmpty({
+    message:
+      "Field 'supportResourcesDescription' is required when 'needsSupportResources' is true.",
+  })
+  @IsString({ message: "Field 'supportResourcesDescription' must be a string." })
+  @MaxLength(255, {
+    message: "Field 'supportResourcesDescription' must be at most 255 characters.",
+  })
   supportResourcesDescription?: string;
 }

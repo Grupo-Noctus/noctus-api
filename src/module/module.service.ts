@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ModuleRequstDto } from './dto/request/module-request.dto';
 import { ModuleUpdateDto } from './dto/update/module-update.dto';
@@ -6,8 +6,8 @@ import { ModuleResponseDto } from './dto/response/module-response.dto';
 import { handleAppError } from 'src/utils/handle-app-error.error';
 import { ModuleWithVideosResponseDto } from './dto/response/module-and-video-response.dto';
 import { Role } from '@prisma/client';
-import { StreamingService } from 'src/streaming/streaming.service';
 import { IModuleService } from './interface/module.interface';
+import { IStreamingService } from 'src/streaming/interface/streaming.intercafe';
 
 @Injectable()
 export class ModuleService implements IModuleService {
@@ -15,7 +15,8 @@ export class ModuleService implements IModuleService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly streamingService: StreamingService,
+    @Inject('IStreamingService')
+    private readonly streamingService: IStreamingService,
   ) {}
 
   async createModule(
@@ -103,6 +104,7 @@ export class ModuleService implements IModuleService {
 
   async findModulesWithVideos(
     idCourse: number,
+    idEnrollment: number,
     user: number,
     role: Role,
   ): Promise<ModuleWithVideosResponseDto[]> {
@@ -115,7 +117,12 @@ export class ModuleService implements IModuleService {
       const result: ModuleWithVideosResponseDto[] = [];
 
       for (const module of modules) {
-        const videos = await this.streamingService.findManyVideos(idCourse, module.id, user, role);
+        const videos = await this.streamingService.findManyVideos(
+          idEnrollment,
+          module.id,
+          user,
+          role,
+        );
 
         result.push({
           id: module.id,

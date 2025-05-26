@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { StreamingResponseDto } from 'src/streaming/dto/streaming-response.dto';
+import { StreamingResponseDto } from 'src/streaming/dto/response/streaming.response.dto';
 
 export class ModuleWithVideosResponseDto {
   @ApiProperty({

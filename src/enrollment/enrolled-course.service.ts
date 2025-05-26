@@ -43,6 +43,7 @@ export class EnrolledCourseService implements IEnrolledCourseService {
         enrrolmentsAndCourses.map(async course => {
           const modules = await this.moduleService.findModulesWithVideos(
             course.idCourse,
+            course.idEnrrolment,
             user,
             role,
           );

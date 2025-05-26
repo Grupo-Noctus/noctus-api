@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -10,6 +11,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
@@ -74,10 +76,14 @@ export class ModuleController {
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async findManyModule(
     @Param('idCourse', ParseIntPipe) idCourse: number,
+    @Query('idEnrollment') idEnrollment: number | null,
     @CurrentUser() user: number,
-    @CurrentUser('role') userRole: Role,
+    @CurrentUser('role') role: Role,
   ): Promise<ModuleResponseDto[] | []> {
-    return await this.moduleService.findModulesWithVideos(+idCourse, user, userRole);
+    if (role === Role.STUDENT && !idEnrollment) {
+      throw new BadRequestException('idEnrollment is required for students');
+    }
+    return await this.moduleService.findModulesWithVideos(idCourse, idEnrollment, user, role);
   }
 
   @HttpCode(HttpStatus.OK)

@@ -4,8 +4,8 @@ import { IsEmailOrUsername } from '../../validator/is-email-or-username.validato
 
 export class LoginRequestDto {
   @ApiProperty({
-    example: 'joao@exemple.com ou joao_123',
-    description: 'Email or username used for login',
+    example: 'john.doe@example.com or john_doe',
+    description: 'Email address or username used for login',
   })
   @IsNotEmpty({ message: 'The email or username must not be empty.' })
   @IsString({ message: 'The email or username must be a string.' })
@@ -13,8 +13,8 @@ export class LoginRequestDto {
   usernameOrEmail: string;
 
   @ApiProperty({
-    example: 'senhaSegura123',
-    description: 'Password used to access the account',
+    example: 'SecurePass123',
+    description: 'Password used for authentication',
   })
   @IsNotEmpty({ message: 'The password must not be empty.' })
   @IsString({ message: 'The password must be a string.' })

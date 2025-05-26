@@ -27,7 +27,7 @@ export class UserService {
       });
     } catch (error) {
       this.logger.error(`Failed to find user by username or email: ${usernameOrEmail}`, error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
@@ -45,7 +45,7 @@ export class UserService {
       return data.id;
     } catch (error) {
       this.logger.error(`Failed to find student by user ID: ${idUser}`, error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 }

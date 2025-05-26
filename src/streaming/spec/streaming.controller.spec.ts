@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { StreamingController } from './streaming.controller';
-import { StreamingService } from './streaming.service';
+import { StreamingController } from './spec/streaming.controller';
+import { StreamingService } from '../streaming.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { StreamingRequest } from './dto/streaming-request.dto';
+import { StreamingRequest } from '../dto/request/streaming.request.dto';
 import { StreamingUpdate } from './dto/streaming-update.dto';
 
 describe('StreamingController', () => {

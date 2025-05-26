@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateProgressDto {
+export class SaveProgressDto {
   @ApiProperty({
     example: 40,
     description: 'Progress value in percentage for the video (0 to 100)',

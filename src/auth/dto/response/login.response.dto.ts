@@ -1,15 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '@prisma/client';
 
 export class LoginResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+    description: 'JWT access token for authenticated requests',
+  })
   access_token: string;
 
   @ApiProperty({
+    description: 'Payload information extracted from the JWT',
     example: {
       sub: 1,
       name: 'John Doe',
-      username: 'johndoe',
-      image: 'images-users/jonhjpg-5fdb9912-c1c8-44ec-bb83-64ded774053e.jpeg',
+      username: 'john_doe',
+      image: 'images-users/john-doe-uuid.jpeg',
       role: 'student',
       active: true,
     },
@@ -19,7 +24,7 @@ export class LoginResponseDto {
     name: string;
     username: string;
     image: string;
-    role: string;
+    role: Role;
     active: boolean;
   };
 }

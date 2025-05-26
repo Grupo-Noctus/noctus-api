@@ -1,23 +1,22 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { StreamingRequest } from './dto/streaming-request.dto';
+import { StreamingRequest } from './dto/request/streaming.request.dto';
 import { StreamingDto } from './dto/streaming.dto';
-import { StreamingUpdate } from './dto/streaming-update.dto';
-import { StreamingResponseDto } from './dto/streaming-response.dto';
+import { StreamingUpdate } from './dto/update/streaming.update.dto';
+import { StreamingResponseDto } from './dto/response/streaming.response.dto';
 import { VideoMetadata } from 'src/upload/dto/video-metadata.dto';
 import { handleAppError } from 'src/utils/handle-app-error.error';
 import { UploadService } from 'src/upload/upload.service';
 import { Role } from '@prisma/client';
-import { ProgressVideoDto } from './dto/progress-video.dto';
-import { UserService } from 'src/user/user.service';
+import { ProgressVideoDto } from './dto/response/progress.response.dto';
+import { IStreamingService } from './interface/streaming.intercafe';
 
 @Injectable()
-export class StreamingService {
+export class StreamingService implements IStreamingService {
   private readonly logger = new Logger(StreamingService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly uploadService: UploadService,
-    private readonly userService: UserService,
   ) {}
 
   async createVideoLecture(
@@ -48,12 +47,12 @@ export class StreamingService {
     } catch (error) {
       this.logger.error(`Failed to create video lecture for module`, error);
       if (videoMetadata) await this.uploadService.deleteFile(videoMetadata.key);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
   async findManyVideos(
-    idCourse: number,
+    idEnrollment: number,
     idModule: number,
     user: number,
     role: Role,
@@ -69,12 +68,38 @@ export class StreamingService {
         },
       });
       if (role === Role.STUDENT) {
-        const idEnrrolment = await this.getEnrrolmentByIdCourseAndIdStudent(idCourse, user);
+        const student = await this.prisma.student.findUnique({
+          where: {
+            idUser: user,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (!student) {
+          throw new ForbiddenException('Student not found for this user');
+        }
+
+        const verifyEnrollment = await this.prisma.enrollment.findFirst({
+          where: {
+            id: idEnrollment,
+            idStudent: student.id,
+          },
+        });
+
+        if (!verifyEnrollment || verifyEnrollment == null) {
+          throw new ForbiddenException('Enrollment not found for this student');
+        }
+
         for (const item of data) {
-          const progressVideo = await this.getVideoProgress(idEnrrolment, item.id);
+          const progressVideo = await this.getVideoProgress(idEnrollment, item.id);
           if (progressVideo != null) {
             item['idProgressVideo'] = progressVideo.id;
             item['viewed'] = progressVideo.viewed;
+          } else {
+            item['idProgressVideo'] = 0;
+            item['viewed'] = 0;
           }
         }
       }
@@ -82,7 +107,7 @@ export class StreamingService {
       return data;
     } catch (error) {
       this.logger.error(`Failed to fetch video lectures for module ID ${idModule}`, error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
@@ -102,7 +127,7 @@ export class StreamingService {
       return true;
     } catch (error) {
       this.logger.error(`Failed to update video lecture with ID ${idVideo}`, error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
@@ -124,7 +149,7 @@ export class StreamingService {
       return videoData;
     } catch (error) {
       this.logger.error(`Failed to retrieve video lecture with ID ${id}`, error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
@@ -146,19 +171,19 @@ export class StreamingService {
       await this.prisma.videoLecture.delete({ where: { id: idVideo } });
     } catch (error) {
       this.logger.error(`Failed to delete video lecture with ID ${idVideo}`, error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
   private async getVideoProgress(
-    idEnrrolment: number,
+    idEnrollment: number,
     idVideo: number,
   ): Promise<ProgressVideoDto | null> {
     try {
       const data = await this.prisma.progressVideo.findUnique({
         where: {
-          idEnrrolment_idVideo: {
-            idEnrrolment,
+          idEnrollment_idVideo: {
+            idEnrollment,
             idVideo,
           },
         },
@@ -175,31 +200,36 @@ export class StreamingService {
       return data;
     } catch (error) {
       this.logger.error(`Failed to find video progress`, error);
-      handleAppError(error);
+      throw handleAppError(error);
     }
   }
 
-  async getEnrrolmentByIdCourseAndIdStudent(idCourse: number, idUser: number): Promise<number> {
+  async saveProgressVideo(
+    idEnrollment: number,
+    idVideo: number,
+    progressVideo: number,
+  ): Promise<boolean> {
     try {
-      const idStudent = await this.userService.findStudentByIdUser(idUser);
-      const data = await this.prisma.enrollment.findUnique({
+      const data = await this.prisma.progressVideo.upsert({
         where: {
-          idStudent_idCourse: {
-            idStudent,
-            idCourse,
+          idEnrollment_idVideo: {
+            idVideo,
+            idEnrollment,
           },
         },
-        select: {
-          id: true,
+        create: {
+          idVideo,
+          idEnrollment,
+          viewed: progressVideo,
+        },
+        update: {
+          viewed: progressVideo,
         },
       });
-      if (!data) {
-        this.logger.error('Enrollment not found');
-        throw new NotFoundException('Enrollment not found');
-      }
-      return data.id;
+
+      return !!data;
     } catch (error) {
-      this.logger.error('Error fetching enrrolement: ', error);
+      this.logger.error(`Failed to save video progress`, error);
       throw handleAppError(error);
     }
   }

@@ -20,7 +20,7 @@ export class EnrroledCourseController {
   @ApiOperation({ summary: 'Find couse per enrollments' })
   @ApiResponse({ status: 200, description: 'Success', type: [EnrolledCourseDto] })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   async findCoursesPerEnrollment(
     @CurrentUser() user: number,
     @CurrentUser('role') role: Role,

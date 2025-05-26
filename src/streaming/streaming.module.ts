@@ -2,13 +2,16 @@ import { Module } from '@nestjs/common';
 import { StreamingService } from './streaming.service';
 import { StreamingController } from './streaming.controller';
 import { UploadModule } from 'src/upload/upload.module';
-import { StreamingProgressService } from './streaming-progress.service';
-import { UserModule } from 'src/user/user.module';
 
 @Module({
-  imports: [UploadModule, UserModule],
+  imports: [UploadModule],
   controllers: [StreamingController],
-  providers: [StreamingService, StreamingProgressService],
-  exports: [StreamingService],
+  providers: [
+    {
+      provide: 'IStreamingService',
+      useClass: StreamingService,
+    },
+  ],
+  exports: ['IStreamingService'],
 })
 export class StreamingModule {}

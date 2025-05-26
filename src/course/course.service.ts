@@ -125,7 +125,12 @@ export class CourseService implements ICourseService {
 
       const coursesWithModules = await Promise.all(
         courses.map(async course => {
-          const modules = await this.moduleService.findModulesWithVideos(course.id, user, role);
+          const modules = await this.moduleService.findModulesWithVideos(
+            course.id,
+            null,
+            user,
+            role,
+          );
           return {
             ...course,
             modules,
@@ -170,7 +175,12 @@ export class CourseService implements ICourseService {
 
       const { isHidden, ...courseData } = course;
 
-      const modulesAndVideos = await this.moduleService.findModulesWithVideos(idCourse, user, role);
+      const modulesAndVideos = await this.moduleService.findModulesWithVideos(
+        idCourse,
+        null,
+        user,
+        role,
+      );
       const countModules = modulesAndVideos.length;
       const countVideos = modulesAndVideos.reduce((acc, module) => acc + module.videos.length, 0);
       const durationVideos = modulesAndVideos.reduce(

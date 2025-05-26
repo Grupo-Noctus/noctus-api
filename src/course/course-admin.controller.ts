@@ -141,6 +141,7 @@ export class CourseAdminController {
   @ApiResponse({ status: 200, description: 'Success', type: CoursePaginationResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   @ApiQuery({
     name: 'page',
     required: false,

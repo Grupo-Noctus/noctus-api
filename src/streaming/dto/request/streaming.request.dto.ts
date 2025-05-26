@@ -19,14 +19,4 @@ export class StreamingRequest {
   @IsString()
   @IsNotEmpty()
   description: string;
-
-  @ApiProperty({
-    description: 'The URL or path of the thumbnail image',
-    type: String,
-    example: '/uploads/thumbnails/intro-thumbnail.jpg',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  thumbnail?: string;
 }

@@ -23,6 +23,7 @@ export abstract class IModuleService {
 
   abstract findModulesWithVideos(
     idCourse: number,
+    idEnrollment: number | null,
     user: number,
     role: Role,
   ): Promise<ModuleWithVideosResponseDto[]>;
