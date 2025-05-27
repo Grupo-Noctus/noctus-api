@@ -26,7 +26,8 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  student Student?
+  student  Student?
+  messages Messages[]
 }
 
 model Student {
@@ -39,20 +40,21 @@ model Student {
   gender                      Gender
   hasDisability               Boolean        @default(false)
   disabilityType              String?
-  needsSupportResources       Boolean?        @default(false)
+  needsSupportResources       Boolean?       @default(false)
   supportResourcesDescription String?
   user                        User           @relation(fields: [idUser], references: [id])
-  
-  enrollment                  Enrollment[]
+
+  enrollment Enrollment[]
 }
 
 model Course {
   id               Int      @id @default(autoincrement())
   name             String   @unique
   description      String
-  image            String
-  durationInDays   Int 
+  image            String?
+  duration         Int
   certificateModel String?
+  isHidden         Boolean
   createdAt        DateTime @default(now())
   createdBy        Int
   updatedAt        DateTime @updatedAt
@@ -62,22 +64,33 @@ model Course {
   alerts      Alert[]
   materials   Material[]
   modules     Module[]
+  messages    Messages[]
 }
 
 model Enrollment {
   id        Int      @id @default(autoincrement())
   idStudent Int
   idCourse  Int
-  active    Boolean @default(true)
+  active    Boolean  @default(true)
   completed Boolean
-  startDate DateTime
-  endDate   DateTime
+  expiresAt DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([idStudent, idCourse])
   student     Student      @relation(fields: [idStudent], references: [id])
   course      Course       @relation(fields: [idCourse], references: [id])
   certificate Certificate?
+}
+
+model PreEnrollment {
+  id         Int      @id @default(autoincrement())
+  email      String
+  idCourse   Int
+  createdAt  DateTime @default(now())
+  createdBy  Int
+
+  @@unique([email, idCourse])
 }
 
 model Certificate {
@@ -142,10 +155,9 @@ model VideoLecture {
   description String
   duration    Int
   key         String
-  url         String  
-  mimetype    String  
-  size        Int     
-  order       Int     
+  url         String
+  mimetype    String
+  size        Int
   thumbnail   String?
   createdAt   DateTime @default(now())
   createdBy   Int
@@ -166,7 +178,7 @@ model Question {
   updatedAt    DateTime     @updatedAt
   updatedBy    Int
 
-  module  Module   @relation(fields: [idModule], references: [id])
+  module  Module            @relation(fields: [idModule], references: [id])
   options QuestionOptions[]
 }
 
@@ -181,6 +193,29 @@ model QuestionOptions {
   updatedBy  Int
 
   question Question @relation(fields: [idQuestion], references: [id])
+}
+
+model Messages {
+  id        Int      @id @default(autoincrement())
+  idCourse  Int
+  idUser    Int
+  content   String
+  fixed     Boolean?
+  createdAt DateTime @default(now())
+
+  course Course @relation(fields: [idCourse], references: [id])
+  user   User   @relation(fields: [idUser], references: [id])
+}
+
+model ProgressVideo {
+  id           Int      @id @default(autoincrement())
+  idVideo      Int
+  idEnrollment Int
+  viewed       Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([idEnrollment, idVideo])
 }
 
 enum Role {

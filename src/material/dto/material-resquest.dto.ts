@@ -13,7 +13,10 @@ export class MaterialRequestDto {
   @IsNotEmpty()
   description: string;
 
-  @ApiProperty({ example: 'https://link.com/material', description: 'Link para acesso do material' })
+  @ApiProperty({
+    example: 'https://link.com/material',
+    description: 'Link para acesso do material',
+  })
   @IsString()
   @IsNotEmpty()
   link: string;

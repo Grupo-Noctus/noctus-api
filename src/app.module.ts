@@ -13,7 +13,6 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
 import { ModuleModule } from './module/module.module';
 import { MaterialModule } from './material/material.module';
 import { StreamingModule } from './streaming/streaming.module';
-import { UploadService } from './upload/upload.service';
 import { UploadModule } from './upload/upload.module';
 
 @Module({
@@ -28,7 +27,7 @@ import { UploadModule } from './upload/upload.module';
         ttl: 60000,
         limit: 30,
         blockDuration: 5000,
-      }
+      },
     ]),
     UploadModule,
     ModuleModule,
@@ -41,15 +40,15 @@ import { UploadModule } from './upload/upload.module';
     AppService,
     {
       provide: APP_GUARD,
-      useClass:ThrottlerGuard
+      useClass: ThrottlerGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: AuthGuard
+      useClass: AuthGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard
+      useClass: RolesGuard,
     },
   ],
 })
