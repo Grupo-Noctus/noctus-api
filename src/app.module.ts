@@ -15,6 +15,7 @@ import { MaterialModule } from './material/material.module';
 import { StreamingModule } from './streaming/streaming.module';
 import { UploadService } from './upload/upload.service';
 import { UploadModule } from './upload/upload.module';
+import { CertificateModule } from './certificate/certificate.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { UploadModule } from './upload/upload.module';
     MaterialModule,
     StreamingModule,
     EnrollmentModule,
+    CertificateModule,
   ],
   controllers: [AppController],
   providers: [
