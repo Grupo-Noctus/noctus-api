@@ -30,9 +30,7 @@ describe('CertificateService', () => {
 
     service = module.get<CertificateService>(CertificateService);
 
-    // Mock fs.existsSync
     jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-    // Mock fs.promises.readFile
     jest.spyOn(fs.promises, 'readFile').mockResolvedValue('<html>{{name}}</html>');
   });
 

@@ -3,12 +3,12 @@ import { IsString, IsNotEmpty, IsDateString } from 'class-validator';
 export class CreateCertificateDto {
   @IsString()
   @IsNotEmpty()
-  studentName: string;
+  name: string;
 
   @IsString()
   @IsNotEmpty()
-  courseName: string;
+  course: string;
 
   @IsDateString()
-  completionDate: string;
+  date: string;
 }

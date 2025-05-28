@@ -15,7 +15,18 @@ export class CertificateService {
   async generateCertificate(studentData: StudentCertificateData): Promise<Buffer> {
     this.validateStudentData(studentData);
 
-    const templatePath = path.join(__dirname, 'uploads', 'certificate', 'certificate.template.hbs');
+    const templatePath = path.join(process.cwd(), 'uploads', 'certificate', 'certificate.template.hbs');
+    
+    if (!fs.existsSync(templatePath)) {
+      throw new InternalServerErrorException(`Template not found at: ${templatePath}`);
+    }
+
+    try {
+      await fs.promises.access(templatePath, fs.constants.R_OK);
+    } catch (error) {
+      throw new InternalServerErrorException(`No permission to read file at: ${templatePath}`);
+    }
+
     const templateHtml = await fs.promises.readFile(templatePath, 'utf8');
     const template = handlebars.compile(templateHtml);
     const html = template(studentData);
