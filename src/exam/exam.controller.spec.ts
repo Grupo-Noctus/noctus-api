@@ -9,10 +9,8 @@ describe('ExamController', () => {
   let examController: ExamController;
   let examService: ExamService;
 
-  // Data fixa para os testes
   const fixedDate = new Date('2025-01-01T00:00:00.000Z');
 
-  // Função auxiliar para criar mocks de ExamResponseDto
   function mockExamResponse(overrides = {}): ExamResponseDto {
     return {
       id: 1,

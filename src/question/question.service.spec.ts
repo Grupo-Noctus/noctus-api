@@ -5,7 +5,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 describe('QuestionService', () => {
   let service: QuestionService;
 
-  // Mock básico do PrismaService, só os métodos usados no service
   const mockPrismaService = {
     exam: {
       findFirst: jest.fn(),

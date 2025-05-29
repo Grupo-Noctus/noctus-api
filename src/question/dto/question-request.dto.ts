@@ -24,7 +24,7 @@ export class QuestionRequestDto {
 
   @ApiProperty({
     enum: TypeQuestion,
-    example: TypeQuestion.MULTIPLE_CHOICE, // ajuste com o valor real
+    example: TypeQuestion.MULTIPLE_CHOICE, 
   })
   @IsEnum(TypeQuestion)
   @IsNotEmpty()

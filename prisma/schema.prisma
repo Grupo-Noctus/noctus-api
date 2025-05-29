@@ -161,7 +161,7 @@ model Exam {
   title       String
   description String?
   createdAt   DateTime   @default(now())
-  createdBy   Int?
+  createdBy   Int
   updatedAt   DateTime   @updatedAt
   updatedBy   Int
 

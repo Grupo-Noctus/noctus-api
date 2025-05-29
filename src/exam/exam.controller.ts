@@ -63,7 +63,7 @@ export class ExamController {
 
   @HttpCode(HttpStatus.OK)
   @Get('find-one/:idModule/:idExam')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.STUDENT)
   @ApiOperation({ summary: 'Find One exam of Module'})
   @ApiResponse({ status: 200, description:'Success', type: ExamResponseDto})
   @ApiResponse({status:400, description:'Bad Request'})
