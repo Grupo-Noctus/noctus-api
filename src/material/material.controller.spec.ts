@@ -9,11 +9,11 @@ describe('MaterialController', () => {
   let service: MaterialService;
 
   const mockMaterialService = {
-    create: jest.fn((dto) => ({ id: 1, ...dto })),
+    create: jest.fn(dto => ({ id: 1, ...dto })),
     findAllMaterial: jest.fn(),
-    findOne: jest.fn((id) => ({ id, name: 'Test Material' })),
+    findOne: jest.fn(id => ({ id, name: 'Test Material' })),
     update: jest.fn((id, dto) => ({ id, ...dto })),
-    remove: jest.fn((id) => ({ id })),
+    remove: jest.fn(id => ({ id })),
   };
 
   beforeEach(async () => {
@@ -31,7 +31,6 @@ describe('MaterialController', () => {
   });
 
   it('should create a material', async () => {
-
     const mockFile: Express.Multer.File = {
       fieldname: 'file',
       originalname: 'test.pdf',
@@ -45,7 +44,7 @@ describe('MaterialController', () => {
       stream: null,
     } as Express.Multer.File;
 
-    const dto: MaterialResponseDto = { 
+    const dto: MaterialResponseDto = {
       name: 'Test Material',
       description: 'Test Description',
       filename: 'test.pdf',
@@ -55,29 +54,56 @@ describe('MaterialController', () => {
       idCourse: 1,
       updatedBy: null,
       file: mockFile,
+      length: 0,
     };
     const userId = 1;
-    
-    
-    expect(await controller.createMaterial(dto, {id: userId}, mockFile)).toEqual({ id: 1, ...dto });
+
+    expect(await controller.createMaterial(dto, { id: userId }, mockFile)).toEqual({
+      id: 1,
+      ...dto,
+    });
 
     expect(service.createMaterial).toHaveBeenCalledWith(dto);
   });
 
   describe('findManyMaterial', () => {
-      it('should return paginated courses', async () => {
-        const mockPagination: MaterialPaginationResponseDto = {
-          materials: [],
-          totalPages: 1,
-        };
-        mockMaterialService.findAllMaterial.mockResolvedValue(mockPagination);
-        
-      const result = await controller.findManyMaterial(1);
+    it('should return paginated courses', async () => {
+      const mockFile: Express.Multer.File = {
+        fieldname: 'file',
+        originalname: 'test.pdf',
+        encoding: '7bit',
+        mimetype: 'application/pdf',
+        buffer: Buffer.from('mock file content'),
+        size: 1024,
+        destination: '',
+        filename: 'test.pdf',
+        path: '',
+        stream: null,
+      } as Express.Multer.File;
+
+      const dto: MaterialResponseDto = {
+        name: 'Test Material',
+        description: 'Test Description',
+        filename: 'test.pdf',
+        type: 'PDF',
+        link: 'http://example.com',
+        createdBy: 1,
+        idCourse: 1,
+        updatedBy: null,
+        file: mockFile,
+        length: 0,
+      };
+      const mockPagination: MaterialPaginationResponseDto = {
+        materials: [],
+        totalPages: 1,
+      };
+      mockMaterialService.findAllMaterial.mockResolvedValue(mockPagination);
+
+      const result = await controller.findManyMaterial(1, dto);
       expect(service.findManyMaterial).toHaveBeenCalledWith(1);
       expect(result).toEqual(mockPagination);
     });
   });
-
 
   it('should return a material by id', async () => {
     expect(await controller.findOneMaterial('1')).toEqual({ id: 1, name: 'Test Material' });

@@ -1,6 +1,6 @@
 import { diskStorage } from 'multer';
 import { BadRequestException } from '@nestjs/common';
-import { generateUniqueKey } from 'src/utils/genarate-unique-key'; 
+import { generateUniqueKey } from 'src/utils/genarate-unique-key';
 
 export function multerFileOptions(destination: string, allowedMimeTypes: RegExp) {
   return {
@@ -8,13 +8,13 @@ export function multerFileOptions(destination: string, allowedMimeTypes: RegExp)
       if (!file.mimetype.match(allowedMimeTypes)) {
         return cb(new BadRequestException('Invalid file type'), false);
       }
-      cb(null, true); 
+      cb(null, true);
     },
     storage: diskStorage({
       destination: (req, file, cb) => cb(null, destination),
       filename: (req, file, cb) => {
         const key = generateUniqueKey(file.originalname, file.mimetype);
-        cb(null, key); 
+        cb(null, key);
       },
     }),
   };
@@ -30,7 +30,10 @@ export function multerFieldsOptions(fieldsConfig: Record<string, FieldOptions>) 
     fileFilter: (req, file, cb) => {
       const field = fieldsConfig[file.fieldname];
       if (!field || !file.mimetype.match(field.allowedMimeTypes)) {
-        return cb(new BadRequestException(`Invalid file type for field "${file.fieldname}"`), false);
+        return cb(
+          new BadRequestException(`Invalid file type for field "${file.fieldname}"`),
+          false,
+        );
       }
       cb(null, true);
     },

@@ -6,6 +6,12 @@ import { UploadModule } from 'src/upload/upload.module';
 @Module({
   imports: [UploadModule],
   controllers: [StreamingController],
-  providers: [StreamingService],
+  providers: [
+    {
+      provide: 'IStreamingService',
+      useClass: StreamingService,
+    },
+  ],
+  exports: ['IStreamingService'],
 })
 export class StreamingModule {}

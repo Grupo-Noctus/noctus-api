@@ -6,7 +6,7 @@ import { TypeMidia } from '@prisma/client';
 
 const user = {
   id: 1,
-}
+};
 const mockMaterial = {
   id: 1,
   name: 'Material Test',
@@ -79,7 +79,7 @@ describe('MaterialService', () => {
 
   describe('findAll', () => {
     it('should return an array of materials', async () => {
-      const result = await service.findManyMaterial(10);
+      const result = await service.findManyMaterial(1);
       expect(result).toEqual([mockMaterial]);
       expect(prisma.material.findMany).toHaveBeenCalled();
     });
@@ -106,7 +106,9 @@ describe('MaterialService', () => {
     });
 
     it('should throw NotFoundException if material does not exist', async () => {
-      jest.spyOn(prisma.material, 'delete').mockRejectedValue(new NotFoundException('Material not found'));
+      jest
+        .spyOn(prisma.material, 'delete')
+        .mockRejectedValue(new NotFoundException('Material not found'));
       await expect(service.deleteMaterial(999)).rejects.toThrow(NotFoundException);
     });
   });
