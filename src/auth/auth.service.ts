@@ -41,6 +41,7 @@ export class AuthService implements IAuthService {
       image: user.image,
       role: user.role,
       active: user.active,
+      email: user.email
     };
 
     const access_token = await this.jwt.signAsync(payload);
