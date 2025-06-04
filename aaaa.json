@@ -1,0 +1,2633 @@
+{
+    "openapi": "3.0.0",
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "operationId": "AuthController_signIn",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequestDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - invalid credentials"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "summary": "Login",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "operationId": "AuthController_register",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or invalid user/student data"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "summary": "Register new user",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/course/create": {
+            "post": {
+                "operationId": "CourseController_createCourse",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseRequestDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Create course",
+                "tags": [
+                    "Course"
+                ]
+            }
+        },
+        "/course/find-one/{idCourse}": {
+            "get": {
+                "operationId": "CourseController_findOneCourse",
+                "parameters": [
+                    {
+                        "name": "idCourse",
+                        "required": true,
+                        "in": "path",
+                        "description": "ID do curso",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Find one course",
+                "tags": [
+                    "Course"
+                ]
+            }
+        },
+        "/course/update/{idCourse}": {
+            "put": {
+                "operationId": "CourseController_updateCourse",
+                "parameters": [
+                    {
+                        "name": "idCourse",
+                        "required": true,
+                        "in": "path",
+                        "description": "ID of course",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseUpdateDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Update course",
+                "tags": [
+                    "Course"
+                ]
+            }
+        },
+        "/course/delete/{idCourse}": {
+            "delete": {
+                "operationId": "CourseController_deleteCourse",
+                "parameters": [
+                    {
+                        "name": "idCourse",
+                        "required": true,
+                        "in": "path",
+                        "description": "ID of course",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Delete course",
+                "tags": [
+                    "Course"
+                ]
+            }
+        },
+        "/course/find-many-pagination": {
+            "get": {
+                "operationId": "CourseController_findManyCoursePagination",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "schema": {
+                            "example": 1,
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "schema": {
+                            "example": 10,
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CoursePaginationResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Find many courses with pagination",
+                "tags": [
+                    "Course"
+                ]
+            }
+        },
+        "/course/find-many": {
+            "get": {
+                "operationId": "CourseController_findManyCourse",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CourseResponseDto"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Find many courses",
+                "tags": [
+                    "Course"
+                ]
+            }
+        },
+        "/enrollment/create": {
+            "post": {
+                "operationId": "EnrollmentController_createEnrollment",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EnrollmentRequestDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Create a new enrollment",
+                "tags": [
+                    "Enrollment"
+                ]
+            }
+        },
+        "/enrollment/get-one/{id}": {
+            "get": {
+                "operationId": "EnrollmentController_getEnrollmentById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EnrollmentResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Get enrollment by ID",
+                "tags": [
+                    "Enrollment"
+                ]
+            }
+        },
+        "/enrollment/update/{id}": {
+            "put": {
+                "operationId": "EnrollmentController_updateEnrollment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EnrollmentUpdateDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Update an existing enrollment",
+                "tags": [
+                    "Enrollment"
+                ]
+            }
+        },
+        "/enrollment/delete/{id}": {
+            "delete": {
+                "operationId": "EnrollmentController_deleteEnrollment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Delete an enrollment by ID",
+                "tags": [
+                    "Enrollment"
+                ]
+            }
+        },
+        "/enrollment/find-many": {
+            "get": {
+                "operationId": "EnrollmentController_findManyEnrollment",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EnrollmentPaginationResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Find many enrollments",
+                "tags": [
+                    "Enrollment"
+                ]
+            }
+        },
+        "/enrollment/course": {
+            "get": {
+                "operationId": "EnrollmentController_findCoursePerEnrollment",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/EnrolledCourseDto"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Find couse per enrollments",
+                "tags": [
+                    "Enrollment"
+                ]
+            }
+        },
+        "/module/create/{idCourse}": {
+            "post": {
+                "operationId": "ModuleController_createModule",
+                "parameters": [
+                    {
+                        "name": "idCourse",
+                        "required": true,
+                        "in": "path",
+                        "description": "ID of course of module",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ModuleRequstDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Created Module of course",
+                "tags": [
+                    "Module"
+                ]
+            }
+        },
+        "/module/update/{idModule}": {
+            "put": {
+                "operationId": "ModuleController_updateModule",
+                "parameters": [
+                    {
+                        "name": "idModule",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ModuleRequstDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Update Module of course",
+                "tags": [
+                    "Module"
+                ]
+            }
+        },
+        "/module/find-one/{idModule}": {
+            "get": {
+                "operationId": "ModuleController_findOneModule",
+                "parameters": [
+                    {
+                        "name": "idModule",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ModuleResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Find One Module of course",
+                "tags": [
+                    "Module"
+                ]
+            }
+        },
+        "/module/delete/{idModule}": {
+            "delete": {
+                "operationId": "ModuleController_deletemodule",
+                "parameters": [
+                    {
+                        "name": "idModule",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Delete module of course",
+                "tags": [
+                    "Module"
+                ]
+            }
+        },
+        "/module/find-many/{idCourse}": {
+            "get": {
+                "operationId": "ModuleController_findManyModule",
+                "parameters": [
+                    {
+                        "name": "idCourse",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ModuleResponseDto"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Find many modules of course",
+                "tags": [
+                    "Module"
+                ]
+            }
+        },
+        "/material/create": {
+            "post": {
+                "operationId": "MaterialController_createMaterial",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialRequestDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Create Material",
+                "tags": [
+                    "Material"
+                ]
+            }
+        },
+        "/material/find-many": {
+            "get": {
+                "operationId": "MaterialController_findManyMaterial",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialPaginationResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Find many Materials",
+                "tags": [
+                    "Material"
+                ]
+            }
+        },
+        "/material/find-one/{id}": {
+            "get": {
+                "operationId": "MaterialController_findOneMaterial",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Find One Material",
+                "tags": [
+                    "Material"
+                ]
+            }
+        },
+        "/material/delete/{id}": {
+            "delete": {
+                "operationId": "MaterialController_deleteMaterial",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Delete Material",
+                "tags": [
+                    "Material"
+                ]
+            }
+        },
+        "/streaming/upload/{idModule}": {
+            "post": {
+                "operationId": "StreamingController_uploadFile",
+                "parameters": [
+                    {
+                        "name": "idModule",
+                        "required": true,
+                        "in": "path",
+                        "description": "ID of the module where the video is",
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "description": "Data to create the video information.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StreamingRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Video file uploaded successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request or missing file."
+                    }
+                },
+                "summary": "Upload a video file",
+                "tags": [
+                    "Streaming"
+                ]
+            }
+        },
+        "/streaming/update/{idVideo}": {
+            "post": {
+                "operationId": "StreamingController_updateVideoData",
+                "parameters": [
+                    {
+                        "name": "idVideo",
+                        "required": true,
+                        "in": "path",
+                        "description": "ID of the video to be updated",
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "description": "Data to update the video information.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StreamingUpdate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Video data updated successfully."
+                    },
+                    "400": {
+                        "description": "Bad request. Could not update video data."
+                    }
+                },
+                "summary": "Update video data",
+                "tags": [
+                    "Streaming"
+                ]
+            }
+        },
+        "/streaming/{idVideo}": {
+            "get": {
+                "operationId": "StreamingController_streamingVideo",
+                "parameters": [
+                    {
+                        "name": "idVideo",
+                        "required": true,
+                        "in": "path",
+                        "description": "ID of the video lecture to be streamed",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "Range",
+                        "in": "header",
+                        "description": "The byte range for video streaming",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "206": {
+                        "description": "Partial content (video stream)"
+                    },
+                    "400": {
+                        "description": "Invalid range header."
+                    },
+                    "416": {
+                        "description": "Requested range is not satisfiable."
+                    }
+                },
+                "summary": "Stream a video file",
+                "tags": [
+                    "Streaming"
+                ]
+            }
+        },
+        "/streaming/findMany/{id}": {
+            "get": {
+                "operationId": "StreamingController_findManyVideos",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "description": "The ID of the module to get the videos from",
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of video lectures for the given module ID",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/StreamingResponseDto"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Get multiple video lectures by module ID",
+                "tags": [
+                    "Streaming"
+                ]
+            }
+        },
+        "/streaming/delete/{idVideo}": {
+            "delete": {
+                "operationId": "StreamingController_deleteVideoLecture",
+                "parameters": [
+                    {
+                        "name": "idVideo",
+                        "required": true,
+                        "in": "path",
+                        "description": "ID of the video lecture to be deleted",
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Video lecture deleted successfully."
+                    },
+                    "400": {
+                        "description": "Bad request. Could not delete the video lecture."
+                    },
+                    "404": {
+                        "description": "Video lecture not found."
+                    }
+                },
+                "summary": "Delete a video lecture by ID",
+                "tags": [
+                    "Streaming"
+                ]
+            }
+        },
+        "/question/create/{idModule}/{idExam}": {
+            "post": {
+                "operationId": "QuestionController_createQuestion",
+                "parameters": [
+                    {
+                        "name": "idModule",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idExam",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idQuestion",
+                        "required": true,
+                        "in": "path",
+                        "description": "Question ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/QuestionRequestDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Create a new Question for an exam",
+                "tags": [
+                    "Question"
+                ]
+            }
+        },
+        "/question/update/{idModule}/{idExam}/{idQuestion}": {
+            "put": {
+                "operationId": "QuestionController_updateQuestion",
+                "parameters": [
+                    {
+                        "name": "idModule",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idExam",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idQuestion",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateQuestionDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Update Question of an exam",
+                "tags": [
+                    "Question"
+                ]
+            }
+        },
+        "/question/find-many/{idModule}/{idExam}": {
+            "get": {
+                "operationId": "QuestionController_findManyQuestion",
+                "parameters": [
+                    {
+                        "name": "idModule",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idExam",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/QuestionResponseDto"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Find many questions of an exam",
+                "tags": [
+                    "Question"
+                ]
+            }
+        },
+        "/question/find-one/{idModule}/{idExam}/{idQuestion}": {
+            "get": {
+                "operationId": "QuestionController_findOneQuestion",
+                "parameters": [
+                    {
+                        "name": "idModule",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idExam",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idQuestion",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/QuestionResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Find One Question of exam",
+                "tags": [
+                    "Question"
+                ]
+            }
+        },
+        "/question/delete/{idModule}/{idExam}/{idQuestion}": {
+            "delete": {
+                "operationId": "QuestionController_deleteQuestion",
+                "parameters": [
+                    {
+                        "name": "idModule",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idExam",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idQuestion",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Delete a question of exam",
+                "tags": [
+                    "Question"
+                ]
+            }
+        },
+        "/exam/create/{idModule}": {
+            "post": {
+                "operationId": "ExamController_createExam",
+                "parameters": [
+                    {
+                        "name": "idModule",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idExam",
+                        "required": true,
+                        "in": "path",
+                        "description": "Exam ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExamRequestDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Create a new exam",
+                "tags": [
+                    "Exam"
+                ]
+            }
+        },
+        "/exam/update/{idModule}/{idExam}": {
+            "put": {
+                "operationId": "ExamController_updateExam",
+                "parameters": [
+                    {
+                        "name": "idModule",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idExam",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateExamDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Update an exam ",
+                "tags": [
+                    "Exam"
+                ]
+            }
+        },
+        "/exam/find-many/{idModule}": {
+            "get": {
+                "operationId": "ExamController_findManyExams",
+                "parameters": [
+                    {
+                        "name": "idModule",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idExam",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ExamResponseDto"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Find many exams from a module",
+                "tags": [
+                    "Exam"
+                ]
+            }
+        },
+        "/exam/find-one/{idModule}/{idExam}": {
+            "get": {
+                "operationId": "ExamController_findOneExam",
+                "parameters": [
+                    {
+                        "name": "idModule",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idExam",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExamResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Find One exam of Module",
+                "tags": [
+                    "Exam"
+                ]
+            }
+        },
+        "/exam/delete/{idModule}/{idExam}": {
+            "delete": {
+                "operationId": "ExamController_deleteExam",
+                "parameters": [
+                    {
+                        "name": "idModule",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idExam",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "Delete a exam of a Module",
+                "tags": [
+                    "Exam"
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "Noctus",
+        "description": "Noctus API",
+        "version": "1.0",
+        "contact": {}
+    },
+    "tags": [
+        {
+            "name": "Enrollment",
+            "description": ""
+        },
+        {
+            "name": "Auth",
+            "description": ""
+        },
+        {
+            "name": "Course",
+            "description": ""
+        },
+        {
+            "name": "Module",
+            "description": ""
+        },
+        {
+            "name": "Streaming",
+            "description": ""
+        },
+        {
+            "name": "Exam",
+            "description": ""
+        },
+        {
+            "name": "Question",
+            "description": ""
+        }
+    ],
+    "servers": [
+        {
+            "url": "http://localhost:3000"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "bearer": {
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "type": "http"
+            }
+        },
+        "schemas": {
+            "LoginRequestDto": {
+                "type": "object",
+                "properties": {
+                    "usernameOrEmail": {
+                        "type": "string",
+                        "example": "joao@exemple.com ou joao_123",
+                        "description": "Email or username used for login"
+                    },
+                    "password": {
+                        "type": "string",
+                        "example": "senhaSegura123",
+                        "description": "Password used to access the account"
+                    }
+                },
+                "required": [
+                    "usernameOrEmail",
+                    "password"
+                ]
+            },
+            "UserRegisterDto": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "example": "joaosilva",
+                        "description": "Unique username used on the platform"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "João da Silva",
+                        "description": "Full name of the user"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "joao@email.com",
+                        "description": "Email address of the user"
+                    },
+                    "password": {
+                        "type": "string",
+                        "example": "senhaSegura123",
+                        "description": "Password created by the user for authentication"
+                    },
+                    "phoneNumber": {
+                        "type": "string",
+                        "example": "+55 11 91234-5678",
+                        "description": "Phone number of the user"
+                    },
+                    "image": {
+                        "type": "string",
+                        "example": "https://exemple.com/imagens/exemple.png",
+                        "description": "URL of the user profile image (optional)"
+                    }
+                },
+                "required": [
+                    "username",
+                    "name",
+                    "email",
+                    "password"
+                ]
+            },
+            "EducationLevel": {
+                "type": "string",
+                "enum": [
+                    "NO_SCHOOLING",
+                    "PRIMARY_INCOMPLETE",
+                    "PRIMARY_COMPLETE",
+                    "SECONDARY_INCOMPLETE",
+                    "SECONDARY_COMPLETE",
+                    "HIGHER_INCOMPLETE",
+                    "HIGHER_COMPLETE",
+                    "POSTGRADUATE",
+                    "MASTERS",
+                    "DOCTORATE"
+                ],
+                "description": "Student's education level"
+            },
+            "State": {
+                "type": "string",
+                "enum": [
+                    "AC",
+                    "AL",
+                    "AP",
+                    "AM",
+                    "BA",
+                    "CE",
+                    "DF",
+                    "ES",
+                    "GO",
+                    "MA",
+                    "MT",
+                    "MS",
+                    "MG",
+                    "PA",
+                    "PB",
+                    "PR",
+                    "PE",
+                    "PI",
+                    "RJ",
+                    "RN",
+                    "RS",
+                    "RO",
+                    "RR",
+                    "SC",
+                    "SP",
+                    "SE",
+                    "TO"
+                ],
+                "description": "Student's state of residence"
+            },
+            "Ethnicity": {
+                "type": "string",
+                "enum": [
+                    "WHITE",
+                    "BLACK",
+                    "BROWN",
+                    "ASIAN",
+                    "INDIGENOUS",
+                    "OTHER"
+                ],
+                "description": "Student's ethnicity"
+            },
+            "Gender": {
+                "type": "string",
+                "enum": [
+                    "MALE",
+                    "FEMALE",
+                    "NON_BINARY",
+                    "PREFER_NOT_TO_SAY"
+                ],
+                "description": "Student's gender"
+            },
+            "StudentRegisterDto": {
+                "type": "object",
+                "properties": {
+                    "dateBirth": {
+                        "type": "string",
+                        "example": "2005-03-23T15:00:00.000Z",
+                        "description": "Student's date of birth in ISO format (YYYY-MM-DD)"
+                    },
+                    "educationLevel": {
+                        "description": "Student's education level",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/EducationLevel"
+                            }
+                        ]
+                    },
+                    "state": {
+                        "description": "Student's state of residence",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/State"
+                            }
+                        ]
+                    },
+                    "ethnicity": {
+                        "description": "Student's ethnicity",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Ethnicity"
+                            }
+                        ]
+                    },
+                    "gender": {
+                        "description": "Student's gender",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Gender"
+                            }
+                        ]
+                    },
+                    "hasDisability": {
+                        "type": "boolean",
+                        "description": "Indicates whether the student has a disability",
+                        "example": true
+                    },
+                    "disabilityType": {
+                        "type": "string",
+                        "description": "Type of disability (if applicable)",
+                        "example": "Visual"
+                    },
+                    "needsSupportResources": {
+                        "type": "boolean",
+                        "description": "Indicates whether the student requires support resources",
+                        "example": false
+                    },
+                    "supportResourcesDescription": {
+                        "type": "string",
+                        "description": "Description of required support resources (if applicable)",
+                        "example": "Screen reader"
+                    }
+                },
+                "required": [
+                    "dateBirth",
+                    "educationLevel",
+                    "state",
+                    "ethnicity",
+                    "gender",
+                    "hasDisability",
+                    "needsSupportResources"
+                ]
+            },
+            "RegisterDto": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "$ref": "#/components/schemas/UserRegisterDto"
+                    },
+                    "student": {
+                        "$ref": "#/components/schemas/StudentRegisterDto"
+                    }
+                },
+                "required": [
+                    "user"
+                ]
+            },
+            "CourseRequestDto": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Full-Stack Web Development",
+                        "description": "The name of the course."
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Learn to build web applications using React, Node.js, and MongoDB.",
+                        "description": "A short description summarizing the course content and goals."
+                    },
+                    "image": {
+                        "type": "string",
+                        "example": "https://example.com/images/fullstack-course.png",
+                        "description": "Optional URL of the course cover image.",
+                        "nullable": true
+                    },
+                    "durationInDays": {
+                        "type": "number",
+                        "example": 21,
+                        "description": "Duration of course in days"
+                    },
+                    "certificateModel": {
+                        "type": "string",
+                        "example": "<html><body><h1>Certificate of Completion</h1><p>This certifies that {{name}} has completed the course.</p></body></html>",
+                        "description": "HTML template used to generate the course completion certificate PDF. Supports variables like {{name}}.",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "name",
+                    "description",
+                    "durationInDays"
+                ]
+            },
+            "CourseResponseDto": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number",
+                        "example": "1",
+                        "description": "Id of course."
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Full-Stack Web Development",
+                        "description": "The name of the course."
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Learn to build web applications using React, Node.js, and MongoDB.",
+                        "description": "A short description summarizing the course content and goals."
+                    },
+                    "image": {
+                        "type": "string",
+                        "example": "https://example.com/images/fullstack-course.png",
+                        "description": "Optional URL of the course cover image."
+                    },
+                    "durationInDays": {
+                        "type": "number",
+                        "example": 21,
+                        "description": "Duration of course in days"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "image",
+                    "durationInDays"
+                ]
+            },
+            "CourseUpdateDto": {
+                "type": "object",
+                "properties": {}
+            },
+            "CoursePaginationResponseDto": {
+                "type": "object",
+                "properties": {
+                    "courses": {
+                        "description": "List of courses in the current page.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CourseResponseDto"
+                        }
+                    },
+                    "totalPages": {
+                        "type": "number",
+                        "description": "Total number of pages based on the current page size.",
+                        "example": 5
+                    }
+                },
+                "required": [
+                    "courses",
+                    "totalPages"
+                ]
+            },
+            "EnrollmentRequestDto": {
+                "type": "object",
+                "properties": {
+                    "idStudent": {
+                        "type": "number",
+                        "description": "Students ID",
+                        "example": 123
+                    },
+                    "idCourse": {
+                        "type": "number",
+                        "description": "Courses ID",
+                        "example": 1
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "description": "Enrollment activation status",
+                        "example": true
+                    },
+                    "completed": {
+                        "type": "boolean",
+                        "description": "Enrollment completion status",
+                        "example": true
+                    },
+                    "startDate": {
+                        "format": "date-time",
+                        "type": "string",
+                        "description": "Registration start date in ISO format (YYYY-MM-DD)",
+                        "example": "2023-03-23T15:00:00.000Z"
+                    },
+                    "endDate": {
+                        "format": "date-time",
+                        "type": "string",
+                        "description": "Enrollment end date in ISO format (YYYY-MM-DD)",
+                        "example": "2023-03-23T15:00:00.000Z"
+                    }
+                },
+                "required": [
+                    "idStudent",
+                    "idCourse",
+                    "active",
+                    "completed",
+                    "startDate",
+                    "endDate"
+                ]
+            },
+            "EnrollmentResponseDto": {
+                "type": "object",
+                "properties": {
+                    "active": {
+                        "type": "boolean",
+                        "description": "Enrollment activation status",
+                        "example": true
+                    },
+                    "completed": {
+                        "type": "boolean",
+                        "description": "Enrollment completion status",
+                        "example": false
+                    },
+                    "startDate": {
+                        "format": "date-time",
+                        "type": "string",
+                        "description": "Registration start date in ISO format (YYYY-MM-DD)",
+                        "example": "2023-03-23T15:00:00.000Z"
+                    },
+                    "endDate": {
+                        "format": "date-time",
+                        "type": "string",
+                        "description": "Enrollment end date in ISO format (YYYY-MM-DD)",
+                        "example": "2023-06-23T15:00:00.000Z"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Username",
+                        "example": "Maria Luiza"
+                    },
+                    "nameCourse": {
+                        "type": "string",
+                        "description": "Course name",
+                        "example": "Advanced Java"
+                    }
+                },
+                "required": [
+                    "active",
+                    "completed",
+                    "startDate",
+                    "endDate",
+                    "name",
+                    "nameCourse"
+                ]
+            },
+            "EnrollmentUpdateDto": {
+                "type": "object",
+                "properties": {}
+            },
+            "EnrollmentPaginationResponseDto": {
+                "type": "object",
+                "properties": {
+                    "enrollments": {
+                        "description": "List of enrollments in the current page.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EnrollmentResponseDto"
+                        }
+                    },
+                    "totalPages": {
+                        "type": "number",
+                        "description": "Total number of pages.",
+                        "example": 5
+                    }
+                },
+                "required": [
+                    "enrollments",
+                    "totalPages"
+                ]
+            },
+            "EnrolledCourseDto": {
+                "type": "object",
+                "properties": {
+                    "enrollmentId": {
+                        "type": "number",
+                        "example": 1
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "completed": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "enrollmentStartDate": {
+                        "format": "date-time",
+                        "type": "string",
+                        "example": "2024-01-10T00:00:00.000Z"
+                    },
+                    "enrollmentEndDate": {
+                        "format": "date-time",
+                        "type": "string",
+                        "example": "2024-03-10T00:00:00.000Z"
+                    },
+                    "courseId": {
+                        "type": "number",
+                        "example": 3
+                    },
+                    "courseName": {
+                        "type": "string",
+                        "example": "Curso de Astrologia"
+                    },
+                    "courseDescription": {
+                        "type": "string",
+                        "example": "Descubra os mistérios do zodíaco"
+                    },
+                    "courseImage": {
+                        "type": "string",
+                        "example": "https://cdn.example.com/image.jpg"
+                    },
+                    "courseStartDate": {
+                        "format": "date-time",
+                        "type": "string",
+                        "example": "2024-01-01T00:00:00.000Z"
+                    },
+                    "courseEndDate": {
+                        "format": "date-time",
+                        "type": "string",
+                        "example": "2024-03-01T00:00:00.000Z"
+                    }
+                },
+                "required": [
+                    "enrollmentId",
+                    "active",
+                    "completed",
+                    "enrollmentStartDate",
+                    "enrollmentEndDate",
+                    "courseId",
+                    "courseName",
+                    "courseDescription",
+                    "courseImage",
+                    "courseStartDate",
+                    "courseEndDate"
+                ]
+            },
+            "ModuleRequstDto": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Full-stack Web development",
+                        "description": "Name of module"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Full-Stack Web Development course covering frontend and backend technologies.",
+                        "description": "Description of module of course"
+                    }
+                },
+                "required": [
+                    "name",
+                    "description"
+                ]
+            },
+            "ModuleResponseDto": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number",
+                        "example": "1",
+                        "description": "Id of module."
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Full-stack Web Development",
+                        "description": "The name of the module in the course."
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Full-Stack Web Development course covering frontend and backend technologies.",
+                        "description": "A short description summarizing the content and goals of the module."
+                    },
+                    "order": {
+                        "type": "number",
+                        "example": 1,
+                        "description": "The order of the module in the course sequence (e.g., module 1, module 2, etc.)."
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "order"
+                ]
+            },
+            "MaterialRequestDto": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Matemática Aula 1"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Material introdutório de matemática"
+                    },
+                    "link": {
+                        "type": "string",
+                        "example": "https://link.com/material",
+                        "description": "Link para acesso do material"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "PDF",
+                            "AUDIO",
+                            "IMAGE",
+                            "TEXT",
+                            "SLIDES",
+                            "LINK",
+                            "CODE"
+                        ],
+                        "example": "PDF"
+                    },
+                    "idCourse": {
+                        "type": "number",
+                        "example": 1,
+                        "description": "ID do curso associado ao material"
+                    }
+                },
+                "required": [
+                    "name",
+                    "description",
+                    "link",
+                    "type",
+                    "idCourse"
+                ]
+            },
+            "MaterialResponseDto": {
+                "type": "object",
+                "properties": {
+                    "idCourse": {
+                        "type": "number",
+                        "description": "ID of the course associated with the material",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the material",
+                        "example": "Mathematics Workbook"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the material",
+                        "example": "Supplementary material for the Mathematics course"
+                    },
+                    "filename": {
+                        "type": "string",
+                        "description": "Filename of the material",
+                        "example": "mathematics_workbook.pdf"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Type of media for the material",
+                        "enum": [
+                            "PDF",
+                            "AUDIO",
+                            "IMAGE",
+                            "TEXT",
+                            "SLIDES",
+                            "LINK",
+                            "CODE"
+                        ]
+                    },
+                    "link": {
+                        "type": "string",
+                        "description": "Link to access the material",
+                        "example": "https://example.com/materials/mathematics"
+                    },
+                    "createdBy": {
+                        "type": "number",
+                        "description": "ID of the user who created the material",
+                        "example": 42
+                    }
+                },
+                "required": [
+                    "idCourse",
+                    "name",
+                    "description",
+                    "filename",
+                    "type",
+                    "link",
+                    "createdBy"
+                ]
+            },
+            "MaterialPaginationResponseDto": {
+                "type": "object",
+                "properties": {
+                    "materials": {
+                        "description": "List of materials in the current page.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MaterialResponseDto"
+                        }
+                    },
+                    "totalPages": {
+                        "type": "number",
+                        "description": "Total number of pages based on the current page size.",
+                        "example": 5
+                    }
+                },
+                "required": [
+                    "materials",
+                    "totalPages"
+                ]
+            },
+            "StreamingRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the video",
+                        "example": "Introduction to NestJS"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "The description of the video",
+                        "example": "This video covers the basics of NestJS framework."
+                    },
+                    "order": {
+                        "type": "number",
+                        "description": "The display order of the video within the module",
+                        "example": 1
+                    },
+                    "thumbnail": {
+                        "type": "string",
+                        "description": "The URL or path of the thumbnail image",
+                        "example": "/uploads/thumbnails/intro-thumbnail.jpg"
+                    }
+                },
+                "required": [
+                    "name",
+                    "description",
+                    "order"
+                ]
+            },
+            "StreamingUpdate": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the video",
+                        "example": "Introduction to NestJS"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "The description of the video",
+                        "example": "This video covers the basics of NestJS framework."
+                    },
+                    "order": {
+                        "type": "number",
+                        "description": "The display order of the video within the module",
+                        "example": 1
+                    },
+                    "thumbnail": {
+                        "type": "string",
+                        "description": "The URL or path of the thumbnail image",
+                        "example": "/uploads/thumbnails/intro-thumbnail.jpg"
+                    }
+                }
+            },
+            "StreamingResponseDto": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number",
+                        "description": "The unique identifier of the video lecture",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the video lecture",
+                        "example": "Introduction to NestJS"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "A brief description of the video lecture",
+                        "example": "This video covers the basics of NestJS framework."
+                    },
+                    "duration": {
+                        "type": "number",
+                        "description": "The duration of the video lecture in seconds",
+                        "example": 3600
+                    },
+                    "order": {
+                        "type": "number",
+                        "description": "The display order of the video lecture in the module",
+                        "example": 1
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "duration",
+                    "order"
+                ]
+            },
+            "QuestionOptionDto": {
+                "type": "object",
+                "properties": {
+                    "optionText": {
+                        "type": "string",
+                        "example": "Option A"
+                    },
+                    "correct": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "required": [
+                    "optionText",
+                    "correct"
+                ]
+            },
+            "QuestionRequestDto": {
+                "type": "object",
+                "properties": {
+                    "idExam": {
+                        "type": "number",
+                        "description": "ID of the exam",
+                        "example": 1
+                    },
+                    "questionText": {
+                        "type": "string",
+                        "description": "Text of the question",
+                        "example": "What is a variable?"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "SINGLE_CHOICE",
+                            "MULTIPLE_CHOICE",
+                            "TRUE_FALSE"
+                        ],
+                        "example": "MULTIPLE_CHOICE"
+                    },
+                    "order": {
+                        "type": "number",
+                        "example": 1
+                    },
+                    "options": {
+                        "description": "Question options",
+                        "example": [
+                            {
+                                "optionText": "Option A",
+                                "correct": true
+                            },
+                            {
+                                "optionText": "Option B",
+                                "correct": false
+                            }
+                        ],
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/QuestionOptionDto"
+                        }
+                    }
+                },
+                "required": [
+                    "idExam",
+                    "questionText",
+                    "type",
+                    "options"
+                ]
+            },
+            "UpdateQuestionDto": {
+                "type": "object",
+                "properties": {
+                    "idExam": {
+                        "type": "number",
+                        "description": "ID of the exam",
+                        "example": 1
+                    },
+                    "questionText": {
+                        "type": "string",
+                        "description": "Text of the question",
+                        "example": "What is a variable?"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "SINGLE_CHOICE",
+                            "MULTIPLE_CHOICE",
+                            "TRUE_FALSE"
+                        ],
+                        "example": "MULTIPLE_CHOICE"
+                    },
+                    "order": {
+                        "type": "number",
+                        "example": 1
+                    },
+                    "options": {
+                        "description": "Question options",
+                        "example": [
+                            {
+                                "optionText": "Option A",
+                                "correct": true
+                            },
+                            {
+                                "optionText": "Option B",
+                                "correct": false
+                            }
+                        ],
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/QuestionOptionDto"
+                        }
+                    }
+                }
+            },
+            "QuestionResponseDto": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number",
+                        "description": "ID of the question",
+                        "example": 1
+                    },
+                    "idExam": {
+                        "type": "number",
+                        "description": "ID of the exam associated with the question",
+                        "example": 1
+                    },
+                    "questionText": {
+                        "type": "string",
+                        "description": "Text of the question",
+                        "example": "How many variables has..."
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "SINGLE_CHOICE",
+                            "MULTIPLE_CHOICE",
+                            "TRUE_FALSE"
+                        ],
+                        "example": {
+                            "SINGLE_CHOICE": "SINGLE_CHOICE",
+                            "MULTIPLE_CHOICE": "MULTIPLE_CHOICE",
+                            "TRUE_FALSE": "TRUE_FALSE"
+                        }
+                    },
+                    "order": {
+                        "type": "number",
+                        "example": 1
+                    },
+                    "options": {
+                        "description": "Question options",
+                        "example": [
+                            {
+                                "optionText": "Option A",
+                                "correct": true
+                            },
+                            {
+                                "optionText": "Option B",
+                                "correct": false
+                            }
+                        ],
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/QuestionOptionDto"
+                        }
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "example": "2025-05-13T19:00:00.000Z"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "example": "2025-05-13T19:10:00.000Z"
+                    }
+                },
+                "required": [
+                    "id",
+                    "idExam",
+                    "questionText",
+                    "type",
+                    "order",
+                    "options",
+                    "createdAt",
+                    "updatedAt"
+                ]
+            },
+            "ExamRequestDto": {
+                "type": "object",
+                "properties": {
+                    "idModule": {
+                        "type": "number",
+                        "example": 1,
+                        "description": "ID of the module with the exam"
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Exam of Java",
+                        "description": "Title of the exam"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Java teory",
+                        "description": "Optional description"
+                    }
+                },
+                "required": [
+                    "idModule",
+                    "title"
+                ]
+            },
+            "UpdateExamDto": {
+                "type": "object",
+                "properties": {}
+            },
+            "ExamResponseDto": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number",
+                        "example": 1
+                    },
+                    "idModule": {
+                        "type": "number",
+                        "example": 2
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Java Exam"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Java teory"
+                    },
+                    "createdAt": {
+                        "format": "date-time",
+                        "type": "string",
+                        "example": "2025-05-13T19:00:00.000Z"
+                    },
+                    "createdBy": {
+                        "type": "number",
+                        "example": 101
+                    },
+                    "updatedAt": {
+                        "format": "date-time",
+                        "type": "string",
+                        "example": "2025-05-13T20:00:00.000Z"
+                    },
+                    "updatedBy": {
+                        "type": "number",
+                        "example": 102
+                    },
+                    "questions": {
+                        "description": "List of questions",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/QuestionResponseDto"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "idModule",
+                    "title",
+                    "createdAt",
+                    "updatedAt",
+                    "updatedBy",
+                    "questions"
+                ]
+            }
+        }
+    }
+}
