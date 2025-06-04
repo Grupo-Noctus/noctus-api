@@ -27,7 +27,7 @@ model User {
   updatedAt   DateTime @updatedAt
 
   student  Student?
-  messages Messages[]
+  messages Message[]
 }
 
 model Student {
@@ -64,7 +64,7 @@ model Course {
   alerts      Alert[]
   materials   Material[]
   modules     Module[]
-  messages    Messages[]
+  messages    Message[]
 }
 
 model Enrollment {
@@ -195,18 +195,6 @@ model QuestionOptions {
   question Question @relation(fields: [idQuestion], references: [id])
 }
 
-model Messages {
-  id        Int      @id @default(autoincrement())
-  idCourse  Int
-  idUser    Int
-  content   String
-  fixed     Boolean?
-  createdAt DateTime @default(now())
-
-  course Course @relation(fields: [idCourse], references: [id])
-  user   User   @relation(fields: [idUser], references: [id])
-}
-
 model ProgressVideo {
   id           Int      @id @default(autoincrement())
   idVideo      Int
@@ -217,6 +205,22 @@ model ProgressVideo {
 
   @@unique([idEnrollment, idVideo])
 }
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  message   String
+  time      DateTime @default(now())
+  userName  String
+  admin     Boolean  @default(false)
+  courseId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [id], references: [id])
+  course    Course   @relation(fields: [courseId], references: [id])
+
+  @@map("messages")
+}
+
 
 enum Role {
   ADMIN

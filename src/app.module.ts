@@ -14,6 +14,7 @@ import { ModuleModule } from './module/module.module';
 import { MaterialModule } from './material/material.module';
 import { StreamingModule } from './streaming/streaming.module';
 import { UploadModule } from './upload/upload.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { UploadModule } from './upload/upload.module';
     UserModule,
     CourseModule,
     ModuleModule,
+    ChatModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -34,6 +36,7 @@ import { UploadModule } from './upload/upload.module';
     MaterialModule,
     StreamingModule,
     EnrollmentModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [
