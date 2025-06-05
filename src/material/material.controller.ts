@@ -14,6 +14,7 @@ import {
   Res,
   NotFoundException,
   BadRequestException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { MaterialService } from './material.service';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
@@ -77,9 +78,9 @@ export class MaterialController {
   @ApiResponse({ status: 200, description: 'Success', type: [MaterialResponseDto] })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findManyMaterial(@Param('idCourse') idCourse: string): Promise<MaterialResponseDto[]> {
+  async findManyMaterial(@Param('idCourse', ParseIntPipe) idCourse: number): Promise<MaterialResponseDto[]> {
     try {
-      return await this.materialService.findManyMaterial({ idCourse: +idCourse });
+      return await this.materialService.findManyMaterial(idCourse);
     } catch (error) {
       this.logger.error('Error in find the Materials', error);
       throw handleAppError(error);
@@ -93,10 +94,13 @@ export class MaterialController {
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiParam({ name: 'idMaterial', type: String, description: 'ID Material' })
-  async findOneMaterial(@Param('idMaterial') id: string, @Res() res: Response) {
+  @ApiParam({ name: 'idMaterial', type: Number, description: 'ID Material' })
+  async findOneMaterial(
+    @Param('idMaterial', ParseIntPipe) id: number,
+    @Res() res: Response
+  ): Promise<void> {
     try {
-      const material = await this.materialService.findOneMaterial(+id);
+      const material = await this.materialService.findOneMaterial(id);
 
       if (!material.filename) {
         throw new NotFoundException('This material has no file available for download.');
@@ -117,10 +121,10 @@ export class MaterialController {
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiParam({ name: 'idMaterial', type: String, description: 'ID Material' })
-  async deleteMaterial(@Param('idMaterial') id: string): Promise<void> {
+  @ApiParam({ name: 'idMaterial', type: Number, description: 'ID Material' })
+  async deleteMaterial(@Param('idMaterial', ParseIntPipe) id: number): Promise<void> {
     try {
-      await this.materialService.deleteMaterial(+id);
+      await this.materialService.deleteMaterial(id);
     } catch (error) {
       this.logger.error('Error deleting material:', error);
       throw handleAppError(error);

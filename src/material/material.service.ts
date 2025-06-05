@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { MaterialRequestDto } from './dto/material-resquest.dto';
-import { FindMaterialDto } from './dto/find-material-dto';
 import * as path from 'path';
 import { UploadService } from 'src/upload/upload.service';
 import { MaterialResponseDto } from './dto/material-response.dto';
 import { Material } from '@prisma/client';
+import { IMaterialService } from './interface/material.interface';
 
 @Injectable()
-export class MaterialService {
+export class MaterialService implements IMaterialService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly uploadService: UploadService,
@@ -32,12 +32,10 @@ export class MaterialService {
     return createdMaterial.id;
   }
 
-  async findManyMaterial(param: FindMaterialDto): Promise<MaterialResponseDto[]> {
-    const { idCourse } = param;
-
+  async findManyMaterial(idCourse: number): Promise<MaterialResponseDto[]> {
     const materials = await this.prisma.material.findMany({
       where: {
-        ...(idCourse ? { idCourse } : {}),
+        idCourse,
       },
     });
 

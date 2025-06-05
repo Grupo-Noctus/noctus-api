@@ -2,9 +2,8 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ExamRequestDto } from './dto/exam-request.dto';
 import { UpdateExamDto } from './dto/update-exam.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { handleHttpError } from 'src/utils/handle-http.error';
-import { handlePrismaError } from 'src/utils/handle-prisma.error';
 import { ExamResponseDto } from './dto/exam-response.dto';
+import { handleAppError } from 'src/utils/handle-app-error.error';
 
 @Injectable()
 export class ExamService {
@@ -34,8 +33,7 @@ export class ExamService {
     return true;
     } catch (error){
       this.logger.error('Error while creating exam', error);
-      handlePrismaError(error);
-      handleHttpError(error);      
+      throw handleAppError(error);     
     }
   }
 
@@ -63,8 +61,7 @@ export class ExamService {
       return true;
     } catch(error){
       this.logger.error('Error while updating exam', error);
-      handlePrismaError(error);
-      handleHttpError(error);
+      throw handleAppError(error);
     }
   } 
 
@@ -88,8 +85,7 @@ export class ExamService {
       return exams;
     } catch(error){
     this.logger.error('Error while fetching for exams', error);
-    handlePrismaError(error);
-    handleHttpError(error);     
+    throw handleAppError(error);   
     }
   }
 
@@ -111,8 +107,7 @@ export class ExamService {
       return exams;
     } catch(error){
       this.logger.error('Error while fetching question', error);
-      handlePrismaError(error);
-      handleHttpError(error);   
+      throw handleAppError(error);
     }
   }
 
@@ -138,8 +133,7 @@ export class ExamService {
 
     } catch (error){
       this.logger.error('Error while deleting exam', error);
-      handlePrismaError(error);
-      handleHttpError(error);     
+      throw handleAppError(error);
     }
   }
 }
