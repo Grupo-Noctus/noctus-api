@@ -1,5 +1,5 @@
-import { InternalServerErrorException } from "@nestjs/common";
-import slugify from "slugify";
+import { InternalServerErrorException } from '@nestjs/common';
+import slugify from 'slugify';
 import { v4 as uuidv4 } from 'uuid';
 
 export function generateUniqueKey(filename: string, mimetype: string): string {
