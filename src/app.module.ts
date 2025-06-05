@@ -14,6 +14,7 @@ import { ModuleModule } from './module/module.module';
 import { MaterialModule } from './material/material.module';
 import { StreamingModule } from './streaming/streaming.module';
 import { UploadModule } from './upload/upload.module';
+import { CertificateModule } from './certificate/certificate.module';
 import { QuestionModule } from './question/question.module';
 import { ExamModule } from './exam/exam.module';
 
@@ -36,6 +37,7 @@ import { ExamModule } from './exam/exam.module';
     MaterialModule,
     StreamingModule,
     EnrollmentModule,
+    CertificateModule,
     QuestionModule,
     ExamModule,
   ],

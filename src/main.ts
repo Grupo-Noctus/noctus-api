@@ -24,6 +24,7 @@ async function bootstrap() {
     .addTag('Module')
     .addTag('Material')
     .addTag('Streaming')
+    .addTag('Certificate')
     .addTag('Exam')
     .addTag('Question')
     .addBearerAuth()
