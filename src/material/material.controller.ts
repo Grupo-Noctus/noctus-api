@@ -28,11 +28,12 @@ import { handleAppError } from 'src/utils/handle-app-error.error';
 import { multerFileOptions } from 'src/upload/helper/multer-file-options.helper';
 import { join } from 'path';
 import { Response } from 'express';
+import { IMaterialController } from './interface/material.controller.interface';
 
 @ApiTags('Material')
 @Controller('material')
 @UseGuards(AuthGuard)
-export class MaterialController {
+export class MaterialController implements IMaterialController {
   private readonly logger = new Logger(MaterialController.name);
   constructor(private readonly materialService: MaterialService) {}
 
@@ -79,7 +80,7 @@ export class MaterialController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async findManyMaterial(@Param('idCourse') idCourse: string): Promise<MaterialResponseDto[]> {
     try {
-      return await this.materialService.findManyMaterial({ idCourse: +idCourse });
+      return await this.materialService.findManyMaterial(+idCourse);
     } catch (error) {
       this.logger.error('Error in find the Materials', error);
       throw handleAppError(error);
@@ -94,7 +95,7 @@ export class MaterialController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiParam({ name: 'idMaterial', type: String, description: 'ID Material' })
-  async findOneMaterial(@Param('idMaterial') id: string, @Res() res: Response) {
+  async findOneMaterial(@Param('idMaterial') id: string, @Res() res: Response): Promise<void> {
     try {
       const material = await this.materialService.findOneMaterial(+id);
 
