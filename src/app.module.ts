@@ -13,9 +13,10 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
 import { ModuleModule } from './module/module.module';
 import { MaterialModule } from './material/material.module';
 import { StreamingModule } from './streaming/streaming.module';
-import { UploadService } from './upload/upload.service';
 import { UploadModule } from './upload/upload.module';
 import { CertificateModule } from './certificate/certificate.module';
+import { QuestionModule } from './question/question.module';
+import { ExamModule } from './exam/exam.module';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { CertificateModule } from './certificate/certificate.module';
         ttl: 60000,
         limit: 30,
         blockDuration: 5000,
-      }
+      },
     ]),
     UploadModule,
     ModuleModule,
@@ -37,21 +38,23 @@ import { CertificateModule } from './certificate/certificate.module';
     StreamingModule,
     EnrollmentModule,
     CertificateModule,
+    QuestionModule,
+    ExamModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     {
       provide: APP_GUARD,
-      useClass:ThrottlerGuard
+      useClass: ThrottlerGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: AuthGuard
+      useClass: AuthGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard
+      useClass: RolesGuard,
     },
   ],
 })

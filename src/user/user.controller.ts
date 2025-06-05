@@ -1,9 +1,10 @@
-import { Controller, Get } from '@nestjs/common';
-import { UserService } from './user.service';
-import { Roles } from 'src/auth/decorator/role.decorator';
-import { Role } from '@prisma/client';
+import { Controller, Inject } from '@nestjs/common';
+import { IUserService } from './interface/user.service.interface';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    @Inject('IUserService')
+    private readonly userService: IUserService,
+  ) {}
 }
