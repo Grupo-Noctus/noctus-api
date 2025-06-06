@@ -16,22 +16,23 @@ export class CertificateService {
         course: true,
         student: {
           include: {
-            user: true
-          }
-        }
-      }
+            user: true,
+          },
+        },
+      },
     });
 
     if (!enrollment) {
       throw new BadRequestException('Enrollment not found');
     }
 
-    if (!enrollment.completed) {
-      throw new BadRequestException('Student has not completed the course');
-    }
+    const templatePath = path.join(
+      process.cwd(),
+      'uploads',
+      'certificate',
+      'certificate.template.hbs',
+    );
 
-    const templatePath = path.join(process.cwd(), 'uploads', 'certificate', 'certificate.template.hbs');
-    
     if (!fs.existsSync(templatePath)) {
       throw new InternalServerErrorException(`Template not found at: ${templatePath}`);
     }
@@ -44,29 +45,28 @@ export class CertificateService {
 
     const templateHtml = await fs.promises.readFile(templatePath, 'utf8');
     const template = handlebars.compile(templateHtml);
-    
+
     const certificateData = {
       name: enrollment.student.user.name,
       course: enrollment.course.name,
-      date: new Date().toISOString()
+      date: new Date().toISOString(),
     };
 
     const html = template(certificateData);
 
     const browser = await puppeteer.launch({
-      headless: true
+      headless: true,
     });
-    
+
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
-    
+
     const uint8Array = await page.pdf({
       format: 'A4',
-      printBackground: true
+      printBackground: true,
     });
-    
+
     await browser.close();
     return Buffer.from(uint8Array);
   }
 }
-
