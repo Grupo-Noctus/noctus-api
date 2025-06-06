@@ -64,7 +64,7 @@ export class EnrollmentController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Put('update/:idEnrrolment')
+  @Put('update/:idEnrollment')
   @ApiOperation({ summary: 'Update an existing enrollment' })
   @ApiBody({ type: EnrollmentUpdateDto })
   @ApiResponse({ status: 200, description: 'Success', type: Boolean })
@@ -74,7 +74,7 @@ export class EnrollmentController {
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async updateEnrollment(
-    @Param('idEnrrolment', ParseIntPipe) idEnrollment: number,
+    @Param('idEnrollment', ParseIntPipe) idEnrollment: number,
     @Body() updateEnrollment: EnrollmentUpdateDto,
     @CurrentUser() user: number,
   ): Promise<boolean> {
@@ -112,7 +112,7 @@ export class EnrollmentController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('find-one/:idEnrrolment')
+  @Get('find-one/:idEnrollment')
   @ApiOperation({ summary: 'Get enrollment by ID' })
   @ApiResponse({ status: 200, description: 'Success', type: EnrollmentResponseDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -121,7 +121,7 @@ export class EnrollmentController {
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async getEnrollmentById(
-    @Param('idEnrrolment', ParseIntPipe) idEnrollment: number,
+    @Param('idEnrollment', ParseIntPipe) idEnrollment: number,
   ): Promise<EnrollmentResponseDto> {
     return await this.enrollmentService.getEnrollmentById(idEnrollment);
   }
