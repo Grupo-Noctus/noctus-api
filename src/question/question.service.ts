@@ -3,6 +3,7 @@ import { QuestionRequestDto } from './dto/question-request.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { QuestionResponseDto } from './dto/question-response.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { handleAppError } from 'src/utils/handle-app-error.error';
 
 @Injectable()
 export class QuestionService {
@@ -50,6 +51,7 @@ export class QuestionService {
       return true;
     } catch (error) {
       this.logger.error('Error while creating question', error);
+      throw handleAppError(error);
     }
   }
 
@@ -97,6 +99,7 @@ export class QuestionService {
       return true;
     } catch (error) {
       this.logger.error('Error while updating question', error);
+      throw handleAppError(error);
     }
   }
 
@@ -127,6 +130,7 @@ export class QuestionService {
       return questions;
     } catch (error) {
       this.logger.error('Error while searching for questions', error);
+      throw handleAppError(error);
     }
   }
 
@@ -163,6 +167,7 @@ export class QuestionService {
       return question;
     } catch (error) {
       this.logger.error('Error while fetching question', error);
+      throw handleAppError(error);
     }
   }
 
@@ -201,6 +206,7 @@ export class QuestionService {
       });
     } catch (error) {
       this.logger.error('Error while deleting question', error);
+      throw handleAppError(error);
     }
   }
 }

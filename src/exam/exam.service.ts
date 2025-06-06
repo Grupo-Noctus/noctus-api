@@ -3,6 +3,7 @@ import { ExamRequestDto } from './dto/exam-request.dto';
 import { UpdateExamDto } from './dto/update-exam.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ExamResponseDto } from './dto/exam-response.dto';
+import { handleAppError } from 'src/utils/handle-app-error.error';
 
 @Injectable()
 export class ExamService {
@@ -36,6 +37,7 @@ export class ExamService {
       return true;
     } catch (error) {
       this.logger.error('Error while creating exam', error);
+      throw handleAppError(error);
     }
   }
 
@@ -68,6 +70,7 @@ export class ExamService {
       return true;
     } catch (error) {
       this.logger.error('Error while updating exam', error);
+      throw handleAppError(error);
     }
   }
 
@@ -90,6 +93,7 @@ export class ExamService {
       return exams;
     } catch (error) {
       this.logger.error('Error while fetching for exams', error);
+      throw handleAppError(error);
     }
   }
 
@@ -111,6 +115,7 @@ export class ExamService {
       return exams;
     } catch (error) {
       this.logger.error('Error while fetching question', error);
+      throw handleAppError(error);
     }
   }
 
@@ -134,6 +139,7 @@ export class ExamService {
       });
     } catch (error) {
       this.logger.error('Error while deleting exam', error);
+      throw handleAppError(error);
     }
   }
 }
