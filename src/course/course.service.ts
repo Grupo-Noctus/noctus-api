@@ -150,56 +150,95 @@ export class CourseService implements ICourseService {
     }
   }
 
-  async findOneCoursePreview(
-    idCourse: number,
+  async findAvailableCoursesExcludingEnrolled(
     user: number,
     role: Role,
-  ): Promise<coursePreviewDto> {
+  ): Promise<coursePreviewDto[]> {
     try {
-      const course = await this.prisma.course.findUnique({
-        where: { id: idCourse },
+      const student = await this.prisma.student.findFirst({
+        where: { idUser: user },
+        select: { id: true },
+      });
+      const enrolledCourses = await this.prisma.enrollment.findMany({
+        where: {
+          student: {
+            idUser: student.id,
+          },
+        },
+        select: {
+          idCourse: true,
+        },
+      });
+
+      const enrolledCourseIds = enrolledCourses.map(e => e.idCourse);
+
+      const availableCourses = await this.prisma.course.findMany({
+        where: {
+          isHidden: false,
+          ...(enrolledCourseIds.length > 0 && {
+            id: {
+              notIn: enrolledCourseIds,
+            },
+          }),
+        },
         select: {
           id: true,
           name: true,
           description: true,
           image: true,
           duration: true,
-          isHidden: true,
         },
       });
+      const coursesWithDetails = await Promise.all(
+        availableCourses.map(async course => {
+          let enrollmentId: number | null = null;
 
-      if (!course) {
-        throw new NotFoundException(`Course with ID ${idCourse} not found.`);
-      }
-      if (course.isHidden) {
-        throw new ForbiddenException(`Course with ID ${idCourse} is not accessible.`);
-      }
+          if (student) {
+            const enrollment = await this.prisma.enrollment.findFirst({
+              where: {
+                idStudent: student.id,
+                idCourse: course.id,
+              },
+              select: { id: true },
+            });
 
-      const { isHidden, ...courseData } = course;
+            enrollmentId = enrollment?.id ?? null;
+          }
+          const modulesAndVideos = await this.moduleService.findModulesWithVideos(
+            course.id,
+            null,
+            user,
+            'ADMIN',
+          );
 
-      const modulesAndVideos = await this.moduleService.findModulesWithVideos(
-        idCourse,
-        null,
-        user,
-        role,
+          const safeModules = (modulesAndVideos ?? []).map(module => ({
+            ...module,
+            videos: module.videos ?? [],
+          }));
+
+          const countModules = safeModules.length;
+          const countVideos = safeModules.reduce((acc, module) => acc + module.videos.length, 0);
+          const durationVideos = safeModules.reduce(
+            (acc, module) =>
+              acc + module.videos.reduce((sum, video) => sum + (video.duration ?? 0), 0),
+            0,
+          );
+
+          const modules = safeModules.map(({ videos, ...mod }) => mod);
+
+          return {
+            ...course,
+            modules,
+            countModules,
+            countVideos,
+            durationVideos,
+          };
+        }),
       );
-      const countModules = modulesAndVideos.length;
-      const countVideos = modulesAndVideos.reduce((acc, module) => acc + module.videos.length, 0);
-      const durationVideos = modulesAndVideos.reduce(
-        (acc, module) => acc + module.videos.reduce((sum, video) => sum + video.duration, 0),
-        0,
-      );
-      const modules = modulesAndVideos.map(({ videos, ...module }) => module);
 
-      return {
-        ...courseData,
-        modules,
-        countModules,
-        countVideos,
-        durationVideos,
-      };
+      return coursesWithDetails;
     } catch (error) {
-      this.logger.error('Error while fetching single course', error);
+      this.logger.error('Error while fetching non-enrolled courses', error);
       throw handleAppError(error);
     }
   }
