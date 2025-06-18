@@ -13,7 +13,7 @@ export interface ICourseService {
     image?: string,
   ): Promise<boolean>;
   toggleCourseVisibility(idCourse: number): Promise<void>;
-  findOneCoursePreview(idCourse: number, user: number, role: Role): Promise<coursePreviewDto>;
+  findAvailableCoursesExcludingEnrolled(user: number, role: Role): Promise<coursePreviewDto[]>;
   findManyCoursePagination(
     limit: number,
     page: number,

@@ -15,7 +15,7 @@ export class CourseController {
   ) {}
 
   @HttpCode(HttpStatus.OK)
-  @Get('preview/:idCourse')
+  @Get('preview')
   @ApiOperation({ summary: 'Find one course preview' })
   @ApiResponse({ status: 200, description: 'Success', type: coursePreviewDto })
   @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -27,12 +27,9 @@ export class CourseController {
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiParam({ name: 'idCourse', type: String, description: 'ID do curso' })
   async findOneCourse(
-    @Param('idCourse') idCourse: string,
     @CurrentUser() user: number,
     @CurrentUser('role') role: Role,
-  ): Promise<coursePreviewDto> {
-    return await this.courseService.findOneCoursePreview(+idCourse, user, role);
+  ): Promise<coursePreviewDto[]> {
+    return await this.courseService.findAvailableCoursesExcludingEnrolled(user, role);
   }
-
-  //Criar pegar todos os cursos preview
 }
